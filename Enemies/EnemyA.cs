@@ -38,7 +38,25 @@ public class EnemyA : IEnemy
             Position = new Vector2(0, Position.Y);
             _direction = new Vector2(1, 0);
         }
-        
+
+        if (Position.X > 960 - 64)
+        {
+            Position = new Vector2(960 - 64, Position.Y);
+            _direction = new Vector2(-1,0);
+        }
+
+        if (Position.Y < 0)
+        {
+            Position = new Vector2(Position.X, 0);
+            _direction = new Vector2(0, 1);
+        }
+
+        if (Position.Y > 540 - 64)
+        {
+            Position = new Vector2(Position.X, 540 - 64);
+            _direction = new Vector2(0, -1);
+        }
+
         _directionTimer += deltaTime;
 
         if (_directionTimer >= 2f)
@@ -79,5 +97,7 @@ public class EnemyA : IEnemy
         Position = _initialPosition;
         _sprite.Reset();
         _sprite.Position = Position;
+        _direction = new Vector2(1, 0);
+        _directionTimer = 0f;
     }
 }
