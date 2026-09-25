@@ -54,25 +54,45 @@ public class Game1 : Game
             _sprites.Add(SpriteFactory.CreateBlockSprite(_blockAtlas, blockTypes[i], position, 2f));
         }
 
-        var enemyPosition = new Vector2(450, 200);
+        var enemyAPosition = new Vector2(450, 200);
 
-        var enemyFrames = new[]
+        var enemyAFrames = new[]
         {
             new Rectangle(0, 0, 32, 32),
             new Rectangle(32, 0, 32, 32)
         };
 
-        var enemySprite = SpriteFactory.CreateAnimatedSprite(
+        var enemyASprite = SpriteFactory.CreateAnimatedSprite(
             _blockAtlas,
-            enemyFrames,
-            enemyPosition,
+            enemyAFrames,
+            enemyAPosition,
             0.12f,
             2f
         );
 
-        var enemyA = new EnemyA(enemySprite, enemyPosition);
+        var enemyA = new EnemyA(enemyASprite, enemyAPosition);
 
         _enemies.Add(enemyA);
+
+        var enemyBPosition = new Vector2(660, 300);
+
+        var enemyBFrames = new[]
+        {
+            new Rectangle(64, 0, 32, 32),
+            new Rectangle(96, 0, 32, 32)
+        };
+
+        var enemyBSprite = SpriteFactory.CreateAnimatedSprite(
+            _blockAtlas,
+            enemyBFrames,
+            enemyBPosition,
+            0.12f,
+            2f
+        );
+
+        var enemyB = new EnemyB(enemyBSprite, enemyBPosition);
+
+        _enemies.Add(enemyB);
         
     }
 
