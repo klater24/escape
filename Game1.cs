@@ -2,8 +2,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using escape.Blocks;
+using escape.Enemies;
 using escape.Interfaces;
 using escape.Sprites;
+using System.Collections.Generic;
 
 namespace escape;
 
@@ -16,6 +18,7 @@ public class Game1 : Game
     private readonly BlockManager _blockManager = new();
     private readonly GameResetCoordinator _resetCoordinator = new();
     private KeyboardState _previousKeyboardState;
+    private readonly List<IEnemy> _enemies = new();
 
     public Game1()
     {
@@ -54,6 +57,25 @@ public class Game1 : Game
             var position = new Vector2(448, 238);
             _blockManager.Add(new Block(_blockAtlas, blockTypes[i], position, 2f));
         }
+
+        var enemyPosition = new Vector2(450, 200);
+        var enemyFrames = new[]
+        {
+            new Rectangle(0, 0, 32, 32),
+            new Rectangle(32, 0, 32, 32)
+        };
+
+        var enemySprite = SpriteFactory.CreateAnimatedSprite(
+            _blockAtlas,
+            enemyFrames,
+            enemyPosition,
+            0.12f,
+            2f);
+
+        var enemyA = new EnemyA(enemySprite, enemyPosition);
+        _enemies.Add(enemyA);
+        RegisterResettable(enemyA);
+
         _previousKeyboardState = Keyboard.GetState();
     }
 
@@ -73,6 +95,11 @@ public class Game1 : Game
         _blockManager.Update(gameTime);
         _previousKeyboardState = keyboardState;
 
+        foreach (var enemy in _enemies)
+        {
+            enemy.Update(gameTime);
+        }
+
         base.Update(gameTime);
     }
 
@@ -84,6 +111,11 @@ public class Game1 : Game
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
         _blockManager.Draw(_spriteBatch);
+
+        foreach (var enemy in _enemies)
+        {
+            enemy.Draw(_spriteBatch);
+        }
 
         _spriteBatch.End();
 
