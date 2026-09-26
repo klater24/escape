@@ -74,6 +74,8 @@ public class Game1 : Game
 
         _enemies.Add(enemyA);
 
+
+
         var enemyBPosition = new Vector2(660, 300);
 
         var enemyBFrames = new[]
@@ -93,6 +95,28 @@ public class Game1 : Game
         var enemyB = new EnemyB(enemyBSprite, enemyBPosition);
 
         _enemies.Add(enemyB);
+
+
+
+        var enemyCPosition = new Vector2(450, 400);
+
+        var enemyCFrames = new[]
+        {
+            new Rectangle(128, 0, 32, 32),
+            new Rectangle(160, 0, 32, 32)
+        };
+
+        var enemyCSprite = SpriteFactory.CreateAnimatedSprite(
+            _blockAtlas,
+            enemyCFrames,
+            enemyCPosition,
+            0.12f,
+            2f
+        );
+
+        var enemyC = new EnemyC(enemyCSprite, enemyCPosition);
+
+        _enemies.Add(enemyC);
         
     }
 
