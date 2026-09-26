@@ -19,7 +19,7 @@ public static class SpriteFactory
         return new AnimatedSprite(texture, frames, position, frameSeconds, scale);
     }
 
-    // Pick the texture area for a named block
+    // Pick the matching tile in PixelPack_Block_Atlas.png for a named block
     public static ISprite CreateBlockSprite(Texture2D atlas, string blockType, Vector2 position, float scale = 1f)
     {
         var source = blockType.ToLowerInvariant() switch
@@ -38,18 +38,5 @@ public static class SpriteFactory
         };
 
         return new StaticSprite(atlas, source, position, scale);
-    }
-
-    // Create a basic animated sprite for a player
-    public static ISprite CreatePlayerSprite(Texture2D atlas, Vector2 position, float scale = 1f)
-    {
-        var frames = new[]
-        {
-            new Rectangle(0, 0, 32, 32),
-            new Rectangle(32, 0, 32, 32),
-            new Rectangle(64, 0, 32, 32)
-        };
-
-        return new AnimatedSprite(atlas, frames, position, 0.12f, scale);
     }
 }

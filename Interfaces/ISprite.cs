@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace escape.Interfaces;
 
 // The shared rules for anything the game can draw
-public interface ISprite
+public interface ISprite : IGameResettable
 {
     // The sprite position on screen
     Vector2 Position { get; set; }
@@ -15,6 +15,4 @@ public interface ISprite
     // Draw the sprite
     void Draw(SpriteBatch spriteBatch);
 
-    // Return the sprite to its starting state
-    void Reset();
 }
