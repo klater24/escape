@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\katwe\\MonoGame\\escape\\escape.csproj": {}
+    "C:\\Users\\024x7\\OneDrive\\Documents\\GitHub\\escape\\escape.csproj": {}
   },
   "projects": {
-    "C:\\Users\\katwe\\MonoGame\\escape\\escape.csproj": {
+    "C:\\Users\\024x7\\OneDrive\\Documents\\GitHub\\escape\\escape.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\katwe\\MonoGame\\escape\\escape.csproj",
+        "projectUniqueName": "C:\\Users\\024x7\\OneDrive\\Documents\\GitHub\\escape\\escape.csproj",
         "projectName": "escape",
-        "projectPath": "C:\\Users\\katwe\\MonoGame\\escape\\escape.csproj",
-        "packagesPath": "C:\\Users\\katwe\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\katwe\\MonoGame\\escape\\obj\\",
+        "projectPath": "C:\\Users\\024x7\\OneDrive\\Documents\\GitHub\\escape\\escape.csproj",
+        "packagesPath": "C:\\Users\\024x7\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\024x7\\OneDrive\\Documents\\GitHub\\escape\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\katwe\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\024x7\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"

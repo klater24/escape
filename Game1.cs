@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
 using escape.Sprites;
+using escape.Inputs;
 using System.Collections.Generic;
 using escape.Enemies;
 
@@ -13,6 +14,7 @@ public class Game1 : Game
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch = null!;
     private Texture2D _blockAtlas = null!;
+    private IController keyboardController = null!;
 
     private readonly List<ISprite> _sprites = new();
     private readonly List<IEnemy> _enemies = new();
@@ -30,6 +32,8 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
+        keyboardController = new KeyboardController(this);
+        keyboardController.Initialize();
         base.Initialize();
     }
 
@@ -128,11 +132,7 @@ public class Game1 : Game
             sprite.Update(gameTime);
         }
 
-        foreach(var enemy in _enemies)
-        {
-            enemy.Update(gameTime);
-        }
-
+        keyboardController.Update();
         base.Update(gameTime);
     }
 
