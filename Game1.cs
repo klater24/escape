@@ -4,7 +4,6 @@ using escape.Interfaces;
 using escape.Sprites;
 using escape.Inputs;
 using System.Collections.Generic;
-using escape.Enemies;
 
 namespace escape;
 
@@ -14,10 +13,11 @@ public class Game1 : Game
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch = null!;
     private Texture2D _blockAtlas = null!;
-    private IController keyboardController = null!;
+    private Texture2D _playerSheet = null!;
+    private IController _keyboardController = null!;
+    private Player _player = null!;
 
     private readonly List<ISprite> _sprites = new();
-    private readonly List<IEnemy> _enemies = new();
 
     public Game1()
     {
@@ -32,8 +32,6 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        keyboardController = new KeyboardController(this);
-        keyboardController.Initialize();
         base.Initialize();
     }
 
@@ -41,6 +39,9 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+        _playerSheet = Content.Load<Texture2D>("link");
+        _player = new Player(new Vector2(100, 100), _playerSheet);
 
         // Use colored placeholder blocks until the real art is added
         _blockAtlas = DemoSpriteSheetBuilder.CreateBlockAtlas(GraphicsDevice);
@@ -57,27 +58,10 @@ public class Game1 : Game
             var position = new Vector2(40 + (i % 5) * 64, 40 + (i / 5) * 64);
             _sprites.Add(SpriteFactory.CreateBlockSprite(_blockAtlas, blockTypes[i], position, 2f));
         }
-
-        var enemyPosition = new Vector2(450, 200);
-
-        var enemyFrames = new[]
-        {
-            new Rectangle(0, 0, 32, 32),
-            new Rectangle(32, 0, 32, 32)
-        };
-
-        var enemySprite = SpriteFactory.CreateAnimatedSprite(
-            _blockAtlas,
-            enemyFrames,
-            enemyPosition,
-            0.12f,
-            2f
-        );
-
-        var enemyA = new EnemyA(enemySprite, enemyPosition);
-
-        _enemies.Add(enemyA);
         
+        _keyboardController = new KeyboardController(this, _player);
+        _keyboardController.Initialize();
+
     }
 
     // Update every sprite once per frame
@@ -88,14 +72,10 @@ public class Game1 : Game
             sprite.Update(gameTime);
         }
 
+        _player.Update(gameTime);
 
-        keyboardController.Update();
-
-        foreach(var enemy in _enemies)
-        {
-            enemy.Update(gameTime);
-        }
-
+        _keyboardController.Update();
+        
         base.Update(gameTime);
     }
 
@@ -110,11 +90,7 @@ public class Game1 : Game
         {
             sprite.Draw(_spriteBatch);
         }
-
-        foreach (var enemy in _enemies)
-        {
-            enemy.Draw(_spriteBatch);
-        }
+        _player.Draw(_spriteBatch);
 
         _spriteBatch.End();
 
@@ -128,10 +104,6 @@ public class Game1 : Game
         {
             sprite.Reset();
         }
-
-        foreach (var enemy in _enemies)
-        {
-            enemy.Reset();
-        }
+        _player.Reset();
     }
 }
