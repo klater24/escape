@@ -1,0 +1,3 @@
+# .NET / MonoGame build outputs at any directory level
+[Bb]in/
+[Oo]bj/
