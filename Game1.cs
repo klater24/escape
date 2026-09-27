@@ -121,7 +121,26 @@ public class Game1 : Game
         var enemyC = new EnemyC(enemyCSprite, enemyCPosition);
 
         _enemies.Add(enemyC);
-        
+
+
+        var bossPosition = new Vector2(480, 300);
+
+        var bossFrames = new[]
+        {
+            new Rectangle(192, 0, 32, 32),
+            new Rectangle(224, 0, 32, 32)
+        };
+
+        var bossSprite = SpriteFactory.CreateAnimatedSprite(
+            _blockAtlas,
+            bossFrames,
+            bossPosition,
+            0.12f,
+            2f
+        );
+
+        var boss = new Boss(bossSprite, bossPosition);
+        _enemies.Add(boss);
     }
 
     // Update every sprite once per frame
