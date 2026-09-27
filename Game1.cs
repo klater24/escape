@@ -4,6 +4,7 @@ using escape.Interfaces;
 using escape.Sprites;
 using escape.Inputs;
 using System.Collections.Generic;
+using escape.Enemies;
 
 namespace escape;
 
@@ -16,6 +17,7 @@ public class Game1 : Game
     private IController keyboardController = null!;
 
     private readonly List<ISprite> _sprites = new();
+    private readonly List<IEnemy> _enemies = new();
 
     public Game1()
     {
@@ -56,6 +58,70 @@ public class Game1 : Game
             _sprites.Add(SpriteFactory.CreateBlockSprite(_blockAtlas, blockTypes[i], position, 2f));
         }
 
+        var enemyAPosition = new Vector2(450, 200);
+
+        var enemyAFrames = new[]
+        {
+            new Rectangle(0, 0, 32, 32),
+            new Rectangle(32, 0, 32, 32)
+        };
+
+        var enemyASprite = SpriteFactory.CreateAnimatedSprite(
+            _blockAtlas,
+            enemyAFrames,
+            enemyAPosition,
+            0.12f,
+            2f
+        );
+
+        var enemyA = new EnemyA(enemyASprite, enemyAPosition);
+
+        _enemies.Add(enemyA);
+
+
+
+        var enemyBPosition = new Vector2(660, 300);
+
+        var enemyBFrames = new[]
+        {
+            new Rectangle(64, 0, 32, 32),
+            new Rectangle(96, 0, 32, 32)
+        };
+
+        var enemyBSprite = SpriteFactory.CreateAnimatedSprite(
+            _blockAtlas,
+            enemyBFrames,
+            enemyBPosition,
+            0.12f,
+            2f
+        );
+
+        var enemyB = new EnemyB(enemyBSprite, enemyBPosition);
+
+        _enemies.Add(enemyB);
+
+
+
+        var enemyCPosition = new Vector2(450, 400);
+
+        var enemyCFrames = new[]
+        {
+            new Rectangle(128, 0, 32, 32),
+            new Rectangle(160, 0, 32, 32)
+        };
+
+        var enemyCSprite = SpriteFactory.CreateAnimatedSprite(
+            _blockAtlas,
+            enemyCFrames,
+            enemyCPosition,
+            0.12f,
+            2f
+        );
+
+        var enemyC = new EnemyC(enemyCSprite, enemyCPosition);
+
+        _enemies.Add(enemyC);
+        
     }
 
     // Update every sprite once per frame
@@ -82,6 +148,11 @@ public class Game1 : Game
             sprite.Draw(_spriteBatch);
         }
 
+        foreach (var enemy in _enemies)
+        {
+            enemy.Draw(_spriteBatch);
+        }
+
         _spriteBatch.End();
 
         base.Draw(gameTime);
@@ -93,6 +164,11 @@ public class Game1 : Game
         foreach (var sprite in _sprites)
         {
             sprite.Reset();
+        }
+
+        foreach (var enemy in _enemies)
+        {
+            enemy.Reset();
         }
     }
 }
