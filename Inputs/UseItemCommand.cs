@@ -5,11 +5,11 @@ namespace escape.Inputs;
 
 public class UseItemCommand : ICommand
 {
-    private int itemNumber;
+    private int _itemSlot;
 
-    public UseItemCommand(int itemNumber)
+    public UseItemCommand(int itemSlot)
     {
-        this.itemNumber = itemNumber;
+        _itemSlot = itemSlot;
     }
     public void Execute()
     {

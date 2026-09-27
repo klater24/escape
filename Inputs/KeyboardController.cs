@@ -6,15 +6,17 @@ namespace escape.Inputs;
 
 public class KeyboardController : IController
 {
-    private Game game;
+    private Game _game;
+    private Player _player;
     private KeyboardState previousState;
     private KeyboardState currentState;
     private Dictionary<Keys, ICommand> pressedCommands;
     private Dictionary<Keys, ICommand> heldCommands;
 
-    public KeyboardController(Game game)
+    public KeyboardController(Game game, Player player)
     {
-        this.game = game;
+        _game = game;
+        _player = player;
         previousState = new KeyboardState();
         currentState = Keyboard.GetState();
         pressedCommands = new Dictionary<Keys, ICommand>();
@@ -22,25 +24,25 @@ public class KeyboardController : IController
     }
     public void Initialize()
     {
-        heldCommands[Keys.W] = new MoveUpCommand();
-        heldCommands[Keys.Up] = new MoveUpCommand();
+        heldCommands[Keys.W] = new MoveUpCommand(_player);
+        heldCommands[Keys.Up] = new MoveUpCommand(_player);
 
-        heldCommands[Keys.S] = new MoveDownCommand();
-        heldCommands[Keys.Down] = new MoveDownCommand();
+        heldCommands[Keys.S] = new MoveDownCommand(_player);
+        heldCommands[Keys.Down] = new MoveDownCommand(_player);
 
-        heldCommands[Keys.A] = new MoveLeftCommand();
-        heldCommands[Keys.Left] = new MoveLeftCommand();
+        heldCommands[Keys.A] = new MoveLeftCommand(_player);
+        heldCommands[Keys.Left] = new MoveLeftCommand(_player);
 
-        heldCommands[Keys.D] = new MoveRightCommand();
-        heldCommands[Keys.Right] = new MoveRightCommand();
+        heldCommands[Keys.D] = new MoveRightCommand(_player);
+        heldCommands[Keys.Right] = new MoveRightCommand(_player);
 
-        pressedCommands[Keys.Z] = new AttackCommand();
-        pressedCommands[Keys.N] = new AttackCommand();
+        pressedCommands[Keys.Z] = new AttackCommand(_player);
+        pressedCommands[Keys.N] = new AttackCommand(_player);
 
-        pressedCommands[Keys.Q] = new QuitCommand(game);
+        pressedCommands[Keys.Q] = new QuitCommand(_game);
         pressedCommands[Keys.R] = new ResetCommand();
 
-        pressedCommands[Keys.E] = new DamageSelfCommand();
+        pressedCommands[Keys.E] = new DamageSelfCommand(_player);
         
         pressedCommands[Keys.D1] = new UseItemCommand(1);
         pressedCommands[Keys.D2] = new UseItemCommand(2);
