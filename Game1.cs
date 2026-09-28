@@ -22,8 +22,8 @@ public class Game1 : Game
     private IController keyboardController = null!;
     private Player _player = null!;
 
-    private readonly List<ISprite> _sprites = new();
-    private readonly List<IEnemy> _enemies = new();
+    private EnemySpriteFactory _enemySpriteFactory = null!;
+    private EnemyManager _enemies = null!;
 
     public Game1()
     {
@@ -75,89 +75,16 @@ public class Game1 : Game
             _blockManager.Add(new Block(_blockAtlas, blockTypes[i], position, 2f));
         }
 
-        var enemyAPosition = new Vector2(450, 200);
-
-        var enemyAFrames = new[]
+        _enemySpriteFactory = new EnemySpriteFactory(GraphicsDevice);
+        var enemyPosition = new Vector2(450, 260);
+        _enemies = new EnemyManager(new IEnemy[]
         {
-            new Rectangle(0, 0, 32, 32),
-            new Rectangle(32, 0, 32, 32)
-        };
-
-        var enemyASprite = SpriteFactory.CreateAnimatedSprite(
-            _blockAtlas,
-            enemyAFrames,
-            enemyAPosition,
-            0.12f,
-            2f);
-
-        var enemyA = new EnemyA(enemyASprite, enemyAPosition);
-
-        _enemies.Add(enemyA);
-
-        var enemyBPosition = new Vector2(660, 300);
-
-        var enemyBFrames = new[]
-        {
-            new Rectangle(64, 0, 32, 32),
-            new Rectangle(96, 0, 32, 32)
-        };
-
-        var enemyBSprite = SpriteFactory.CreateAnimatedSprite(
-            _blockAtlas,
-            enemyBFrames,
-            enemyBPosition,
-            0.12f,
-            2f
-        );
-
-        var enemyB = new EnemyB(enemyBSprite, enemyBPosition);
-
-        _enemies.Add(enemyB);
-
-        var enemyCPosition = new Vector2(450, 400);
-
-        var enemyCFrames = new[]
-        {
-            new Rectangle(128, 0, 32, 32),
-            new Rectangle(160, 0, 32, 32)
-        };
-
-        var enemyCSprite = SpriteFactory.CreateAnimatedSprite(
-            _blockAtlas,
-            enemyCFrames,
-            enemyCPosition,
-            0.12f,
-            2f
-        );
-
-        var enemyC = new EnemyC(enemyCSprite, enemyCPosition);
-
-        _enemies.Add(enemyC);
-
-        var bossPosition = new Vector2(480, 300);
-
-        var bossFrames = new[]
-        {
-            new Rectangle(192, 0, 32, 32),
-            new Rectangle(224, 0, 32, 32)
-        };
-
-        var bossSprite = SpriteFactory.CreateAnimatedSprite(
-            _blockAtlas,
-            bossFrames,
-            bossPosition,
-            0.12f,
-            2f
-        );
-
-        var boss = new Boss(bossSprite, bossPosition);
-        _enemies.Add(boss);
-
-        foreach (var enemy in _enemies)
-        {
-            RegisterResettable(enemy);
-        }
-
+            new EnemyA(_enemySpriteFactory.Create("Run", enemyPosition), enemyPosition),
+            new EnemyB(_enemySpriteFactory.Create("DemonFlying", enemyPosition), enemyPosition),
+            new EnemyC(_enemySpriteFactory.Create("Shield", enemyPosition), enemyPosition),
+            new Boss(_enemySpriteFactory.Create("SorcererAttack", enemyPosition), enemyPosition)
+        });
+        RegisterResettable(_enemies);
         _previousKeyboardState = Keyboard.GetState();
     }
 
@@ -177,12 +104,10 @@ public class Game1 : Game
         _blockManager.Update(gameTime);
         _previousKeyboardState = keyboardState;
 
-        foreach (var enemy in _enemies)
-        {
-            enemy.Update(gameTime);
-        }
+        _enemies.Update(gameTime);
 
         keyboardController.Update();
+        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | R: reset | Q: quit";
         base.Update(gameTime);
     }
 
@@ -195,10 +120,7 @@ public class Game1 : Game
 
         _blockManager.Draw(_spriteBatch);
 
-        foreach (var enemy in _enemies)
-        {
-            enemy.Draw(_spriteBatch);
-        }
+        _enemies.Draw(_spriteBatch);
 
         _spriteBatch.End();
 
@@ -216,4 +138,12 @@ public class Game1 : Game
     {
         _resetCoordinator.Register(system);
     }
-}
+    public void CycleEnemy(int direction) => _enemies.Cycle(direction);
+
+    protected override void UnloadContent()
+    {
+        _enemySpriteFactory.Dispose();
+        _blockAtlas.Dispose();
+        _spriteBatch.Dispose();
+        base.UnloadContent();
+    }}

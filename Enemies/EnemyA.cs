@@ -39,9 +39,9 @@ public class EnemyA : IEnemy
             _direction = new Vector2(1, 0);
         }
 
-        if (Position.X > 960 - 64)
+        if (Position.X > 960 - 96)
         {
-            Position = new Vector2(960 - 64, Position.Y);
+            Position = new Vector2(960 - 96, Position.Y);
             _direction = new Vector2(-1,0);
         }
 

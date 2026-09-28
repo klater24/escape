@@ -41,9 +41,9 @@ public class EnemyB : IEnemy
             _direction = new Vector2(1, 0);
         }
 
-        if (Position.X > 960 - 64)
+        if (Position.X > 960 - 81)
         {
-            Position = new Vector2(960 - 64, Position.Y);
+            Position = new Vector2(960 - 81, Position.Y);
             _direction = new Vector2(-1,0);
         }
 
@@ -53,9 +53,9 @@ public class EnemyB : IEnemy
             _direction = new Vector2(0, 1);
         }
 
-        if (Position.Y > 540 - 64)
+        if (Position.Y > 540 - 71)
         {
-            Position = new Vector2(Position.X, 540 - 64);
+            Position = new Vector2(Position.X, 540 - 71);
             _direction = new Vector2(0, -1);
         }
 
