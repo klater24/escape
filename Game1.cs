@@ -25,6 +25,7 @@ public class Game1 : Game
     private Player _player = null!;
 
     private readonly List<ISprite> _sprites = new();
+    private readonly List<IEnemy> _enemies = new();
 
     public Game1()
     {
@@ -51,15 +52,17 @@ public class Game1 : Game
         _playerSheet = Texture2D.FromFile(GraphicsDevice, "Content/Textures/Player/link.png");
         _player = new Player(new Vector2(100, 100), _playerSheet);
 
+
         // Load the PixelPack block tiles
         _blockAtlas = TextureLoader.Load(GraphicsDevice, "Content/Textures/Blocks/PixelPack_Block_Atlas.png");
-
+/*
         _player = new Player(
             new Vector2(100, 100),
             _blockAtlas, 1,
             _blockAtlas, 1,
             _blockAtlas, 1,
             _spriteBatch);
+            */
 
         RegisterResettable(_player); 
 
@@ -220,12 +223,13 @@ public class Game1 : Game
     public void Reset()
     {
         _resetCoordinator.Reset();
+       //_player.Reset();
     }
 
     // Add a player or system so the game-wide reset can reach it
     public void RegisterResettable(IGameResettable system)
     {
         _resetCoordinator.Register(system);
-        _player.Reset();
+         
     }
 }
