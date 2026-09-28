@@ -4,6 +4,8 @@ using escape.Interfaces;
 using escape.Sprites;
 using System.Collections.Generic;
 using escape.Enemies;
+using escape.Input;
+using Microsoft.Xna.Framework.Input;
 
 namespace escape;
 
@@ -15,7 +17,9 @@ public class Game1 : Game
     private Texture2D _blockAtlas = null!;
 
     private readonly List<ISprite> _sprites = new();
-    private readonly List<IEnemy> _enemies = new();
+    private EnemyManager _enemies = null!;
+    private EnemySpriteFactory _enemySpriteFactory = null!;
+    private readonly KeyboardController _keyboard = new();
 
     public Game1()
     {
@@ -50,95 +54,24 @@ public class Game1 : Game
 
         for (int i = 0; i < blockTypes.Length; i++)
         {
-            var position = new Vector2(40 + (i % 5) * 64, 40 + (i / 5) * 64);
-            _sprites.Add(SpriteFactory.CreateBlockSprite(_blockAtlas, blockTypes[i], position, 2f));
+            var blockPosition = new Vector2(40 + (i % 5) * 64, 40 + (i / 5) * 64);
+            _sprites.Add(SpriteFactory.CreateBlockSprite(_blockAtlas, blockTypes[i], blockPosition, 2f));
         }
 
-        var enemyAPosition = new Vector2(450, 200);
-
-        var enemyAFrames = new[]
+        _enemySpriteFactory = new EnemySpriteFactory(GraphicsDevice);
+        var position = new Vector2(450, 260);
+        _enemies = new EnemyManager(new IEnemy[]
         {
-            new Rectangle(0, 0, 32, 32),
-            new Rectangle(32, 0, 32, 32)
-        };
-
-        var enemyASprite = SpriteFactory.CreateAnimatedSprite(
-            _blockAtlas,
-            enemyAFrames,
-            enemyAPosition,
-            0.12f,
-            2f
-        );
-
-        var enemyA = new EnemyA(enemyASprite, enemyAPosition);
-
-        _enemies.Add(enemyA);
-
-
-
-        var enemyBPosition = new Vector2(660, 300);
-
-        var enemyBFrames = new[]
-        {
-            new Rectangle(64, 0, 32, 32),
-            new Rectangle(96, 0, 32, 32)
-        };
-
-        var enemyBSprite = SpriteFactory.CreateAnimatedSprite(
-            _blockAtlas,
-            enemyBFrames,
-            enemyBPosition,
-            0.12f,
-            2f
-        );
-
-        var enemyB = new EnemyB(enemyBSprite, enemyBPosition);
-
-        _enemies.Add(enemyB);
-
-
-
-        var enemyCPosition = new Vector2(450, 400);
-
-        var enemyCFrames = new[]
-        {
-            new Rectangle(128, 0, 32, 32),
-            new Rectangle(160, 0, 32, 32)
-        };
-
-        var enemyCSprite = SpriteFactory.CreateAnimatedSprite(
-            _blockAtlas,
-            enemyCFrames,
-            enemyCPosition,
-            0.12f,
-            2f
-        );
-
-        var enemyC = new EnemyC(enemyCSprite, enemyCPosition);
-
-        _enemies.Add(enemyC);
-
-
-        var bossPosition = new Vector2(480, 300);
-
-        var bossFrames = new[]
-        {
-            new Rectangle(192, 0, 32, 32),
-            new Rectangle(224, 0, 32, 32)
-        };
-
-        var bossSprite = SpriteFactory.CreateAnimatedSprite(
-            _blockAtlas,
-            bossFrames,
-            bossPosition,
-            0.12f,
-            2f
-        );
-
-        var boss = new Boss(bossSprite, bossPosition);
-        _enemies.Add(boss);
+            new EnemyA(_enemySpriteFactory.Create("Run", position), position),
+            new EnemyB(_enemySpriteFactory.Create("DemonFlying", position), position),
+            new EnemyC(_enemySpriteFactory.Create("Shield", position), position),
+            new Boss(_enemySpriteFactory.Create("SorcererAttack", position), position)
+        });
+        _keyboard.Bind(Keys.O, new ActionCommand(() => _enemies.Cycle(-1)));
+        _keyboard.Bind(Keys.P, new ActionCommand(() => _enemies.Cycle(1)));
+        _keyboard.Bind(Keys.R, new ActionCommand(Reset));
+        _keyboard.Bind(Keys.Q, new ActionCommand(Exit));
     }
-
     // Update every sprite once per frame
     protected override void Update(GameTime gameTime)
     {
@@ -147,10 +80,9 @@ public class Game1 : Game
             sprite.Update(gameTime);
         }
 
-        foreach(var enemy in _enemies)
-        {
-            enemy.Update(gameTime);
-        }
+        _keyboard.Update(Keyboard.GetState());
+        _enemies.Update(gameTime);
+        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: cycle | R: reset | Q: quit";
 
         base.Update(gameTime);
     }
@@ -167,10 +99,7 @@ public class Game1 : Game
             sprite.Draw(_spriteBatch);
         }
 
-        foreach (var enemy in _enemies)
-        {
-            enemy.Draw(_spriteBatch);
-        }
+        _enemies.Draw(_spriteBatch);
 
         _spriteBatch.End();
 
@@ -185,9 +114,13 @@ public class Game1 : Game
             sprite.Reset();
         }
 
-        foreach (var enemy in _enemies)
-        {
-            enemy.Reset();
-        }
+        _enemies.Reset();
+    }
+    protected override void UnloadContent()
+    {
+        _enemySpriteFactory.Dispose();
+        _blockAtlas.Dispose();
+        _spriteBatch.Dispose();
+        base.UnloadContent();
     }
 }
