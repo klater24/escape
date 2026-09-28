@@ -34,7 +34,6 @@ public class Player
     private StaticSprite idleSide;
     private Vector2 initialPosition;
     private State currentState;
-    //private Texture2D _spriteSheet;
     
         public Player(Vector2 intiPos, Texture2D spriteSheet)
         {
@@ -168,7 +167,7 @@ public class Player
             {
                 walkingSide.Update(gameTime);
             }
-        }
+        }    
         else if (currentState == State.Attacking)
         {
             if (facingDirection == Direction.Up)
