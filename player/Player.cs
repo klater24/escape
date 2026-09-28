@@ -20,7 +20,7 @@ public enum State
     Attacking
 }
 
-public class Player
+public class Player : IGameResettable
 {  
     private Direction facingDirection;
     private Vector2 position;

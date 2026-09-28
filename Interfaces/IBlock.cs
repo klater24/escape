@@ -14,6 +14,4 @@ public interface IBlock : ISprite
     // Shows whether the block should be used and drawn
     bool IsActive { get; set; }
 
-    // Leaves room for future block cycling controls
-    void Cycle();
 }
