@@ -43,48 +43,48 @@ public class Player : IGameResettable
         initialPosition = intiPos;
 
         //idle
-        Rectangle idleDownFrame = new Rectangle(0, 11, 16, 16);  // frame 1
-        Rectangle idleSideFrame = new Rectangle(32, 11, 16, 16); // frame 3
-        Rectangle idleUpFrame = new Rectangle(64, 11, 16, 16);   
+        Rectangle idleDownFrame = new Rectangle(0, 10, 16, 16); 
+        Rectangle idleSideFrame = new Rectangle(32, 16, 16, 16);
+        Rectangle idleUpFrame = new Rectangle(64, 16, 16, 16);   
 
         //walk
         Rectangle[] walkUpFrame =
         {
-            new Rectangle(64, 11, 16, 16),  // 5
-            new Rectangle(80, 11, 16, 16)   // 6
+            new Rectangle(69, 11, 16, 16), 
+            new Rectangle(86, 11, 16, 16)  
         };
         Rectangle[] walkDownFrame =
         {
-            new Rectangle(0, 11, 16, 16),   
-            new Rectangle(16, 11, 16, 16)   
+            new Rectangle(1, 11, 16, 16),   
+            new Rectangle(18, 11, 16, 16)   
         };
         Rectangle[] walkSideFrame =
         {
-            new Rectangle(32, 11, 16, 16),  // 3
-            new Rectangle(48, 11, 16, 16)   // 4
+            new Rectangle(35, 11, 16, 16), 
+            new Rectangle(52, 11, 16, 16)   
         };
         //attack
         Rectangle[] attackUpFrame =
         {
-            new Rectangle(0, 59, 16, 16),   
-            new Rectangle(16, 59, 16, 16),  
-            new Rectangle(32, 59, 16, 16),  
-            new Rectangle(48, 59, 16, 16)   
+            new Rectangle(1, 109, 16, 16),   
+            new Rectangle(18, 97, 16, 28),  
+            new Rectangle(35, 98, 16, 27),  
+            new Rectangle(52, 106, 16, 19)   
         };
         Rectangle[] attackDownFrame =
         {
-            new Rectangle(0, 27, 16, 16),   
-            new Rectangle(16, 27, 16, 16),  
-            new Rectangle(32, 27, 16, 16),  
-            new Rectangle(48, 27, 16, 16)   
+            new Rectangle(1, 47, 16, 16),   
+            new Rectangle(18, 47, 16, 27),  
+            new Rectangle(35, 47, 16, 23),  
+            new Rectangle(52, 47, 16, 19)   
             
         };
         Rectangle[] attackSideFrame =
         {
-            new Rectangle(0, 43, 16, 16),   
-            new Rectangle(16, 43, 16, 16),  
-            new Rectangle(32, 43, 16, 16),  
-            new Rectangle(48, 43, 16, 16)   
+            new Rectangle(1, 77, 16, 16),   
+            new Rectangle(18, 77, 27, 16),  
+            new Rectangle(46, 77, 23, 16),  
+            new Rectangle(70, 77, 19, 16)   
         };
 
         //walk

@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <None Update="Content\Textures\Blocks\PixelPack_Block_Atlas.png" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Content/Textures/Enemies/*.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <None Update="Content\Textures\Player\link.png"
             CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
