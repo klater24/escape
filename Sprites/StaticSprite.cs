@@ -11,6 +11,7 @@ public class StaticSprite : ISprite
     private readonly Rectangle _sourceRectangle;
     private readonly float _scale;
     private readonly Vector2 _initialPosition;
+    private SpriteEffects _spriteEffects = SpriteEffects.None;
 
     public Vector2 Position { get; set; }
 
@@ -22,6 +23,10 @@ public class StaticSprite : ISprite
         _scale = scale;
         _initialPosition = position;
         Position = position;
+    }
+    public void SetSpriteEffects(SpriteEffects effects)
+    {
+        _spriteEffects = effects;
     }
 
     // Static sprites do not change during updates
@@ -40,7 +45,7 @@ public class StaticSprite : ISprite
             0f,
             Vector2.Zero,
             _scale,
-            SpriteEffects.None,
+            _spriteEffects,
             0f);
     }
 

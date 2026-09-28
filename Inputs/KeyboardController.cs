@@ -53,13 +53,19 @@ public class KeyboardController : IController
     {
         previousState = currentState;
         currentState = Keyboard.GetState();
+        bool moving = false;
 
         foreach (var key in heldCommands.Keys)
         {
             if (currentState.IsKeyDown(key))
             {
+                moving = true;
                 heldCommands[key].Execute();
             }
+        }
+        if (!moving)
+        {
+            _player.StopMoving();
         }
         foreach (var key in pressedCommands.Keys)
         {

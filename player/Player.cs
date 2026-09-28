@@ -34,6 +34,8 @@ public class Player : IGameResettable
     private StaticSprite idleSide;
     private Vector2 initialPosition;
     private State currentState;
+    private float attackTimer;
+    private const float AttackDuration = 0.48f;
     
         public Player(Vector2 intiPos, Texture2D spriteSheet)
         {
@@ -43,9 +45,9 @@ public class Player : IGameResettable
         initialPosition = intiPos;
 
         //idle
-        Rectangle idleDownFrame = new Rectangle(0, 10, 16, 16); 
-        Rectangle idleSideFrame = new Rectangle(32, 16, 16, 16);
-        Rectangle idleUpFrame = new Rectangle(64, 16, 16, 16);   
+        Rectangle idleDownFrame = new Rectangle(1, 11, 16, 16); 
+        Rectangle idleSideFrame = new Rectangle(35, 11, 16, 16);
+        Rectangle idleUpFrame = new Rectangle(69, 11, 16, 16);  
 
         //walk
         Rectangle[] walkUpFrame =
@@ -107,8 +109,13 @@ public class Player : IGameResettable
     }
     public void Move(Direction direct)
     {
+        if (currentState == State.Attacking)
+        {
+            return;
+        }
         currentState = State.Walking;
         facingDirection = direct;
+
         if(direct == Direction.Up)
         {
             position.Y -= 1;
@@ -120,10 +127,16 @@ public class Player : IGameResettable
         else if (direct == Direction.Right)
         {
             position.X += 1;
+            walkingSide.SetSpriteEffects(SpriteEffects.None);
+            attackSide.SetSpriteEffects(SpriteEffects.None);
+            idleSide.SetSpriteEffects(SpriteEffects.None);
         }
         else if (direct == Direction.Left)
         {
             position.X -= 1;
+            walkingSide.SetSpriteEffects(SpriteEffects.FlipHorizontally);
+            attackSide.SetSpriteEffects(SpriteEffects.FlipHorizontally);
+            idleSide.SetSpriteEffects(SpriteEffects.FlipHorizontally);
         }
         UpdateSpritePositions();
     }
@@ -133,7 +146,11 @@ public class Player : IGameResettable
     }
     public void Attack()
     {
+        if (currentState == State.Attacking)
+            return;
+
         currentState = State.Attacking; 
+        attackTimer = 0f;
     }
     public void Walk()
     {
@@ -142,6 +159,13 @@ public class Player : IGameResettable
     public void Idle()
     {
         currentState = State.Idle;
+    }
+    public void StopMoving()
+    {
+        if (currentState == State.Walking)
+        {
+            currentState = State.Idle;
+        }
     }
     public void Reset()
     {
@@ -170,6 +194,8 @@ public class Player : IGameResettable
         }    
         else if (currentState == State.Attacking)
         {
+            attackTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             if (facingDirection == Direction.Up)
             {
                 attackUp.Update(gameTime);
@@ -181,6 +207,11 @@ public class Player : IGameResettable
             else
             {
                 attackSide.Update(gameTime);
+            }
+            if (attackTimer >= AttackDuration)
+            {
+                attackTimer = 0f;
+                currentState = State.Idle;
             }
         }
     }
