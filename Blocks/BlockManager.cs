@@ -5,11 +5,13 @@ using escape.Interfaces;
 namespace escape.Blocks;
 
 // Keeps track of every block in the level
-public class BlockManager
+public class BlockManager : IGameResettable
 {
     private readonly List<IBlock> _blocks = new();
+    private int _selectedIndex;
 
     public IReadOnlyList<IBlock> Blocks => _blocks;
+    public IBlock? CurrentBlock => _blocks.Count == 0 ? null : _blocks[_selectedIndex];
 
     // Add a block to the level
     public void Add(IBlock block)
@@ -17,10 +19,28 @@ public class BlockManager
         _blocks.Add(block);
     }
 
+    // Select the previous block in the list
+    public void SelectPrevious()
+    {
+        if (_blocks.Count > 0)
+        {
+            _selectedIndex = (_selectedIndex - 1 + _blocks.Count) % _blocks.Count;
+        }
+    }
+
+    // Select the next block in the list
+    public void SelectNext()
+    {
+        if (_blocks.Count > 0)
+        {
+            _selectedIndex = (_selectedIndex + 1) % _blocks.Count;
+        }
+    }
+
     // Update every block
     public void Update(GameTime gameTime)
     {
-        foreach (var block in _blocks)
+        if (CurrentBlock is { IsActive: true } block)
         {
             block.Update(gameTime);
         }
@@ -29,12 +49,9 @@ public class BlockManager
     // Draw blocks that are turned on
     public void Draw(SpriteBatch spriteBatch)
     {
-        foreach (var block in _blocks)
+        if (CurrentBlock is { IsActive: true } block)
         {
-            if (block.IsActive)
-            {
-                block.Draw(spriteBatch);
-            }
+            block.Draw(spriteBatch);
         }
     }
 
@@ -45,5 +62,7 @@ public class BlockManager
         {
             block.Reset();
         }
+
+        _selectedIndex = 0;
     }
 }
