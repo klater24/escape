@@ -40,7 +40,7 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        _playerSheet = Content.Load<Texture2D>("link");
+        _playerSheet = Texture2D.FromFile(GraphicsDevice, "Content/Textures/Player/link.png");
         _player = new Player(new Vector2(100, 100), _playerSheet);
 
         // Use colored placeholder blocks until the real art is added
