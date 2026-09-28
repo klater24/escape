@@ -5,6 +5,7 @@ using escape.Blocks;
 using escape.Enemies;
 using escape.Interfaces;
 using escape.Sprites;
+using escape.Inputs;
 using System.Collections.Generic;
 
 namespace escape;
@@ -18,6 +19,10 @@ public class Game1 : Game
     private readonly BlockManager _blockManager = new();
     private readonly GameResetCoordinator _resetCoordinator = new();
     private KeyboardState _previousKeyboardState;
+    private IController keyboardController = null!;
+    private Player _player = null!;
+
+    private readonly List<ISprite> _sprites = new();
     private readonly List<IEnemy> _enemies = new();
 
     public Game1()
@@ -45,6 +50,18 @@ public class Game1 : Game
         // Load the PixelPack block tiles
         _blockAtlas = TextureLoader.Load(GraphicsDevice, "Content/Textures/Blocks/PixelPack_Block_Atlas.png");
 
+        _player = new Player(
+            new Vector2(100, 100),
+            _blockAtlas, 1,
+            _blockAtlas, 1,
+            _blockAtlas, 1,
+            _spriteBatch);
+
+        RegisterResettable(_player); 
+
+        keyboardController = new KeyboardController(this, _player);
+        keyboardController.Initialize();
+
         // Make ten blocks so the team can see how the factory chooses each block
         var blockTypes = new[]
         {
@@ -58,23 +75,88 @@ public class Game1 : Game
             _blockManager.Add(new Block(_blockAtlas, blockTypes[i], position, 2f));
         }
 
-        var enemyPosition = new Vector2(450, 200);
-        var enemyFrames = new[]
+        var enemyAPosition = new Vector2(450, 200);
+
+        var enemyAFrames = new[]
         {
             new Rectangle(0, 0, 32, 32),
             new Rectangle(32, 0, 32, 32)
         };
 
-        var enemySprite = SpriteFactory.CreateAnimatedSprite(
+        var enemyASprite = SpriteFactory.CreateAnimatedSprite(
             _blockAtlas,
-            enemyFrames,
-            enemyPosition,
+            enemyAFrames,
+            enemyAPosition,
             0.12f,
             2f);
 
-        var enemyA = new EnemyA(enemySprite, enemyPosition);
+        var enemyA = new EnemyA(enemyASprite, enemyAPosition);
+
         _enemies.Add(enemyA);
-        RegisterResettable(enemyA);
+
+        var enemyBPosition = new Vector2(660, 300);
+
+        var enemyBFrames = new[]
+        {
+            new Rectangle(64, 0, 32, 32),
+            new Rectangle(96, 0, 32, 32)
+        };
+
+        var enemyBSprite = SpriteFactory.CreateAnimatedSprite(
+            _blockAtlas,
+            enemyBFrames,
+            enemyBPosition,
+            0.12f,
+            2f
+        );
+
+        var enemyB = new EnemyB(enemyBSprite, enemyBPosition);
+
+        _enemies.Add(enemyB);
+
+        var enemyCPosition = new Vector2(450, 400);
+
+        var enemyCFrames = new[]
+        {
+            new Rectangle(128, 0, 32, 32),
+            new Rectangle(160, 0, 32, 32)
+        };
+
+        var enemyCSprite = SpriteFactory.CreateAnimatedSprite(
+            _blockAtlas,
+            enemyCFrames,
+            enemyCPosition,
+            0.12f,
+            2f
+        );
+
+        var enemyC = new EnemyC(enemyCSprite, enemyCPosition);
+
+        _enemies.Add(enemyC);
+
+        var bossPosition = new Vector2(480, 300);
+
+        var bossFrames = new[]
+        {
+            new Rectangle(192, 0, 32, 32),
+            new Rectangle(224, 0, 32, 32)
+        };
+
+        var bossSprite = SpriteFactory.CreateAnimatedSprite(
+            _blockAtlas,
+            bossFrames,
+            bossPosition,
+            0.12f,
+            2f
+        );
+
+        var boss = new Boss(bossSprite, bossPosition);
+        _enemies.Add(boss);
+
+        foreach (var enemy in _enemies)
+        {
+            RegisterResettable(enemy);
+        }
 
         _previousKeyboardState = Keyboard.GetState();
     }
@@ -100,6 +182,7 @@ public class Game1 : Game
             enemy.Update(gameTime);
         }
 
+        keyboardController.Update();
         base.Update(gameTime);
     }
 
