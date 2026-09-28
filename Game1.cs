@@ -1,11 +1,12 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using escape.Blocks;
+using escape.Enemies;
 using escape.Interfaces;
 using escape.Sprites;
+using escape.Inputs;
 using System.Collections.Generic;
-using escape.Enemies;
-using escape.Input;
-using Microsoft.Xna.Framework.Input;
 
 namespace escape;
 
@@ -15,11 +16,14 @@ public class Game1 : Game
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch = null!;
     private Texture2D _blockAtlas = null!;
+    private readonly BlockManager _blockManager = new();
+    private readonly GameResetCoordinator _resetCoordinator = new();
+    private KeyboardState _previousKeyboardState;
+    private IController keyboardController = null!;
+    private Player _player = null!;
 
-    private readonly List<ISprite> _sprites = new();
-    private EnemyManager _enemies = null!;
     private EnemySpriteFactory _enemySpriteFactory = null!;
-    private readonly KeyboardController _keyboard = new();
+    private EnemyManager _enemies = null!;
 
     public Game1()
     {
@@ -30,6 +34,7 @@ public class Game1 : Game
 
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+        _resetCoordinator.Register(_blockManager);
     }
 
     protected override void Initialize()
@@ -42,8 +47,20 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        // Use colored placeholder blocks until the real art is added
-        _blockAtlas = DemoSpriteSheetBuilder.CreateBlockAtlas(GraphicsDevice);
+        // Load the PixelPack block tiles
+        _blockAtlas = TextureLoader.Load(GraphicsDevice, "Content/Textures/Blocks/PixelPack_Block_Atlas.png");
+
+        _player = new Player(
+            new Vector2(100, 100),
+            _blockAtlas, 1,
+            _blockAtlas, 1,
+            _blockAtlas, 1,
+            _spriteBatch);
+
+        RegisterResettable(_player); 
+
+        keyboardController = new KeyboardController(this, _player);
+        keyboardController.Initialize();
 
         // Make ten blocks so the team can see how the factory chooses each block
         var blockTypes = new[]
@@ -54,36 +71,43 @@ public class Game1 : Game
 
         for (int i = 0; i < blockTypes.Length; i++)
         {
-            var blockPosition = new Vector2(40 + (i % 5) * 64, 40 + (i / 5) * 64);
-            _sprites.Add(SpriteFactory.CreateBlockSprite(_blockAtlas, blockTypes[i], blockPosition, 2f));
+            var position = new Vector2(448, 238);
+            _blockManager.Add(new Block(_blockAtlas, blockTypes[i], position, 2f));
         }
 
         _enemySpriteFactory = new EnemySpriteFactory(GraphicsDevice);
-        var position = new Vector2(450, 260);
+        var enemyPosition = new Vector2(450, 260);
         _enemies = new EnemyManager(new IEnemy[]
         {
-            new EnemyA(_enemySpriteFactory.Create("Run", position), position),
-            new EnemyB(_enemySpriteFactory.Create("DemonFlying", position), position),
-            new EnemyC(_enemySpriteFactory.Create("Shield", position), position),
-            new Boss(_enemySpriteFactory.Create("SorcererAttack", position), position)
+            new EnemyA(_enemySpriteFactory.Create("Run", enemyPosition), enemyPosition),
+            new EnemyB(_enemySpriteFactory.Create("DemonFlying", enemyPosition), enemyPosition),
+            new EnemyC(_enemySpriteFactory.Create("Shield", enemyPosition), enemyPosition),
+            new Boss(_enemySpriteFactory.Create("SorcererAttack", enemyPosition), enemyPosition)
         });
-        _keyboard.Bind(Keys.O, new ActionCommand(() => _enemies.Cycle(-1)));
-        _keyboard.Bind(Keys.P, new ActionCommand(() => _enemies.Cycle(1)));
-        _keyboard.Bind(Keys.R, new ActionCommand(Reset));
-        _keyboard.Bind(Keys.Q, new ActionCommand(Exit));
+        RegisterResettable(_enemies);
+        _previousKeyboardState = Keyboard.GetState();
     }
+
     // Update every sprite once per frame
     protected override void Update(GameTime gameTime)
     {
-        foreach (var sprite in _sprites)
+        var keyboardState = Keyboard.GetState();
+        if (keyboardState.IsKeyDown(Keys.T) && _previousKeyboardState.IsKeyUp(Keys.T))
         {
-            sprite.Update(gameTime);
+            _blockManager.SelectPrevious();
+        }
+        else if (keyboardState.IsKeyDown(Keys.Y) && _previousKeyboardState.IsKeyUp(Keys.Y))
+        {
+            _blockManager.SelectNext();
         }
 
-        _keyboard.Update(Keyboard.GetState());
-        _enemies.Update(gameTime);
-        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: cycle | R: reset | Q: quit";
+        _blockManager.Update(gameTime);
+        _previousKeyboardState = keyboardState;
 
+        _enemies.Update(gameTime);
+
+        keyboardController.Update();
+        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | R: reset | Q: quit";
         base.Update(gameTime);
     }
 
@@ -94,10 +118,7 @@ public class Game1 : Game
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-        foreach (var sprite in _sprites)
-        {
-            sprite.Draw(_spriteBatch);
-        }
+        _blockManager.Draw(_spriteBatch);
 
         _enemies.Draw(_spriteBatch);
 
@@ -109,18 +130,20 @@ public class Game1 : Game
     // Reset every sprite to its starting state
     public void Reset()
     {
-        foreach (var sprite in _sprites)
-        {
-            sprite.Reset();
-        }
-
-        _enemies.Reset();
+        _resetCoordinator.Reset();
     }
+
+    // Add a player or system so the game-wide reset can reach it
+    public void RegisterResettable(IGameResettable system)
+    {
+        _resetCoordinator.Register(system);
+    }
+    public void CycleEnemy(int direction) => _enemies.Cycle(direction);
+
     protected override void UnloadContent()
     {
         _enemySpriteFactory.Dispose();
         _blockAtlas.Dispose();
         _spriteBatch.Dispose();
         base.UnloadContent();
-    }
-}
+    }}

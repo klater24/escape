@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace escape.Enemies;
 
 // Only the selected enemy runs in the sprint demonstration.
-public sealed class EnemyManager
+public sealed class EnemyManager : escape.Interfaces.IGameResettable
 {
     private readonly IReadOnlyList<IEnemy> _enemies;
     public int SelectedIndex { get; private set; }
