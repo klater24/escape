@@ -47,10 +47,10 @@ public class KeyboardController : IController
 
         pressedCommands[Keys.E] = new DamageSelfCommand(_player);
         
-        pressedCommands[Keys.D1] = new UseItemCommand(1);
-        pressedCommands[Keys.D2] = new UseItemCommand(2);
-        pressedCommands[Keys.D3] = new UseItemCommand(3);
-        pressedCommands[Keys.D4] = new UseItemCommand(4);
+        pressedCommands[Keys.D1] = new UseItemCommand(1, _player);
+        pressedCommands[Keys.D2] = new UseItemCommand(2, _player);
+        pressedCommands[Keys.D3] = new UseItemCommand(3, _player);
+        pressedCommands[Keys.D4] = new UseItemCommand(4, _player);
     }
     public void Update()
     {

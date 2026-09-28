@@ -21,6 +21,7 @@ public class Game1 : Game
     private KeyboardState _previousKeyboardState;
     private IController keyboardController = null!;
     private Player _player = null!;
+    private Texture2D _playerSheet = null!;
 
     private EnemySpriteFactory _enemySpriteFactory = null!;
     private EnemyManager _enemies = null!;
@@ -50,14 +51,10 @@ public class Game1 : Game
         // Load the PixelPack block tiles
         _blockAtlas = TextureLoader.Load(GraphicsDevice, "Content/Textures/Blocks/PixelPack_Block_Atlas.png");
 
-        _player = new Player(
-            new Vector2(100, 100),
-            _blockAtlas, 1,
-            _blockAtlas, 1,
-            _blockAtlas, 1,
-            _spriteBatch);
+        _playerSheet = TextureLoader.Load(GraphicsDevice, "Content/Textures/Player/link.png");
+        _player = new Player(new Vector2(100, 100), _playerSheet);
 
-        RegisterResettable(_player); 
+        RegisterResettable(_player);
 
         keyboardController = new KeyboardController(this, _player);
         keyboardController.Initialize();
@@ -107,6 +104,7 @@ public class Game1 : Game
         _enemies.Update(gameTime);
 
         keyboardController.Update();
+        _player.Update(gameTime);
         Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | R: reset | Q: quit";
         base.Update(gameTime);
     }
@@ -121,6 +119,7 @@ public class Game1 : Game
         _blockManager.Draw(_spriteBatch);
 
         _enemies.Draw(_spriteBatch);
+        _player.Draw(_spriteBatch);
 
         _spriteBatch.End();
 
@@ -144,6 +143,7 @@ public class Game1 : Game
     {
         _enemySpriteFactory.Dispose();
         _blockAtlas.Dispose();
+        _playerSheet.Dispose();
         _spriteBatch.Dispose();
         base.UnloadContent();
     }}

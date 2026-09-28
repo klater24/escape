@@ -1,4 +1,3 @@
-using Microsoft.Xna.Framework.Input;
 using escape.Interfaces;
 
 namespace escape.Inputs;
