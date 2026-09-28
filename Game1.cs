@@ -130,7 +130,6 @@ public class Game1 : Game
     public void Reset()
     {
         _resetCoordinator.Reset();
-       //_player.Reset();
     }
 
     // Add a player or system so the game-wide reset can reach it
