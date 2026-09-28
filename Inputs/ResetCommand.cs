@@ -1,18 +1,19 @@
-using Microsoft.Xna.Framework;
+using System;
 using escape.Interfaces;
 
 namespace escape.Inputs;
 
 public class ResetCommand : ICommand
 {
-    private Game _game;
+    private readonly Action _reset;
 
-    public ResetCommand(Game game)
+    public ResetCommand(Action reset)
     {
-        _game = game;
+        _reset = reset;
     }
+
     public void Execute()
     {
-        ((Game1)_game).Reset();
+        _reset();
     }
 }

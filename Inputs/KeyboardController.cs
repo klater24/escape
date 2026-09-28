@@ -6,14 +6,14 @@ namespace escape.Inputs;
 
 public class KeyboardController : IController
 {
-    private Game _game;
+    private Game1 _game;
     private Player _player;
     private KeyboardState previousState;
     private KeyboardState currentState;
     private Dictionary<Keys, ICommand> pressedCommands;
     private Dictionary<Keys, ICommand> heldCommands;
 
-    public KeyboardController(Game game, Player player)
+    public KeyboardController(Game1 game, Player player)
     {
         _game = game;
         _player = player;
@@ -39,8 +39,11 @@ public class KeyboardController : IController
         pressedCommands[Keys.Z] = new AttackCommand(_player);
         pressedCommands[Keys.N] = new AttackCommand(_player);
 
+        pressedCommands[Keys.O] = new CycleEnemyCommand(_game, -1);
+        pressedCommands[Keys.P] = new CycleEnemyCommand(_game, 1);
+
         pressedCommands[Keys.Q] = new QuitCommand(_game);
-        pressedCommands[Keys.R] = new ResetCommand(_game);
+        pressedCommands[Keys.R] = new ResetCommand(_game.Reset);
 
         pressedCommands[Keys.E] = new DamageSelfCommand(_player);
         

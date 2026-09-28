@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Sprites;
+using escape.Interfaces;
 public enum Direction
 {
     Up,
@@ -16,7 +17,7 @@ public enum State
     Attacking
 }
 
-public class Player
+public class Player : IGameResettable
 {  
     private Direction facingDirection;
     private Vector2 position;

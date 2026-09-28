@@ -14,7 +14,6 @@ public class Boss : IEnemy
     private Vector2 _direction;
     public Vector2 Position { get; set; }
     private float _speed;
-    private float _fireTimer;
 
     public Boss(ISprite sprite, Vector2 position)
     {
@@ -24,7 +23,6 @@ public class Boss : IEnemy
         _sprite.Position = position;
         _direction = new Vector2(1, 0);
         _speed = 75f;
-        _fireTimer = 0f;
         _leftBoundary = position.X - 150f;
         _rightBoundary = position.X + 150f;
     }
@@ -64,6 +62,5 @@ public class Boss : IEnemy
         _sprite.Position = Position;
         _direction = new Vector2(1, 0);
         _speed = 75f;
-        _fireTimer = 0f;
     }
 }
