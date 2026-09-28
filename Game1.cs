@@ -78,7 +78,7 @@ public class Game1 : Game
         {
             new EnemyA(_enemySpriteFactory.Create("Run", enemyPosition), enemyPosition),
             new EnemyB(_enemySpriteFactory.Create("DemonFlying", enemyPosition), enemyPosition),
-            new EnemyC(_enemySpriteFactory.Create("Shield", enemyPosition), enemyPosition),
+            new EnemyC(_enemySpriteFactory.Create("ManaSeed", enemyPosition), enemyPosition),
             new Boss(_enemySpriteFactory.Create("SorcererAttack", enemyPosition), enemyPosition)
         });
         RegisterResettable(_enemies);

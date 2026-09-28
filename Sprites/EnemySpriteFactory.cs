@@ -17,6 +17,21 @@ public sealed class EnemySpriteFactory : IDisposable
 
     public ISprite Create(string animation, Vector2 position)
     {
+        if (animation == "ManaSeed")
+        {
+            var layers = new Texture2D[3];
+            string[] names = { "ManaSeedBody.png", "ManaSeedOutfit.png", "ManaSeedHair.png" };
+            for (int i = 0; i < names.Length; i++)
+            {
+                string layerPath = Path.Combine(AppContext.BaseDirectory, "Content", "Textures", "Enemies", names[i]);
+                using var layerStream = File.OpenRead(layerPath);
+                layers[i] = Texture2D.FromStream(_graphics, layerStream);
+                _textures.Add(layers[i]);
+                if (layers[i].Width != 512 || layers[i].Height != 512)
+                    throw new InvalidDataException($"Expected a 512x512 Mana Seed sheet: {layerPath}");
+            }
+            return new ManaSeedSprite(layers, position);
+        }
         var (fileName, frameWidth, frameHeight, frameCount, frameSeconds) = animation switch
         {
             "Run" => ("noBKG_KnightRun_strip.png", 96, 64, 8, 0.10f),
