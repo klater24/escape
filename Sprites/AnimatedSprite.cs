@@ -12,6 +12,7 @@ public class AnimatedSprite : ISprite
     private readonly float _frameSeconds;
     private readonly Vector2 _initialPosition;
     private readonly float _scale;
+    private SpriteEffects _spriteEffects = SpriteEffects.None;
 
     private int _currentFrame;
     private float _elapsed;
@@ -29,6 +30,10 @@ public class AnimatedSprite : ISprite
         Position = position;
         _currentFrame = 0;
         _elapsed = 0f;
+    }
+    public void SetSpriteEffects(SpriteEffects effects)
+    {
+        _spriteEffects = effects;
     }
 
     // Move to the next frame when enough time has passed
@@ -54,7 +59,7 @@ public class AnimatedSprite : ISprite
             0f,
             Vector2.Zero,
             _scale,
-            SpriteEffects.None,
+            _spriteEffects,
             0f);
     }
 

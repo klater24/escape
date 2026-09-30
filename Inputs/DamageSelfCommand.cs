@@ -12,6 +12,6 @@ public class DamageSelfCommand : ICommand
     }
     public void Execute()
     {
-        
+        _player.Damage();
     }
 }
