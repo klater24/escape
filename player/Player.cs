@@ -2,7 +2,7 @@ using escape.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Sprites;
-using escape.Interfaces;
+
 public enum Direction
 {
     Up,
@@ -39,8 +39,8 @@ public class Player : IGameResettable
     private Vector2 initialPosition;
     private State currentState;
     private float attackTimer;
-    private const float AttackDuration = 0.48f;
     private float damageTimer;
+    private const float AttackDuration = 0.48f;
     private const float damageDuration = 0.96f;
     private const float PlayerScale = 2f;
     private const float AnimationSpeed = 0.12f;
