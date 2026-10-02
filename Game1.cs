@@ -1,12 +1,10 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using escape.Blocks;
 using escape.Enemies;
 using escape.Interfaces;
 using escape.Sprites;
 using escape.Inputs;
-using System.Collections.Generic;
 
 namespace escape;
 
@@ -18,8 +16,7 @@ public class Game1 : Game
     private Texture2D _blockAtlas = null!;
     private readonly BlockManager _blockManager = new();
     private readonly GameResetCoordinator _resetCoordinator = new();
-    private KeyboardState _previousKeyboardState;
-    private IController keyboardController = null!;
+    private IController _keyboardController = null!;
     private Player _player = null!;
     private Texture2D _playerSheet = null!;
 
@@ -56,8 +53,8 @@ public class Game1 : Game
 
         RegisterResettable(_player);
 
-        keyboardController = new KeyboardController(this, _player);
-        keyboardController.Initialize();
+        _keyboardController = new KeyboardController(this, _player, _blockManager);
+        _keyboardController.Initialize();
 
         // Make ten blocks so the team can see how the factory chooses each block
         var blockTypes = new[]
@@ -81,28 +78,16 @@ public class Game1 : Game
             new Boss(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "SorcererAttack", enemyPosition), enemyPosition)
         });
         RegisterResettable(_enemies);
-        _previousKeyboardState = Keyboard.GetState();
     }
 
     // Update every sprite once per frame
     protected override void Update(GameTime gameTime)
     {
-        var keyboardState = Keyboard.GetState();
-        if (keyboardState.IsKeyDown(Keys.T) && _previousKeyboardState.IsKeyUp(Keys.T))
-        {
-            _blockManager.SelectPrevious();
-        }
-        else if (keyboardState.IsKeyDown(Keys.Y) && _previousKeyboardState.IsKeyUp(Keys.Y))
-        {
-            _blockManager.SelectNext();
-        }
-
         _blockManager.Update(gameTime);
-        _previousKeyboardState = keyboardState;
 
         _enemies.Update(gameTime);
 
-        keyboardController.Update();
+        _keyboardController.Update();
         _player.Update(gameTime);
         Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | R: reset | Q: quit";
         base.Update(gameTime);

@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using escape.Interfaces;
+using escape.Blocks;
 
 namespace escape.Inputs;
 
@@ -12,11 +13,13 @@ public class KeyboardController : IController
     private KeyboardState currentState;
     private Dictionary<Keys, ICommand> pressedCommands;
     private Dictionary<Keys, ICommand> heldCommands;
+    private BlockManager _blockManager;
 
-    public KeyboardController(Game1 game, Player player)
+    public KeyboardController(Game1 game, Player player, BlockManager blockManager)
     {
         _game = game;
         _player = player;
+        _blockManager = blockManager;
         previousState = new KeyboardState();
         currentState = Keyboard.GetState();
         pressedCommands = new Dictionary<Keys, ICommand>();
@@ -46,11 +49,15 @@ public class KeyboardController : IController
         pressedCommands[Keys.R] = new ResetCommand(_game.Reset);
 
         pressedCommands[Keys.E] = new DamageSelfCommand(_player);
+
+        pressedCommands[Keys.T] = new CyclePreviousBlocksCommand(_blockManager);
+        pressedCommands[Keys.Y] = new CycleNextBlocksCommand(_blockManager);
         
         pressedCommands[Keys.D1] = new UseItemCommand(1, _player);
         pressedCommands[Keys.D2] = new UseItemCommand(2, _player);
         pressedCommands[Keys.D3] = new UseItemCommand(3, _player);
         pressedCommands[Keys.D4] = new UseItemCommand(4, _player);
+        pressedCommands[Keys.D5] = new UseItemCommand(5, _player);
     }
     public void Update()
     {
