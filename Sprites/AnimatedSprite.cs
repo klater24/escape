@@ -20,7 +20,7 @@ public class AnimatedSprite : ISprite
     public Vector2 Position { get; set; }
 
     // Set up the animation and remember where it starts
-    public AnimatedSprite(Texture2D texture, Rectangle[] frames, Vector2 position, float frameSeconds = 0.12f, float scale = 1f)
+    public AnimatedSprite(Texture2D texture, Rectangle[] frames, Vector2 position, float frameSeconds = 0.12f, float scale = 3f)
     {
         _texture = texture;
         _frames = frames;
