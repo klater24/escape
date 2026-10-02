@@ -2,7 +2,7 @@ using escape.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Sprites;
-using escape.Interfaces;
+
 public enum Direction
 {
     Up,
@@ -39,9 +39,11 @@ public class Player : IGameResettable
     private Vector2 initialPosition;
     private State currentState;
     private float attackTimer;
-    private const float AttackDuration = 0.48f;
     private float damageTimer;
+    private const float AttackDuration = 0.48f;
     private const float damageDuration = 0.96f;
+    private const float PlayerScale = 2f;
+    private const float AnimationSpeed = 0.12f;
     
         public Player(Vector2 intiPos, Texture2D spriteSheet)
         {
@@ -108,19 +110,19 @@ public class Player : IGameResettable
         };
 
         //walk
-        walkingUp = new AnimatedSprite(spriteSheet, walkUpFrame, intiPos);
-        walkingDown = new AnimatedSprite(spriteSheet, walkDownFrame, intiPos);
-        walkingSide = new AnimatedSprite(spriteSheet, walkSideFrame, intiPos);
+        walkingUp = new AnimatedSprite(spriteSheet, walkUpFrame, intiPos, AnimationSpeed, PlayerScale);
+        walkingDown = new AnimatedSprite(spriteSheet, walkDownFrame, intiPos, AnimationSpeed, PlayerScale);
+        walkingSide = new AnimatedSprite(spriteSheet, walkSideFrame, intiPos, AnimationSpeed, PlayerScale);
         //attack
-        attackUp = new AnimatedSprite(spriteSheet, attackUpFrame, intiPos);
-        attackDown = new AnimatedSprite(spriteSheet, attackDownFrame, intiPos);
-        attackSide = new AnimatedSprite(spriteSheet, attackSideFrame, intiPos);
+        attackUp = new AnimatedSprite(spriteSheet, attackUpFrame, intiPos, AnimationSpeed, PlayerScale);
+        attackDown = new AnimatedSprite(spriteSheet, attackDownFrame, intiPos, AnimationSpeed, PlayerScale);
+        attackSide = new AnimatedSprite(spriteSheet, attackSideFrame, intiPos, AnimationSpeed, PlayerScale);
         //idle
-        idleUp = new StaticSprite(spriteSheet, idleUpFrame, intiPos);
-        idleDown = new StaticSprite(spriteSheet, idleDownFrame, intiPos);
-        idleSide = new StaticSprite(spriteSheet, idleSideFrame, intiPos);
+        idleUp = new StaticSprite(spriteSheet, idleUpFrame, intiPos, PlayerScale);
+        idleDown = new StaticSprite(spriteSheet, idleDownFrame, intiPos, PlayerScale);
+        idleSide = new StaticSprite(spriteSheet, idleSideFrame, intiPos, PlayerScale);
         //damage
-        damaged = new AnimatedSprite(spriteSheet, damagedFrame, intiPos);
+        damaged = new AnimatedSprite(spriteSheet, damagedFrame, intiPos, AnimationSpeed, PlayerScale);
     }
     
     public Vector2 getPosit()
