@@ -1,9 +1,10 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using escape.Blocks;
+using escape.Enemies;
 using escape.Interfaces;
 using escape.Sprites;
-using System.Collections.Generic;
-using escape.Enemies;
+using escape.Inputs;
 
 namespace escape;
 
@@ -13,9 +14,14 @@ public class Game1 : Game
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch = null!;
     private Texture2D _blockAtlas = null!;
+    private readonly BlockManager _blockManager = new();
+    private readonly GameResetCoordinator _resetCoordinator = new();
+    private IController _keyboardController = null!;
+    private Player _player = null!;
+    private Texture2D _playerSheet = null!;
 
-    private readonly List<ISprite> _sprites = new();
-    private readonly List<IEnemy> _enemies = new();
+    private readonly List<Texture2D> _enemyTextures = new();
+    private EnemyManager _enemies = null!;
 
     public Game1()
     {
@@ -26,6 +32,7 @@ public class Game1 : Game
 
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+        _resetCoordinator.Register(_blockManager);
     }
 
     protected override void Initialize()
@@ -38,8 +45,16 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        // Use colored placeholder blocks until the real art is added
-        _blockAtlas = DemoSpriteSheetBuilder.CreateBlockAtlas(GraphicsDevice);
+        // Load the PixelPack block tiles
+        _blockAtlas = TextureLoader.Load(GraphicsDevice, "Content/Textures/Blocks/PixelPack_Block_Atlas.png");
+
+        _playerSheet = Content.Load<Texture2D>("Textures/Player/link");
+        _player = new Player(new Vector2(100, 100), _playerSheet);
+
+        RegisterResettable(_player);
+
+        _keyboardController = new KeyboardController(this, _player, _blockManager);
+        _keyboardController.Initialize();
 
         // Make ten blocks so the team can see how the factory chooses each block
         var blockTypes = new[]
@@ -50,45 +65,31 @@ public class Game1 : Game
 
         for (int i = 0; i < blockTypes.Length; i++)
         {
-            var position = new Vector2(40 + (i % 5) * 64, 40 + (i / 5) * 64);
-            _sprites.Add(SpriteFactory.CreateBlockSprite(_blockAtlas, blockTypes[i], position, 2f));
+            var position = new Vector2(448, 238);
+            _blockManager.Add(new Block(_blockAtlas, blockTypes[i], position, 2f));
         }
 
-        var enemyPosition = new Vector2(450, 200);
-
-        var enemyFrames = new[]
+        var enemyPosition = new Vector2(450, 260);
+        _enemies = new EnemyManager(new IEnemy[]
         {
-            new Rectangle(0, 0, 32, 32),
-            new Rectangle(32, 0, 32, 32)
-        };
-
-        var enemySprite = SpriteFactory.CreateAnimatedSprite(
-            _blockAtlas,
-            enemyFrames,
-            enemyPosition,
-            0.12f,
-            2f
-        );
-
-        var enemyA = new EnemyA(enemySprite, enemyPosition);
-
-        _enemies.Add(enemyA);
-        
+            new EnemyA(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "Run", enemyPosition), enemyPosition),
+            new EnemyB(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "DemonFlying", enemyPosition), enemyPosition),
+            new EnemyC(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "ManaSeed", enemyPosition), enemyPosition),
+            new Boss(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "SorcererAttack", enemyPosition), enemyPosition)
+        });
+        RegisterResettable(_enemies);
     }
 
     // Update every sprite once per frame
     protected override void Update(GameTime gameTime)
     {
-        foreach (var sprite in _sprites)
-        {
-            sprite.Update(gameTime);
-        }
+        _blockManager.Update(gameTime);
 
-        foreach(var enemy in _enemies)
-        {
-            enemy.Update(gameTime);
-        }
+        _enemies.Update(gameTime);
 
+        _keyboardController.Update();
+        _player.Update(gameTime);
+        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | R: reset | Q: quit";
         base.Update(gameTime);
     }
 
@@ -99,15 +100,10 @@ public class Game1 : Game
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-        foreach (var sprite in _sprites)
-        {
-            sprite.Draw(_spriteBatch);
-        }
+        _blockManager.Draw(_spriteBatch);
 
-        foreach (var enemy in _enemies)
-        {
-            enemy.Draw(_spriteBatch);
-        }
+        _enemies.Draw(_spriteBatch);
+        _player.Draw(_spriteBatch);
 
         _spriteBatch.End();
 
@@ -117,14 +113,22 @@ public class Game1 : Game
     // Reset every sprite to its starting state
     public void Reset()
     {
-        foreach (var sprite in _sprites)
-        {
-            sprite.Reset();
-        }
-
-        foreach (var enemy in _enemies)
-        {
-            enemy.Reset();
-        }
+        _resetCoordinator.Reset();
     }
-}
+
+    // Add a player or system so the game-wide reset can reach it
+    public void RegisterResettable(IGameResettable system)
+    {
+        _resetCoordinator.Register(system);
+    }
+    public void CycleEnemy(int direction) => _enemies.Cycle(direction);
+
+    protected override void UnloadContent()
+    {
+        foreach (var texture in _enemyTextures) texture.Dispose();
+        _enemyTextures.Clear();
+        _blockAtlas.Dispose();
+        _playerSheet.Dispose();
+        _spriteBatch.Dispose();
+        base.UnloadContent();
+    }}

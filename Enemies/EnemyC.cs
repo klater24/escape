@@ -5,33 +5,37 @@ using System;
 
 namespace escape.Enemies;
 
-public class EnemyA : IEnemy
+public class EnemyC : IEnemy
 {
 
     private readonly ISprite _sprite;
     private readonly Vector2 _initialPosition;
     private Vector2 _direction;
-    private float _directionTimer;
+    private float _stateTimer;
     private readonly Random _random = new();
+    private bool _isMoving;
     public Vector2 Position { get; set; }
 
-    public EnemyA(ISprite sprite, Vector2 position)
+    public EnemyC(ISprite sprite, Vector2 position)
     {
         _sprite = sprite;
         _initialPosition = position;
         Position = position;
         _sprite.Position = position;
         _direction = new Vector2(1, 0);
-        _directionTimer = 0f;
+        _stateTimer = 0f;
+        _isMoving = true;
     }
-
 
     public void Update(GameTime gameTime)
     {
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         float speed = 100f;
 
-        Position += _direction * speed * deltaTime;
+        if (_isMoving)
+        {
+            Position += _direction * speed * deltaTime;
+        }
 
         if (Position.X < 0)
         {
@@ -39,9 +43,9 @@ public class EnemyA : IEnemy
             _direction = new Vector2(1, 0);
         }
 
-        if (Position.X > 960 - 96)
+        if (Position.X > 960 - 64)
         {
-            Position = new Vector2(960 - 96, Position.Y);
+            Position = new Vector2(960 - 64, Position.Y);
             _direction = new Vector2(-1,0);
         }
 
@@ -57,11 +61,17 @@ public class EnemyA : IEnemy
             _direction = new Vector2(0, -1);
         }
 
-        _directionTimer += deltaTime;
+        _stateTimer += deltaTime;
 
-        if (_directionTimer >= 2f)
+        if (_isMoving && _stateTimer >= 1f)
         {
-            _directionTimer = 0f;
+            _isMoving = false;
+            _stateTimer = 0f;
+        }
+        else if (!_isMoving && _stateTimer >= 0.75f)
+        {
+            _isMoving = true;
+            _stateTimer = 0f;
             int directionChoice = _random.Next(4);
 
             if (directionChoice == 0)
@@ -83,6 +93,7 @@ public class EnemyA : IEnemy
             }
 
         }
+
         _sprite.Position = Position;
 
         _sprite.Update(gameTime);
@@ -98,6 +109,7 @@ public class EnemyA : IEnemy
         _sprite.Reset();
         _sprite.Position = Position;
         _direction = new Vector2(1, 0);
-        _directionTimer = 0f;
+        _stateTimer = 0f;
+        _isMoving = true;
     }
 }
