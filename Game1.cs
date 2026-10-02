@@ -23,7 +23,7 @@ public class Game1 : Game
     private Player _player = null!;
     private Texture2D _playerSheet = null!;
 
-    private EnemySpriteFactory _enemySpriteFactory = null!;
+    private readonly List<Texture2D> _enemyTextures = new();
     private EnemyManager _enemies = null!;
 
     public Game1()
@@ -72,14 +72,13 @@ public class Game1 : Game
             _blockManager.Add(new Block(_blockAtlas, blockTypes[i], position, 2f));
         }
 
-        _enemySpriteFactory = new EnemySpriteFactory(GraphicsDevice);
         var enemyPosition = new Vector2(450, 260);
         _enemies = new EnemyManager(new IEnemy[]
         {
-            new EnemyA(_enemySpriteFactory.Create("Run", enemyPosition), enemyPosition),
-            new EnemyB(_enemySpriteFactory.Create("DemonFlying", enemyPosition), enemyPosition),
-            new EnemyC(_enemySpriteFactory.Create("ManaSeed", enemyPosition), enemyPosition),
-            new Boss(_enemySpriteFactory.Create("SorcererAttack", enemyPosition), enemyPosition)
+            new EnemyA(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "Run", enemyPosition), enemyPosition),
+            new EnemyB(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "DemonFlying", enemyPosition), enemyPosition),
+            new EnemyC(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "ManaSeed", enemyPosition), enemyPosition),
+            new Boss(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "SorcererAttack", enemyPosition), enemyPosition)
         });
         RegisterResettable(_enemies);
         _previousKeyboardState = Keyboard.GetState();
@@ -141,7 +140,8 @@ public class Game1 : Game
 
     protected override void UnloadContent()
     {
-        _enemySpriteFactory.Dispose();
+        foreach (var texture in _enemyTextures) texture.Dispose();
+        _enemyTextures.Clear();
         _blockAtlas.Dispose();
         _playerSheet.Dispose();
         _spriteBatch.Dispose();
