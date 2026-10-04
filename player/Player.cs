@@ -41,7 +41,7 @@ public class Player : IGameResettable
     private float attackTimer;
     private float damageTimer;
     private const float AttackDuration = 0.48f;
-    private const float damageDuration = 0.96f;
+    private const float damageDuration = 0.72f;
     private const float PlayerScale = 2f;
     private const float AnimationSpeed = 0.12f;
     
@@ -52,77 +52,37 @@ public class Player : IGameResettable
         currentState = State.Idle;
         initialPosition = intiPos;
 
-        //idle
-        Rectangle idleDownFrame = new Rectangle(1, 11, 16, 16); 
-        Rectangle idleSideFrame = new Rectangle(35, 11, 16, 16);
-        Rectangle idleUpFrame = new Rectangle(69, 11, 16, 16);  
-
         //walk
-        Rectangle[] walkUpFrame =
-        {
-            new Rectangle(69, 11, 16, 16), 
-            new Rectangle(86, 11, 16, 16)  
-        };
-        Rectangle[] walkDownFrame =
-        {
-            new Rectangle(1, 11, 16, 16),   
-            new Rectangle(18, 11, 16, 16)   
-        };
-        Rectangle[] walkSideFrame =
-        {
-            new Rectangle(35, 11, 16, 16), 
-            new Rectangle(52, 11, 16, 16)   
-        };
+        walkingUp = new AnimatedSprite(spriteSheet, Frames(0, 4, 5), intiPos, AnimationSpeed, PlayerScale);
+        walkingDown = new AnimatedSprite(spriteSheet, Frames(0, 0, 1), intiPos, AnimationSpeed, PlayerScale);
+        walkingSide = new AnimatedSprite(spriteSheet, Frames(0, 2, 3), intiPos, AnimationSpeed, PlayerScale);
         //attack
-        Rectangle[] attackUpFrame =
-        {
-            new Rectangle(1, 109, 16, 16),   
-            new Rectangle(18, 97, 16, 28),  
-            new Rectangle(35, 98, 16, 27),  
-            new Rectangle(52, 106, 16, 19)   
-        };
-        Rectangle[] attackDownFrame =
-        {
-            new Rectangle(1, 47, 16, 16),   
-            new Rectangle(18, 47, 16, 27),  
-            new Rectangle(35, 47, 16, 23),  
-            new Rectangle(52, 47, 16, 19)   
-            
-        };
-        Rectangle[] attackSideFrame =
-        {
-            new Rectangle(1, 77, 16, 16),   
-            new Rectangle(18, 77, 27, 16),  
-            new Rectangle(46, 77, 23, 16),  
-            new Rectangle(70, 77, 19, 16)   
-        };
-        //walk
-        Rectangle[] damagedFrame =
-        {
-            new Rectangle(1, 232, 16, 16), 
-            new Rectangle(109, 241, 16, 16),  
-            new Rectangle(200, 241, 16, 16),
-            new Rectangle(223, 241, 16, 16),
-            new Rectangle(109, 241, 16, 16),  
-            new Rectangle(200, 241, 16, 16),
-            new Rectangle(223, 241, 16, 16),
-            new Rectangle(1, 232, 16, 16)     
-        };
-
-        //walk
-        walkingUp = new AnimatedSprite(spriteSheet, walkUpFrame, intiPos, AnimationSpeed, PlayerScale);
-        walkingDown = new AnimatedSprite(spriteSheet, walkDownFrame, intiPos, AnimationSpeed, PlayerScale);
-        walkingSide = new AnimatedSprite(spriteSheet, walkSideFrame, intiPos, AnimationSpeed, PlayerScale);
-        //attack
-        attackUp = new AnimatedSprite(spriteSheet, attackUpFrame, intiPos, AnimationSpeed, PlayerScale);
-        attackDown = new AnimatedSprite(spriteSheet, attackDownFrame, intiPos, AnimationSpeed, PlayerScale);
-        attackSide = new AnimatedSprite(spriteSheet, attackSideFrame, intiPos, AnimationSpeed, PlayerScale);
+        attackUp = new AnimatedSprite(spriteSheet, Frames(6, 0, 3), intiPos, AnimationSpeed, PlayerScale);
+        attackDown = new AnimatedSprite(spriteSheet, Frames(2, 0, 3), intiPos, AnimationSpeed, PlayerScale);
+        attackSide = new AnimatedSprite(spriteSheet, Frames(4, 0, 3), intiPos, AnimationSpeed, PlayerScale);
         //idle
-        idleUp = new StaticSprite(spriteSheet, idleUpFrame, intiPos, PlayerScale);
-        idleDown = new StaticSprite(spriteSheet, idleDownFrame, intiPos, PlayerScale);
-        idleSide = new StaticSprite(spriteSheet, idleSideFrame, intiPos, PlayerScale);
+        idleUp = new StaticSprite(spriteSheet, Frame(4, 0), intiPos, PlayerScale);
+        idleDown = new StaticSprite(spriteSheet, Frame(0, 0), intiPos, PlayerScale);
+        idleSide = new StaticSprite(spriteSheet, Frame(2, 0), intiPos, PlayerScale);
         //damage
-        damaged = new AnimatedSprite(spriteSheet, damagedFrame, intiPos, AnimationSpeed, PlayerScale);
+        damaged = new AnimatedSprite(spriteSheet, Frames(8, 1, 3), intiPos,AnimationSpeed, PlayerScale);
+        }
+    
+    private Rectangle Frame(int column, int row)
+    {
+        return new Rectangle(1 + column * 17, 1 + row * 17, 16, 16);
+    }
+    
+    private Rectangle[] Frames(int row, int startColumn, int endColumn)
+    {
+        Rectangle[] frames = new Rectangle[endColumn - startColumn + 1];
+
+        for (int x = startColumn; x <= endColumn; x++)
+        {
+            frames[x - startColumn] = Frame(x, row);
+        }
+
+        return frames;
     }
     
     public Vector2 getPosit()
@@ -149,6 +109,7 @@ public class Player : IGameResettable
         else if (direct == Direction.Right)
         {
             position.X += 1;
+
             walkingSide.SetSpriteEffects(SpriteEffects.None);
             attackSide.SetSpriteEffects(SpriteEffects.None);
             idleSide.SetSpriteEffects(SpriteEffects.None);
@@ -156,6 +117,7 @@ public class Player : IGameResettable
         else if (direct == Direction.Left)
         {
             position.X -= 1;
+
             walkingSide.SetSpriteEffects(SpriteEffects.FlipHorizontally);
             attackSide.SetSpriteEffects(SpriteEffects.FlipHorizontally);
             idleSide.SetSpriteEffects(SpriteEffects.FlipHorizontally);
@@ -220,7 +182,7 @@ public class Player : IGameResettable
             {
                 walkingSide.Update(gameTime);
             }
-        }    
+        }
         else if (currentState == State.Attacking)
         {
             attackTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -237,16 +199,19 @@ public class Player : IGameResettable
             {
                 attackSide.Update(gameTime);
             }
+
             if (attackTimer >= AttackDuration)
             {
                 attackTimer = 0f;
                 currentState = State.Idle;
             }
         }
-        else if(currentState == State.Damaged)
+        else if (currentState == State.Damaged)
         {
             damageTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             damaged.Update(gameTime);
+
             if (damageTimer >= damageDuration)
             {
                 damageTimer = 0f;
@@ -254,6 +219,7 @@ public class Player : IGameResettable
             }
         }
     }
+
     private void UpdateSpritePositions()
     {
         idleUp.Position = position;
@@ -271,29 +237,27 @@ public class Player : IGameResettable
         damaged.Position = position;
     }
     public void Draw(SpriteBatch spriteBatch){
-       if(currentState == State.Idle)
-       {
-           if (facingDirection == Direction.Up)
-           {
+        if (currentState == State.Idle)
+        {
+            if (facingDirection == Direction.Up)
+            {
                 idleUp.Draw(spriteBatch);
-           }
-
+            }
             else if (facingDirection == Direction.Down)
             {
                 idleDown.Draw(spriteBatch);
             }
-                
             else
             {
                 idleSide.Draw(spriteBatch);
             }
-       } 
-       else if(currentState == State.Walking)
-       {
-           if (facingDirection == Direction.Up)
-           {
+        }
+        else if (currentState == State.Walking)
+        {
+            if (facingDirection == Direction.Up)
+            {
                 walkingUp.Draw(spriteBatch);
-           }
+            }
             else if (facingDirection == Direction.Down)
             {
                 walkingDown.Draw(spriteBatch);
@@ -302,13 +266,13 @@ public class Player : IGameResettable
             {
                 walkingSide.Draw(spriteBatch);
             }
-       } 
-       else if(currentState == State.Attacking)
-       {
-           if (facingDirection == Direction.Up)
-           {
+        }
+        else if (currentState == State.Attacking)
+        {
+            if (facingDirection == Direction.Up)
+            {
                 attackUp.Draw(spriteBatch);
-           }
+            }
             else if (facingDirection == Direction.Down)
             {
                 attackDown.Draw(spriteBatch);
@@ -317,8 +281,8 @@ public class Player : IGameResettable
             {
                 attackSide.Draw(spriteBatch);
             }
-       }
-       else if(currentState == State.Damaged)
+        }
+        else if (currentState == State.Damaged)
         {
             damaged.Draw(spriteBatch);
         }
