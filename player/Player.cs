@@ -39,12 +39,10 @@ public class Player : IGameResettable
         currentState = State.Idle;
         initialPosition = intiPos;
 
-        //idle
         Rectangle idleDownFrame = new Rectangle(1, 11, 16, 16); 
         Rectangle idleSideFrame = new Rectangle(35, 11, 16, 16);
         Rectangle idleUpFrame = new Rectangle(69, 11, 16, 16);  
 
-        //walk
         Rectangle[] walkUpFrame =
         {
             new Rectangle(69, 11, 16, 16), 
@@ -60,7 +58,6 @@ public class Player : IGameResettable
             new Rectangle(35, 11, 16, 16), 
             new Rectangle(52, 11, 16, 16)   
         };
-        //attack
         Rectangle[] attackUpFrame =
         {
             new Rectangle(1, 109, 16, 16),   
@@ -207,7 +204,7 @@ public class Player : IGameResettable
             {
                 walkingUDS[2].Update(gameTime);
             }
-        }    
+        }
         else if (currentState == State.Attacking)
         {
             attackTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -224,16 +221,19 @@ public class Player : IGameResettable
             {
                 attackUDS[2].Update(gameTime);
             }
+
             if (attackTimer >= AttackDuration)
             {
                 attackTimer = 0f;
                 currentState = State.Idle;
             }
         }
-        else if(currentState == State.Damaged)
+        else if (currentState == State.Damaged)
         {
             damageTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             damaged.Update(gameTime);
+
             if (damageTimer >= damageDuration)
             {
                 damageTimer = 0f;
@@ -241,6 +241,7 @@ public class Player : IGameResettable
             }
         }
     }
+
     private void UpdateSpritePositions()
     {
         idleUDS[0].Position = position;
@@ -269,7 +270,6 @@ public class Player : IGameResettable
             {
                 idleUDS[1].Draw(spriteBatch);
             }
-                
             else
             {
                 idleUDS[2].Draw(spriteBatch);
@@ -304,8 +304,8 @@ public class Player : IGameResettable
             {
                 attackUDS[2].Draw(spriteBatch);
             }
-       }
-       else if(currentState == State.Damaged)
+        }
+        else if (currentState == State.Damaged)
         {
             damaged.Draw(spriteBatch);
         }
