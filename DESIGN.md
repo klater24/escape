@@ -39,6 +39,18 @@ RegisterResettable(projectileManager);
 
 `Player` can implement `ISprite` and inherit the reset contract. Managers can implement `IGameResettable` directly. Register either a manager or its contained objects, not both, to avoid resetting the same state twice. The full game reset is complete only after all participating systems have been registered.
 
+For the input system, verify that `W`, `A`, `S`, and `D` move the player in the expected directions, the arrow keys should perform the same actions. Confirm that movement continues while a movement key is held. 
+
+For attacking verify that `z` and `n` cause the sprite to enter an attack animation in their current direction and switches to idle afterwards, this animation should be continous and end after one loop. All other actions should be blocked while in attack animation
+
+For damaged verify that `E` causes the player to enter a damaged animation loop that occurs once and stops, verify that no other actions are possible while in damaged animation state
+
+For item-use verify that `1`, `2`, `3`, `4`, `5` work and use the appropriate item for their command, these should occur once and not allow any other actions while being performed.
+
+For reset verify that `R` returns everything to their initial state and position, everything should be the same as when first launched
+
+For quit verify that `Q` safely exits and closes the game window ending the program.
+
 ## Manual Checks
 
 Build and launch the game from the repository root:
@@ -49,6 +61,16 @@ dotnet run
 ```
 
 In the game window, check that only one block appears at a time, `T` selects the previous block, and `Y` selects the next block. Confirm selection wraps at both ends. Call `Game1.Reset()` after changing the selection to confirm it returns to the first block. Check reset integration again as each teammate registers their system.
+
+## Input and Command System
+
+The input system incorperates keyboard input using the Command pattern design. `ICommand` interface requires an `Execute()` method, while command classes perform individual game actions such as moving, attacking, taking damage, using an item, resetting, or quitting the game.
+
+`KeyboardController` owns a mapping of keyboard keys to ICommand based classes. `Game1` registers the appropriate commands with the controller during setup. Each `.update()`, `KeyboardController` checks the registered keys and executes their  commands via the respective command class. This keeps keyboard-specific logic inside the controller rather than requiring Game1 or Player to directly process keyboard input.
+
+Movement commands are registered for both WASD and arrow keys. `Attack` is registered with `Z` and `N`, `damage` is registered with `E`, `item-use` uses number keys `1, 2, 3, 4, 5`, `reset` is registered with `R`, and `quit` uses `Q`. Continuous actions such as movement are processed while their keys are held stored in a dictionary, while actions that should occur once per press are seperated in their own dictionary.
+
+A new keyboard action should be implemented as an ICommand rather than adding keyboard checks directly to a gameplay class. The command should call the appropriate method.
 
 ## Player 
 
