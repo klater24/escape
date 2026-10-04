@@ -27,9 +27,6 @@ public class Watch : IItem
     public void Update(GameTime gameTime)
     {
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        
-
-        
             Position +=  _direction * deltaTime * 10;
           if (Position.Y < 0)
         {

@@ -25,7 +25,7 @@ public class Game1 : Game
     private Texture2D _projectileAtlas;
     private Texture2D _bossAtlas;
      private readonly List<ISprite> _sprites = new();
-    private readonly List<IItem> _items = new();
+    private ItemManager _items = null!;
     private  List<IProjectile> _projectiles = new();
 
 
@@ -92,6 +92,17 @@ public class Game1 : Game
         });
         RegisterResettable(_enemies);
 
+        var itemPosition = new Vector2(500, 500);
+        _items = new ItemManager(new List<IItem>
+        {
+            new Book(ItemSprites.CreateBook(_itemAtlas, itemPosition, 2f), itemPosition),
+            new Key(ItemSprites.CreateKey(_itemAtlas, itemPosition, 2f), itemPosition),
+            new Watch(ItemSprites.CreateWatch(_itemAtlas, itemPosition, 2f), itemPosition),
+            new Heart(ItemSprites.CreateHeart(_itemAtlas, itemPosition, 2f), itemPosition),
+            new Potion(ItemSprites.CreatePotion(_itemAtlas, itemPosition, 2f), itemPosition)
+        });
+        RegisterResettable(_items);
+
         var bombSprite = ProjectileSprites.CreateBomb(_projectileAtlas, new Vector2(100, 100), 2f);
         _projectiles.Add(new Bomb(bombSprite, new Vector2(100, 100)));
 
@@ -104,20 +115,7 @@ public class Game1 : Game
         var bossProjectileSprite = ProjectileSprites.CreateBossProjectile(_bossAtlas, new Vector2(400, 400), 2f);
         _projectiles.Add(new BossProjectile(bossProjectileSprite, new Vector2(400, 400)));
 
-        var bookSprite = ItemSprites.CreateBook(_itemAtlas, new Vector2(500, 500), 2f);
-        _items.Add(new Book(bookSprite, new Vector2(500, 500)));
-
-        var keySprite = ItemSprites.CreateKey(_itemAtlas, new Vector2(600, 500), 2f);
-        _items.Add(new Key(keySprite, new Vector2(600, 500)));
-
-        var watchSprite = ItemSprites.CreateWatch(_itemAtlas, new Vector2(700, 500), 2f);
-        _items.Add(new Watch(watchSprite, new Vector2(700, 500)));
-
-        var heartSprite = ItemSprites.CreateHeart(_itemAtlas, new Vector2(200, 400), 2f);
-        _items.Add(new Heart(heartSprite, new Vector2(200, 400)));
-
-        var potionSprite = ItemSprites.CreatePotion(_itemAtlas, new Vector2(200, 300), 2f);
-        _items.Add(new Potion(potionSprite, new Vector2(200, 300)));
+        
 
     }
 
@@ -128,10 +126,7 @@ public class Game1 : Game
 
         _enemies.Update(gameTime);
 
-        foreach(var item in _items)
-        {
-            item.Update(gameTime);
-        }
+        _items.Update(gameTime);
 
         foreach (var projectile in _projectiles)
         {
@@ -140,7 +135,7 @@ public class Game1 : Game
 
         _keyboardController.Update();
         _player.Update(gameTime);
-        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | R: reset | Q: quit";
+        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | U/I: items | R: reset | Q: quit";
         base.Update(gameTime);
     }
 
@@ -156,10 +151,7 @@ public class Game1 : Game
         _enemies.Draw(_spriteBatch);
         _player.Draw(_spriteBatch);
 
-        foreach (var item in _items)
-        {
-            item.Draw(_spriteBatch);
-        }
+        _items.Draw(_spriteBatch);
 
         foreach (var projectile in _projectiles)
         {
@@ -183,6 +175,8 @@ public class Game1 : Game
         _resetCoordinator.Register(system);
     }
     public void CycleEnemy(int direction) => _enemies.Cycle(direction);
+
+    public void CycleItems(int direction) => _items.Cycle(direction);
 
     protected override void UnloadContent()
     {

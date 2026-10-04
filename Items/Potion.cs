@@ -28,10 +28,20 @@ public class Potion : IItem
     {
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         
-
-        
+  Position +=  _direction * deltaTime * 10;
+          if (Position.Y < 0)
+        {
+            Position = new Vector2(Position.X, 0);
+            _direction = new Vector2(0, 1);
             
+        }
 
+        if (Position.Y > 10)
+        {
+            Position = new Vector2(Position.X, 10);
+            _direction = new Vector2(0, -1);
+            
+        }
     
      _sprite.Position = Position;
         _sprite.Update(gameTime);
