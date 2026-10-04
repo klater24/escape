@@ -52,4 +52,22 @@ In the game window, check that only one block appears at a time, `T` selects the
 
 ## Player 
 
-Player class manages the states of the players through Direction and State Enums. Based on the enum value an object of the Player class is set to, the player will be displayed either an idle, walking, attacking, or damaged state. The direction enum dictates what direction the player is facing. The class also contains logic that allows the player to move in the direction it is set to. Player class uses the Enum structures to display the player on a specific position on the game window. The implementation of the Player class allows for transition between different states and movement in four cardinal directions. 
+Player class manages the states of the players through `Direction` and `State` Enums. Based on the enum value an object of the `Player` class is set to, the player will be displayed either an idle, walking, attacking, or damaged state. The direction enum dictates what direction the player is facing. The class also contains logic that allows the player to move in the direction it is set to. Player class uses the Enum structures to display the player on a specific position on the game window. The implementation of the Player class allows for transition between different states and movement in four cardinal directions. 
+
+```csharp
+public enum Direction
+{
+    Up,
+    Down,
+    Left,
+    Right
+}
+public enum State
+{
+    Idle,
+    Walking,
+    Attacking,
+    Damaged
+}
+
+```
