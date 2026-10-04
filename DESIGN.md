@@ -39,6 +39,17 @@ RegisterResettable(projectileManager);
 
 `Player` can implement `ISprite` and inherit the reset contract. Managers can implement `IGameResettable` directly. Register either a manager or its contained objects, not both, to avoid resetting the same state twice. The full game reset is complete only after all participating systems have been registered.
 
+## Manual Checks
+
+Build and launch the game from the repository root:
+
+```powershell
+dotnet build
+dotnet run
+```
+
+In the game window, check that only one block appears at a time, `T` selects the previous block, and `Y` selects the next block. Confirm selection wraps at both ends. Call `Game1.Reset()` after changing the selection to confirm it returns to the first block. Check reset integration again as each teammate registers their system.
+
 For the input system, verify that `W`, `A`, `S`, and `D` move the player in the expected directions, the arrow keys should perform the same actions. Confirm that movement continues while a movement key is held. 
 
 For attacking verify that `z` and `n` cause the sprite to enter an attack animation in their current direction and switches to idle afterwards, this animation should be continous and end after one loop. All other actions should be blocked while in attack animation
@@ -50,17 +61,6 @@ For item-use verify that `1`, `2`, `3`, `4`, `5` work and use the appropriate it
 For reset verify that `R` returns everything to their initial state and position, everything should be the same as when first launched
 
 For quit verify that `Q` safely exits and closes the game window ending the program.
-
-## Manual Checks
-
-Build and launch the game from the repository root:
-
-```powershell
-dotnet build
-dotnet run
-```
-
-In the game window, check that only one block appears at a time, `T` selects the previous block, and `Y` selects the next block. Confirm selection wraps at both ends. Call `Game1.Reset()` after changing the selection to confirm it returns to the first block. Check reset integration again as each teammate registers their system.
 
 ## Input and Command System
 
