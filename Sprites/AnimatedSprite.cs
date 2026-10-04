@@ -31,10 +31,6 @@ public class AnimatedSprite : ISprite
         _currentFrame = 0;
         _elapsed = 0f;
     }
-    public void SetSpriteEffects(SpriteEffects effects)
-    {
-        _spriteEffects = effects;
-    }
 
     // Move to the next frame when enough time has passed
     public void Update(GameTime gameTime)
@@ -61,6 +57,11 @@ public class AnimatedSprite : ISprite
             _scale,
             _spriteEffects,
             0f);
+    }
+
+    public void SetSpriteEffects(SpriteEffects effects)
+    {
+        _spriteEffects = effects;
     }
 
     // Start the animation over and return to the starting position

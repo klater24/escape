@@ -24,10 +24,6 @@ public class StaticSprite : ISprite
         _initialPosition = position;
         Position = position;
     }
-    public void SetSpriteEffects(SpriteEffects effects)
-    {
-        _spriteEffects = effects;
-    }
 
     // Static sprites do not change during updates
     public void Update(GameTime gameTime)
@@ -47,6 +43,11 @@ public class StaticSprite : ISprite
             _scale,
             _spriteEffects,
             0f);
+    }
+
+    public void SetSpriteEffects(SpriteEffects effects)
+    {
+        _spriteEffects = effects;
     }
 
     // Move back to the starting position
