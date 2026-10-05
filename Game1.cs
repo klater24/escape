@@ -113,7 +113,10 @@ public class Game1 : Game
         _projectiles.Add(new Boomerang(boomerangSprite, new Vector2(300, 300)));
 
         var bossProjectileSprite = ProjectileSprites.CreateBossProjectile(_bossAtlas, new Vector2(400, 400), 2f);
-        _projectiles.Add(new BossProjectile(bossProjectileSprite, new Vector2(400, 400)));
+        _projectiles.Add(new BossProjectile(bossProjectileSprite, new Vector2(400, 400), 1));
+        _projectiles.Add(new BossProjectile(bossProjectileSprite, new Vector2(400, 400), 2));
+        _projectiles.Add(new BossProjectile(bossProjectileSprite, new Vector2(400, 400), 3));
+
 
         
 
@@ -167,6 +170,10 @@ public class Game1 : Game
     public void Reset()
     {
         _resetCoordinator.Reset();
+         foreach (var projectile in _projectiles)
+        {
+            projectile.Reset();
+        }
     }
 
     // Add a player or system so the game-wide reset can reach it

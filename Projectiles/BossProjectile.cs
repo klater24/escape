@@ -10,17 +10,19 @@ public class BossProjectile : IProjectile
     private readonly ISprite _sprite;
     private readonly Vector2 _initialPosition;
     private Vector2 _direction;
+
+    int direct;
     public Vector2 Position { get; set;}
 
 
-    public BossProjectile(ISprite sprite,  Vector2 position)
+    public BossProjectile(ISprite sprite,  Vector2 position, int direct)
     {
         _sprite = sprite;
         _initialPosition = position;
         Position = position;
         _sprite.Position = position;
         _direction = new Vector2(1, 0);
-        
+        this.direct = direct;
     }
 
 
@@ -29,7 +31,13 @@ public class BossProjectile : IProjectile
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         
 
-    
+    if (direct == 1)
+        _direction = new Vector2(1, 0);
+    else if (direct == 2)
+        _direction = new Vector2(1, -1);
+    else if (direct == 3)
+        _direction = new Vector2(1, 1);
+
             _sprite.Position +=  _direction * deltaTime * 100;
         
 

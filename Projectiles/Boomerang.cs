@@ -50,5 +50,6 @@ public class Boomerang : IProjectile
        // _sprite.Reset();
         _sprite.Position = Position;
         _direction = new Vector2(1, 0);
+        
     }
 }

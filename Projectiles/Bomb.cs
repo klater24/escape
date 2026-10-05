@@ -36,7 +36,7 @@ public class Bomb : IProjectile
     {
         float deltaTime = (float)gameTime.TotalGameTime.TotalSeconds;
 
-        if(deltaTime < 2) {
+        if(deltaTime < 3) {
             _sprite.Draw(spriteBatch);
         }
     }

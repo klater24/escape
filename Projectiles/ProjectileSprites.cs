@@ -36,7 +36,6 @@ public static ISprite CreateBomb(Texture2D atlas, Vector2 position, float scale)
             new Rectangle(73, 185, 7, 16),
             new Rectangle(82, 185, 7, 16),
             new Rectangle(73, 185, 7, 16),
-            //new Rectangle(53, 185, 7, 15)
         };
         return new AnimatedSprite(atlas, itemBoomerangFrames, position, .5f, scale);
     }
@@ -50,6 +49,6 @@ public static ISprite CreateBomb(Texture2D atlas, Vector2 position, float scale)
             new Rectangle(119, 11, 8, 16),
             new Rectangle(128, 11, 7, 16)
         };
-        return new AnimatedSprite(atlas, itemBossProjectileFrames, position, 1f, scale);
+        return new AnimatedSprite(atlas, itemBossProjectileFrames, position, .1f, scale);
     }
 }
