@@ -14,6 +14,12 @@ public class EnemyA : IEnemy
     private float _directionTimer;
     private readonly Random _random = new();
     public Vector2 Position { get; set; }
+    private const int ScreenWidth = 960;
+    private const int ScreenHeight = 540;
+    private const int SpriteWidth = 96;
+    private const int SpriteHeight = 64;
+    private const float MovementSpeed = 100f;
+    private const float DirectionChangeInterval = 2f;
 
     public EnemyA(ISprite sprite, Vector2 position)
     {
@@ -29,9 +35,8 @@ public class EnemyA : IEnemy
     public void Update(GameTime gameTime)
     {
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        float speed = 100f;
 
-        Position += _direction * speed * deltaTime;
+        Position += _direction * MovementSpeed * deltaTime;
 
         if (Position.X < 0)
         {
@@ -39,9 +44,9 @@ public class EnemyA : IEnemy
             _direction = new Vector2(1, 0);
         }
 
-        if (Position.X > 960 - 96)
+        if (Position.X > ScreenWidth - SpriteWidth)
         {
-            Position = new Vector2(960 - 96, Position.Y);
+            Position = new Vector2(ScreenWidth - SpriteWidth, Position.Y);
             _direction = new Vector2(-1,0);
         }
 
@@ -51,43 +56,34 @@ public class EnemyA : IEnemy
             _direction = new Vector2(0, 1);
         }
 
-        if (Position.Y > 540 - 64)
+        if (Position.Y > ScreenHeight - SpriteHeight)
         {
-            Position = new Vector2(Position.X, 540 - 64);
+            Position = new Vector2(Position.X, ScreenHeight - SpriteHeight);
             _direction = new Vector2(0, -1);
         }
 
         _directionTimer += deltaTime;
 
-        if (_directionTimer >= 2f)
+        if (_directionTimer >= DirectionChangeInterval)
         {
             _directionTimer = 0f;
-            int directionChoice = _random.Next(4);
-
-            if (directionChoice == 0)
-            {
-                _direction = new Vector2(1, 0);
-            }
-
-            else if (directionChoice == 1)
-            {
-                _direction = new Vector2(-1,0);
-            }
-            else if (directionChoice == 2)
-            {
-                _direction = new Vector2(0,1);
-            }
-            else
-            {
-                _direction = new Vector2(0, -1);
-            }
-
+            ChangeDirection();
         }
         _sprite.Position = Position;
 
         _sprite.Update(gameTime);
     }
 
+    private void ChangeDirection()
+    {
+        _direction = _random.Next(4) switch
+        {
+            0 => new Vector2(1, 0),
+            1 => new Vector2(-1, 0),
+            2 => new Vector2(0, 1),
+            _ => new Vector2(0, -1)
+        };
+    }
     public void Draw(SpriteBatch spriteBatch)
     {
         _sprite.Draw(spriteBatch);

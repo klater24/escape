@@ -33,10 +33,10 @@ public class BossProjectile : IProjectile
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         float movementSeconds = MathHelper.Clamp(LifetimeSeconds - _ageSeconds, 0f, deltaTime);
         _ageSeconds += deltaTime;
-        
+
 
         Position += _direction * movementSeconds * 100;
-        
+
         _sprite.Position = Position;
         _sprite.Update(gameTime);
     }
@@ -45,7 +45,7 @@ public class BossProjectile : IProjectile
     {
         if (IsActive)
             _sprite.Draw(spriteBatch);
-        
+
     }
     public void Reset()
     {

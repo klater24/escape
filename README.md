@@ -16,13 +16,13 @@ Content/Textures/
 	Projectiles/
 ```
 
-The project copies PNG files from this folder beside the game when it builds. Load them with `TextureLoader.Load` and give it a path starting at `Content`, using forward slashes
+Register each image in `Content/Content.mgcb` using TextureImporter and TextureProcessor. The build compiles these assets to XNB files. Load textures with an extensionless path relative to `Content`; ContentManager caches and disposes them.
 
 ```csharp
-var texture = TextureLoader.Load(
-		GraphicsDevice,
-		"Content/Textures/Blocks/PixelPack_Block_Atlas.png");
+var texture = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
 ```
+
+Keep premultiplied alpha enabled for SpriteBatch. Color keying is disabled for transparent PNGs; Link uses green (0, 128, 0), and SorcererAttack uses (47, 72, 78). All current PNGs, including spare sheets and previews, are registered in the content file.
 
 Keep each sprite sheet on a regular grid. The current block atlas uses 32 by 32 pixel cells arranged left to right in this order: grass, dirt, stone, brick, water, wood, sand, ice, metal, platform. `SpriteFactory.CreateBlockSprite` maps each name to its cell
 
@@ -62,3 +62,28 @@ The game uses a `KeyboardController` and command system to handle keyboard input
 
 Movement inputs can be held for movement. Other actions are handled as individual commands when pressed.
 Use the same cell size and frame order consistently within a sheet.
+
+The keyboard controls for item are 'I' and 'U'. 'I' moves to the next one while 'U' moves to the previous one. 'R' resets them. There are 5 items in total. Eventually, the player will be able to pick them up and use them. They are made using the sprite class and then making them animate in their own respective classes. There are no known issues with items.
+
+The projectiles are used by the player. The number keys 1-3 control which projectile you shoot. Eventually, these will be used as weapons to harm enemies. These are made using the sprite class and then making them animate in their own respective classes. They are then put into the player class and enemy class to use. The only known issues is that the sprites are not smoothly animated.
+
+## Enemies and Boss
+
+The enemy demo includes three enemies and one boss.
+Only the selected enemy is displayed and updated
+
+### Controls
+
+- O: select the previous enemy.
+- P: select the next enemy.
+- R: reset the game. All enemies return to their starting positions, animations, and movement states. Selection returns to Enemy A. Active boss projectiles are cleared and the boss firing timer restarts.
+
+Enemy selection wraps around the list. Holding O or P doesn't repeatedly change the selection.
+
+### Enemy Behaviors
+- Enemy A (Knight): moves in the 4 cardinal directions, randomly
+- Enemy B (Flying Demon): flies in 8 directions with changing speed
+- Enemy C (Forester): alternates between walking and pausing
+- Boss (Sorcerer): moves horizontally and fires projectiles every two seconds, when selected.
+
+Note: switching away from an enemy pauses its behavior until selected again.

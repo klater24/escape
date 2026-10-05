@@ -6,12 +6,10 @@ Gameplay objects keep their behavior separate from drawing. Anything drawn by th
 
 `StaticSprite` draws one rectangle from a texture. `AnimatedSprite` cycles through an ordered list of rectangles using a frame duration. `SpriteFactory` creates these sprite types and maps the ten named block types to cells in `PixelPack_Block_Atlas.png`.
 
-Texture files belong under `Content/Textures`, grouped into `Blocks`, `Player`, `Enemies`, `Items`, or `Projectiles`. The project copies PNG files from that tree to the build output. Load a texture with a path relative to the output root:
+Texture files belong under `Content/Textures`, grouped into `Blocks`, `Player`, `Enemies`, `Items`, or `Projectiles`. Register images in `Content/Content.mgcb` to compile them into XNB assets. Load textures with extensionless paths relative to Content.RootDirectory. ContentManager owns their lifetime, so sprites do not dispose them:
 
 ```csharp
-var texture = TextureLoader.Load(
-    GraphicsDevice,
-    "Content/Textures/Player/player.png");
+var texture = Content.Load<Texture2D>("Textures/Player/link");
 ```
 
 Sprite sheets use explicit source rectangles. Keep cell dimensions consistent within a sheet and pass animation frames to `CreateAnimatedSprite` in playback order. The block atlas uses 32 by 32 pixel cells arranged left to right as grass, dirt, stone, brick, water, wood, sand, ice, metal, and platform.
@@ -93,3 +91,31 @@ public enum State
 }
 
 ```
+# Projectiles and Item Design
+
+## Projectiles
+
+The projectiles sprites are loaded into the game by using the sprite interface and factory.
+
+Arrow, Bomb, Boomerang, and Boss all have a seperate class. They all have a constructor to create them and have update and draw methods. For arrow, it will update its position every second and stop once it has reached a certain time. It explodes and then draw stops running, so it disappears off screen. For bomb, it will stay stationary but change frames after a couple seconds to explode. It then stops drawing the sprite. For boomerang, it updates its position by moving it forward for 3 seconds then backwards for 3 seconds. After this, it stops drawing. For Boss, it moves indefinetly forward until it reaches off the screen. These are called in the player and enemy classes. 
+
+## Items
+
+The items are loaded into the game by using the sprite interface and factory.
+
+There are 5 items. Book, Heart, Key, Potion, and Watch. They each have their own class. They all animate up and down through update. They are drawn through their classes as well. ItemManager is what controls which one is being displayed. It uses the keyboard controls 'U' and 'I' to cycle through them on screen. They all display in the same spot.
+
+## Enemies and Boss
+
+EnemyA, EnemyB, EnemyC, and Boss implement IEnemy, which provides
+position, update, draw, and reset operations. Each class manages its own movement and timers.
+
+Each enemy receives an ISprite through its constructor. This keeps gameplay behavior separate from animation and drawing. The shared SpriteFactory creates enemy sprites. ManaSeedSprite handles the Forester's layered artwork and directional walking animation.
+
+EnemyManager stores the four enemies and updates and draws only the selected one. The keyboard controller maps O/P to CycleEnemyCommand, which calls Game1.CycleEnemy to change the manager's selection.
+
+Boss uses a two-second firing timer and raises FireRequested with a spawn position. Game1 handles this event by calling ProjectileManager.SpawnBossProjectile. ProjectileFactory creates an independent sprite and BossProjectile for each shot. This lets the boss request a shot without depending on the projectile implementation.
+
+Game1 delegates projectile updates and drawing to ProjectileManager and asks it to remove boss shots off-screen. The manager also removes expired projectiles. EnemyManager is registered with GameResetCoordinator. On reset, it resets every enemy and selects Enemy A. Boss.Reset clears the firing timer, and the registered ProjectileManager clears active shots and recreates only the non-boss demo projectiles. Boss shots are created only by the selected boss.
+
+Movement speeds, timing values, and screen bounds use named constants. ChangeDirection helpers keep random direction selection separate from the main update logic.

@@ -38,6 +38,13 @@ public class ProjectileManager : IGameResettable
             projectile.Draw(spriteBatch, gameTime);
     }
 
+    // Boss shots travel right; discard them once their left edge exits the view.
+    public void RemoveOffscreenBossProjectiles(int screenWidth)
+    {
+        _projectiles.RemoveAll(projectile =>
+            projectile is BossProjectile && projectile.Position.X >= screenWidth);
+    }
+
     public void Reset()
     {
         _projectiles.Clear();
