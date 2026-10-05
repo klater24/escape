@@ -5,7 +5,7 @@ namespace escape.Interfaces;
 // The shared rules for a projectile
 public interface IProjectile
 {
-    //the projectiles position on screen
+    bool IsActive { get; }
     Vector2 Position { get; set;}
 
     //Update the projectile
@@ -14,6 +14,5 @@ public interface IProjectile
     //Draw the projectile
     void Draw(SpriteBatch spriteBatch, GameTime gameTime);
 
-    //Reset the projectile
     void Reset();
 }

@@ -53,6 +53,9 @@ public class KeyboardController : IController
         pressedCommands[Keys.O] = new CycleEnemyCommand(_game, -1);
         pressedCommands[Keys.P] = new CycleEnemyCommand(_game, 1);
 
+        pressedCommands[Keys.U] = new CycleItemsCommand(_game, -1);
+        pressedCommands[Keys.I] = new CycleItemsCommand(_game, 1);
+
         pressedCommands[Keys.Q] = new QuitCommand(_game);
         pressedCommands[Keys.R] = new ResetCommand(_game.Reset);
 

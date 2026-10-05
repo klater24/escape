@@ -25,8 +25,9 @@ public class Game1 : Game
     private Texture2D _projectileAtlas;
     private Texture2D _bossAtlas;
      private readonly List<ISprite> _sprites = new();
-    private readonly List<IItem> _items = new();
-    private  List<IProjectile> _projectiles = new();
+    private ItemManager _items = null!;
+    private ProjectileManager _projectiles = null!;
+    private ProjectileFactory _projectileFactory = null!;
 
 
     private readonly List<Texture2D> _enemyTextures = new();
@@ -66,7 +67,8 @@ public class Game1 : Game
 
         RegisterResettable(_player);
 
-        
+        _keyboardController = new KeyboardController(this, _player, _blockManager);
+        _keyboardController.Initialize();
 
         // Make ten blocks so the team can see how the factory chooses each block
         var blockTypes = new[]
@@ -91,44 +93,37 @@ public class Game1 : Game
         });
         RegisterResettable(_enemies);
 
-        var bombSprite = ProjectileSprites.CreateBomb(_projectileAtlas, new Vector2(100, 100), 2f);
-        _projectiles.Add(new Bomb(bombSprite, new Vector2(100, 100)));
+        var itemPosition = new Vector2(700, 260);
+        _items = new ItemManager(new List<IItem>
+        {
+            new Book(ItemSprites.CreateBook(_itemAtlas, itemPosition, 2f), itemPosition),
+            new Key(ItemSprites.CreateKey(_itemAtlas, itemPosition, 2f), itemPosition),
+            new Watch(ItemSprites.CreateWatch(_itemAtlas, itemPosition, 2f), itemPosition),
+            new Heart(ItemSprites.CreateHeart(_itemAtlas, itemPosition, 2f), itemPosition),
+            new Potion(ItemSprites.CreatePotion(_itemAtlas, itemPosition, 2f), itemPosition)
+        });
+        RegisterResettable(_items);
 
-        var bomb = new Bomb(bombSprite, new Vector2(100, 100));
-        _projectiles.Add(bomb);
+        _projectileFactory = new ProjectileFactory(_projectileAtlas, _bossAtlas);
+        _projectiles = new ProjectileManager(_projectileFactory, CreateDemoProjectiles);
+        _projectiles.Reset();
+        RegisterResettable(_projectiles);
+    }
 
-        var arrowSprite = ProjectileSprites.CreateArrow(_projectileAtlas, new Vector2(200, 200), 2f);
-        _projectiles.Add(new Arrow(arrowSprite, new Vector2(200, 200)));
+    // Fresh instances restore expired shots as well as their timers and animations.
+    private IEnumerable<IProjectile> CreateDemoProjectiles()
+    {
+        var projectiles = new List<IProjectile>
+        {
+            _projectileFactory.CreateBomb(new Vector2(100, 100)),
+            _projectileFactory.CreateArrow(new Vector2(200, 200), Vector2.UnitX),
+            _projectileFactory.CreateBoomerang(new Vector2(300, 300), Vector2.UnitX),
+            _projectileFactory.CreateBossProjectile(new Vector2(400, 400), Vector2.UnitX),
+            _projectileFactory.CreateBossProjectile(new Vector2(400, 400), new Vector2(1, -1)),
+            _projectileFactory.CreateBossProjectile(new Vector2(400, 400), new Vector2(1, 1))
+        };
 
-        var arrow = new Arrow(arrowSprite, new Vector2(200, 200));
-        _projectiles.Add(arrow);
-
-        var boomerangSprite = ProjectileSprites.CreateBoomerang(_projectileAtlas, new Vector2(300, 300), 2f);
-        _projectiles.Add(new Boomerang(boomerangSprite, new Vector2(300, 300)));
-
-        var boomerang = new Boomerang(boomerangSprite, new Vector2(300, 300));
-        _projectiles.Add(boomerang);
-
-        var bossProjectileSprite = ProjectileSprites.CreateBossProjectile(_bossAtlas, new Vector2(400, 400), 2f);
-        _projectiles.Add(new BossProjectile(bossProjectileSprite, new Vector2(400, 400)));
-
-        var bookSprite = ItemSprites.CreateBook(_itemAtlas, new Vector2(500, 500), 2f);
-        _items.Add(new Book(bookSprite, new Vector2(500, 500)));
-
-        var keySprite = ItemSprites.CreateKey(_itemAtlas, new Vector2(600, 500), 2f);
-        _items.Add(new Key(keySprite, new Vector2(600, 500)));
-
-        var watchSprite = ItemSprites.CreateWatch(_itemAtlas, new Vector2(700, 500), 2f);
-        _items.Add(new Watch(watchSprite, new Vector2(700, 500)));
-
-        var heartSprite = ItemSprites.CreateHeart(_itemAtlas, new Vector2(200, 400), 2f);
-        _items.Add(new Heart(heartSprite, new Vector2(200, 400)));
-
-        var potionSprite = ItemSprites.CreatePotion(_itemAtlas, new Vector2(200, 300), 2f);
-        _items.Add(new Potion(potionSprite, new Vector2(200, 300)));
-
-        _keyboardController = new KeyboardController(this, _player, _blockManager, arrow, bomb, boomerang);
-        _keyboardController.Initialize();
+        return projectiles;
     }
 
     // Update every sprite once per frame
@@ -138,19 +133,13 @@ public class Game1 : Game
 
         _enemies.Update(gameTime);
 
-        foreach(var item in _items)
-        {
-            item.Update(gameTime);
-        }
+        _items.Update(gameTime);
 
-        foreach (var projectile in _projectiles)
-        {
-            projectile.Update(gameTime);
-        }
+        _projectiles.Update(gameTime);
 
         _keyboardController.Update();
         _player.Update(gameTime);
-        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | R: reset | Q: quit";
+        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | U/I: items | R: reset | Q: quit";
         base.Update(gameTime);
     }
 
@@ -166,15 +155,9 @@ public class Game1 : Game
         _enemies.Draw(_spriteBatch);
         _player.Draw(_spriteBatch);
 
-        foreach (var item in _items)
-        {
-            item.Draw(_spriteBatch);
-        }
+        _items.Draw(_spriteBatch);
 
-        foreach (var projectile in _projectiles)
-        {
-            projectile.Draw(_spriteBatch, gameTime);
-        }
+        _projectiles.Draw(_spriteBatch, gameTime);
 
         _spriteBatch.End();
 
@@ -185,6 +168,7 @@ public class Game1 : Game
     public void Reset()
     {
         _resetCoordinator.Reset();
+        
     }
 
     // Add a player or system so the game-wide reset can reach it
@@ -193,6 +177,8 @@ public class Game1 : Game
         _resetCoordinator.Register(system);
     }
     public void CycleEnemy(int direction) => _enemies.Cycle(direction);
+
+    public void CycleItems(int direction) => _items.Cycle(direction);
 
     protected override void UnloadContent()
     {
