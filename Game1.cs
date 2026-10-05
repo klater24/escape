@@ -20,7 +20,7 @@ public class Game1 : Game
     private Player _player = null!;
     private Texture2D _playerSheet = null!;
 
-    private readonly List<Texture2D> _enemyTextures = new();
+
     private EnemyManager _enemies = null!;
 
     public Game1()
@@ -46,7 +46,7 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // Load the PixelPack block tiles
-        _blockAtlas = TextureLoader.Load(GraphicsDevice, "Content/Textures/Blocks/PixelPack_Block_Atlas.png");
+        _blockAtlas = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
 
         _playerSheet = Content.Load<Texture2D>("Textures/Player/link");
         _player = new Player(new Vector2(100, 100), _playerSheet);
@@ -72,10 +72,10 @@ public class Game1 : Game
         var enemyPosition = new Vector2(450, 260);
         _enemies = new EnemyManager(new IEnemy[]
         {
-            new EnemyA(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "Run", enemyPosition), enemyPosition),
-            new EnemyB(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "DemonFlying", enemyPosition), enemyPosition),
-            new EnemyC(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "ManaSeed", enemyPosition), enemyPosition),
-            new Boss(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "SorcererAttack", enemyPosition), enemyPosition)
+            new EnemyA(SpriteFactory.CreateEnemySprite(Content, "Run", enemyPosition), enemyPosition),
+            new EnemyB(SpriteFactory.CreateEnemySprite(Content, "DemonFlying", enemyPosition), enemyPosition),
+            new EnemyC(SpriteFactory.CreateEnemySprite(Content, "ManaSeed", enemyPosition), enemyPosition),
+            new Boss(SpriteFactory.CreateEnemySprite(Content, "SorcererAttack", enemyPosition), enemyPosition)
         });
         RegisterResettable(_enemies);
     }
@@ -125,10 +125,7 @@ public class Game1 : Game
 
     protected override void UnloadContent()
     {
-        foreach (var texture in _enemyTextures) texture.Dispose();
-        _enemyTextures.Clear();
-        _blockAtlas.Dispose();
-        _playerSheet.Dispose();
+        // Content owns and disposes the textures loaded through Content.Load.
         _spriteBatch.Dispose();
         base.UnloadContent();
     }}

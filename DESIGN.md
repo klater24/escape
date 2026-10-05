@@ -6,12 +6,10 @@ Gameplay objects keep their behavior separate from drawing. Anything drawn by th
 
 `StaticSprite` draws one rectangle from a texture. `AnimatedSprite` cycles through an ordered list of rectangles using a frame duration. `SpriteFactory` creates these sprite types and maps the ten named block types to cells in `PixelPack_Block_Atlas.png`.
 
-Texture files belong under `Content/Textures`, grouped into `Blocks`, `Player`, `Enemies`, `Items`, or `Projectiles`. The project copies PNG files from that tree to the build output. Load a texture with a path relative to the output root:
+Texture files belong under `Content/Textures`, grouped into `Blocks`, `Player`, `Enemies`, `Items`, or `Projectiles`. Register images in `Content/Content.mgcb` to compile them into XNB assets. Load textures with extensionless paths relative to Content.RootDirectory. ContentManager owns their lifetime, so sprites do not dispose them:
 
 ```csharp
-var texture = TextureLoader.Load(
-    GraphicsDevice,
-    "Content/Textures/Player/player.png");
+var texture = Content.Load<Texture2D>("Textures/Player/link");
 ```
 
 Sprite sheets use explicit source rectangles. Keep cell dimensions consistent within a sheet and pass animation frames to `CreateAnimatedSprite` in playback order. The block atlas uses 32 by 32 pixel cells arranged left to right as grass, dirt, stone, brick, water, wood, sand, ice, metal, and platform.

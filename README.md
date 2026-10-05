@@ -16,13 +16,13 @@ Content/Textures/
 	Projectiles/
 ```
 
-The project copies PNG files from this folder beside the game when it builds. Load them with `TextureLoader.Load` and give it a path starting at `Content`, using forward slashes
+Register each image in `Content/Content.mgcb` using TextureImporter and TextureProcessor. The build compiles these assets to XNB files. Load textures with an extensionless path relative to `Content`; ContentManager caches and disposes them.
 
 ```csharp
-var texture = TextureLoader.Load(
-		GraphicsDevice,
-		"Content/Textures/Blocks/PixelPack_Block_Atlas.png");
+var texture = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
 ```
+
+Keep premultiplied alpha enabled for SpriteBatch. Color keying is disabled for transparent PNGs; Link uses green (0, 128, 0), and SorcererAttack uses (47, 72, 78). All current PNGs, including spare sheets and previews, are registered in the content file.
 
 Keep each sprite sheet on a regular grid. The current block atlas uses 32 by 32 pixel cells arranged left to right in this order: grass, dirt, stone, brick, water, wood, sand, ice, metal, platform. `SpriteFactory.CreateBlockSprite` maps each name to its cell
 

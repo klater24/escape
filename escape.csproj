@@ -17,8 +17,4 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Content\Textures\Blocks\PixelPack_Block_Atlas.png" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="Content/Textures/Enemies/*.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-  </ItemGroup>
 </Project>
