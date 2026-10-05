@@ -66,3 +66,24 @@ Use the same cell size and frame order consistently within a sheet.
 The keyboard controls for item are 'I' and 'U'. 'I' moves to the next one while 'U' moves to the previous one. 'R' resets them. There are 5 items in total. Eventually, the player will be able to pick them up and use them. They are made using the sprite class and then making them animate in their own respective classes. There are no known issues with items.
 
 The projectiles are used by the player. The number keys 1-3 control which projectile you shoot. Eventually, these will be used as weapons to harm enemies. These are made using the sprite class and then making them animate in their own respective classes. They are then put into the player class and enemy class to use. The only known issues is that the sprites are not smoothly animated.
+
+## Enemies and Boss
+
+The enemy demo includes three enemies and one boss.
+Only the selected enemy is displayed and updated
+
+### Controls
+
+- O: select the previous enemy.
+- P: select the next enemy.
+- R: reset the game. All enemies return to their starting positions, animations, and movement states. Selection returns to Enemy A. Active boss projectiles are cleared and the boss firing timer restarts.
+
+Enemy selection wraps around the list. Holding O or P doesn't repeatedly change the selection.
+
+### Enemy Behaviors
+- Enemy A (Knight): moves in the 4 cardinal directions, randomly
+- Enemy B (Flying Demon): flies in 8 directions with changing speed
+- Enemy C (Forester): alternates between walking and pausing
+- Boss (Sorcerer): moves horizontally and fires projectiles every two seconds, when selected.
+
+Note: switching away from an enemy pauses its behavior until selected again.

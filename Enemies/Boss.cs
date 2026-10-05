@@ -14,6 +14,16 @@ public class Boss : IEnemy
     private Vector2 _direction;
     public Vector2 Position { get; set; }
     private float _speed;
+    private float _fireTimer;
+
+    private const float FireInterval = 2f;
+
+    private const float MovementSpeed = 75f;
+    private const float PatrolDistance = 150f;
+    private static readonly Vector2 ProjectileOffset = new(96f, 32f);
+
+    // game1 handles the actual projectile
+    public event System.Action<Vector2>? FireRequested;
 
     public Boss(ISprite sprite, Vector2 position)
     {
@@ -22,9 +32,10 @@ public class Boss : IEnemy
         Position = position;
         _sprite.Position = position;
         _direction = new Vector2(1, 0);
-        _speed = 75f;
-        _leftBoundary = position.X - 150f;
-        _rightBoundary = position.X + 150f;
+        _speed = MovementSpeed;
+        _fireTimer = 0f;
+        _leftBoundary = position.X - PatrolDistance;
+        _rightBoundary = position.X + PatrolDistance;
     }
 
 
@@ -49,6 +60,15 @@ public class Boss : IEnemy
         _sprite.Position = Position;
 
         _sprite.Update(gameTime);
+
+        _fireTimer += deltaTime;
+
+        if (_fireTimer >= FireInterval)
+        {
+            _fireTimer %= FireInterval;
+            Vector2 projectilePosition = Position + ProjectileOffset;
+            FireRequested?.Invoke(projectilePosition);
+        }
     }
 
     public void Draw(SpriteBatch spriteBatch)
@@ -61,6 +81,7 @@ public class Boss : IEnemy
         _sprite.Reset();
         _sprite.Position = Position;
         _direction = new Vector2(1, 0);
-        _speed = 75f;
+        _speed = MovementSpeed;
+        _fireTimer = 0f;
     }
 }

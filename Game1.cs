@@ -21,9 +21,9 @@ public class Game1 : Game
     private IController _keyboardController = null!;
     private Player _player = null!;
     private Texture2D _playerSheet = null!;
-    private Texture2D _itemAtlas;
-    private Texture2D _projectileAtlas;
-    private Texture2D _bossAtlas;
+    private Texture2D _itemAtlas = null!;
+    private Texture2D _projectileAtlas = null!;
+    private Texture2D _bossAtlas = null!;
      private readonly List<ISprite> _sprites = new();
     private ItemManager _items = null!;
     private ProjectileManager _projectiles = null!;
@@ -84,12 +84,16 @@ public class Game1 : Game
         }
 
         var enemyPosition = new Vector2(450, 260);
+        var boss = new Boss(
+            SpriteFactory.CreateEnemySprite(Content, "SorcererAttack", enemyPosition),
+            enemyPosition);
+        boss.FireRequested += SpawnBossProjectile;
         _enemies = new EnemyManager(new IEnemy[]
         {
             new EnemyA(SpriteFactory.CreateEnemySprite(Content, "Run", enemyPosition), enemyPosition),
             new EnemyB(SpriteFactory.CreateEnemySprite(Content, "DemonFlying", enemyPosition), enemyPosition),
             new EnemyC(SpriteFactory.CreateEnemySprite(Content, "ManaSeed", enemyPosition), enemyPosition),
-            new Boss(SpriteFactory.CreateEnemySprite(Content, "SorcererAttack", enemyPosition), enemyPosition)
+            boss
         });
         RegisterResettable(_enemies);
 
@@ -117,10 +121,7 @@ public class Game1 : Game
         {
             _projectileFactory.CreateBomb(new Vector2(100, 100)),
             _projectileFactory.CreateArrow(new Vector2(200, 200), Vector2.UnitX),
-            _projectileFactory.CreateBoomerang(new Vector2(300, 300), Vector2.UnitX),
-            _projectileFactory.CreateBossProjectile(new Vector2(400, 400), Vector2.UnitX),
-            _projectileFactory.CreateBossProjectile(new Vector2(400, 400), new Vector2(1, -1)),
-            _projectileFactory.CreateBossProjectile(new Vector2(400, 400), new Vector2(1, 1))
+            _projectileFactory.CreateBoomerang(new Vector2(300, 300), Vector2.UnitX)
         };
 
         return projectiles;
@@ -136,6 +137,7 @@ public class Game1 : Game
         _items.Update(gameTime);
 
         _projectiles.Update(gameTime);
+        _projectiles.RemoveOffscreenBossProjectiles(GraphicsDevice.Viewport.Width);
 
         _keyboardController.Update();
         _player.Update(gameTime);
@@ -168,7 +170,7 @@ public class Game1 : Game
     public void Reset()
     {
         _resetCoordinator.Reset();
-        
+
     }
 
     // Add a player or system so the game-wide reset can reach it
@@ -177,6 +179,11 @@ public class Game1 : Game
         _resetCoordinator.Register(system);
     }
     public void CycleEnemy(int direction) => _enemies.Cycle(direction);
+
+    private void SpawnBossProjectile(Vector2 position)
+    {
+        _projectiles.SpawnBossProjectile(position, Vector2.UnitX);
+    }
 
     public void CycleItems(int direction) => _items.Cycle(direction);
 
