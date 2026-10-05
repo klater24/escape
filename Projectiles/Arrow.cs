@@ -50,7 +50,7 @@ public class Arrow : IProjectile
     public void Reset()
     {
         Position = _initialPosition;
-       _sprite.Reset();
+       // _sprite.Reset();
         _sprite.Position = Position;
         _direction = new Vector2(1, 0);
     }
