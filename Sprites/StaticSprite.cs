@@ -16,17 +16,13 @@ public class StaticSprite : ISprite
     public Vector2 Position { get; set; }
 
     // Save the texture area and starting position
-    public StaticSprite(Texture2D texture, Rectangle sourceRectangle, Vector2 position, float scale = 1f)
+    public StaticSprite(Texture2D texture, Rectangle sourceRectangle, Vector2 position, float scale = 3f)
     {
         _texture = texture;
         _sourceRectangle = sourceRectangle;
         _scale = scale;
         _initialPosition = position;
         Position = position;
-    }
-    public void SetSpriteEffects(SpriteEffects effects)
-    {
-        _spriteEffects = effects;
     }
 
     // Static sprites do not change during updates
@@ -47,6 +43,11 @@ public class StaticSprite : ISprite
             _scale,
             _spriteEffects,
             0f);
+    }
+
+    public void SetSpriteEffects(SpriteEffects effects)
+    {
+        _spriteEffects = effects;
     }
 
     // Move back to the starting position

@@ -38,4 +38,27 @@ var frames = new[]
 var sprite = SpriteFactory.CreateAnimatedSprite(texture, frames, position);
 ```
 
+## Keyboard Input
+
+The game uses a `KeyboardController` and command system to handle keyboard input, so that input handling is separated from the objects that perform the actions.
+
+### Player Controls
+
+| Key | Action |
+|---|---|
+| `W` / `Up Arrow` | Move up |
+| `A` / `Left Arrow` | Move left |
+| `S` / `Down Arrow` | Move down |
+| `D` / `Right Arrow` | Move right |
+| `Z` / `N` | Attack |
+| `E` | Take damage |
+| `1` - `5` | Use item |
+| `O` | Previous Enemy |
+| `P` | Next Enemy |
+| `T` | Previous Block |
+| `Y` | Next Block |
+| `R` | Reset game |
+| `Q` | Quit game |
+
+Movement inputs can be held for movement. Other actions are handled as individual commands when pressed.
 Use the same cell size and frame order consistently within a sheet.

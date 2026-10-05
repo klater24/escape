@@ -20,7 +20,7 @@ public class AnimatedSprite : ISprite
     public Vector2 Position { get; set; }
 
     // Set up the animation and remember where it starts
-    public AnimatedSprite(Texture2D texture, Rectangle[] frames, Vector2 position, float frameSeconds = 0.12f, float scale = 1f)
+    public AnimatedSprite(Texture2D texture, Rectangle[] frames, Vector2 position, float frameSeconds = 0.12f, float scale = 3f)
     {
         _texture = texture;
         _frames = frames;
@@ -30,10 +30,6 @@ public class AnimatedSprite : ISprite
         Position = position;
         _currentFrame = 0;
         _elapsed = 0f;
-    }
-    public void SetSpriteEffects(SpriteEffects effects)
-    {
-        _spriteEffects = effects;
     }
 
     // Move to the next frame when enough time has passed
@@ -61,6 +57,11 @@ public class AnimatedSprite : ISprite
             _scale,
             _spriteEffects,
             0f);
+    }
+
+    public void SetSpriteEffects(SpriteEffects effects)
+    {
+        _spriteEffects = effects;
     }
 
     // Start the animation over and return to the starting position
