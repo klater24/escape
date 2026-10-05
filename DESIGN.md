@@ -91,3 +91,16 @@ public enum State
 }
 
 ```
+# Projectiles and Item Design
+
+## Projectiles
+
+The projectiles sprites are loaded into the game by using the sprite interface and factory.
+
+Arrow, Bomb, Boomerang, and Boss all have a seperate class. They all have a constructor to create them and have update and draw methods. For arrow, it will update its position every second and stop once it has reached a certain time. It explodes and then draw stops running, so it disappears off screen. For bomb, it will stay stationary but change frames after a couple seconds to explode. It then stops drawing the sprite. For boomerang, it updates its position by moving it forward for 3 seconds then backwards for 3 seconds. After this, it stops drawing. For Boss, it moves indefinetly forward until it reaches off the screen. These are called in the player and enemy classes. 
+
+## Items
+
+The items are loaded into the game by using the sprite interface and factory.
+
+There are 5 items. Book, Heart, Key, Potion, and Watch. They each have their own class. They all animate up and down through update. They are drawn through their classes as well. ItemManager is what controls which one is being displayed. It uses the keyboard controls 'U' and 'I' to cycle through them on screen. They all display in the same spot. 
