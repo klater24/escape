@@ -25,11 +25,12 @@ public class Game1 : Game
     private Texture2D _projectileAtlas = null!;
     private Texture2D _bossAtlas = null!;
      private readonly List<ISprite> _sprites = new();
-    private readonly List<IItem> _items = new();
-    private  List<IProjectile> _projectiles = new();
+    private ItemManager _items = null!;
+    private ProjectileManager _projectiles = null!;
+    private ProjectileFactory _projectileFactory = null!;
 
 
-    private readonly List<Texture2D> _enemyTextures = new();
+
     private EnemyManager _enemies = null!;
 
     public Game1()
@@ -59,7 +60,7 @@ public class Game1 : Game
         _bossAtlas = Content.Load<Texture2D>("boses");
 
         // Load the PixelPack block tiles
-        _blockAtlas = TextureLoader.Load(GraphicsDevice, "Content/Textures/Blocks/PixelPack_Block_Atlas.png");
+        _blockAtlas = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
 
         _playerSheet = Content.Load<Texture2D>("Textures/Player/link");
         _player = new Player(new Vector2(100, 100), _playerSheet);
@@ -83,49 +84,47 @@ public class Game1 : Game
         }
 
         var enemyPosition = new Vector2(450, 260);
-
         var boss = new Boss(
-            SpriteFactory.CreateEnemySprite(
-                GraphicsDevice, _enemyTextures,
-                "SorcererAttack", enemyPosition),
+            SpriteFactory.CreateEnemySprite(Content, "SorcererAttack", enemyPosition),
             enemyPosition);
-
         boss.FireRequested += SpawnBossProjectile;
-
-
         _enemies = new EnemyManager(new IEnemy[]
         {
-            new EnemyA(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "Run", enemyPosition), enemyPosition),
-            new EnemyB(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "DemonFlying", enemyPosition), enemyPosition),
-            new EnemyC(SpriteFactory.CreateEnemySprite(GraphicsDevice, _enemyTextures, "ManaSeed", enemyPosition), enemyPosition),
+            new EnemyA(SpriteFactory.CreateEnemySprite(Content, "Run", enemyPosition), enemyPosition),
+            new EnemyB(SpriteFactory.CreateEnemySprite(Content, "DemonFlying", enemyPosition), enemyPosition),
+            new EnemyC(SpriteFactory.CreateEnemySprite(Content, "ManaSeed", enemyPosition), enemyPosition),
             boss
         });
         RegisterResettable(_enemies);
 
-        var bombSprite = ProjectileSprites.CreateBomb(_projectileAtlas, new Vector2(100, 100), 2f);
-        _projectiles.Add(new Bomb(bombSprite, new Vector2(100, 100)));
+        var itemPosition = new Vector2(700, 260);
+        _items = new ItemManager(new List<IItem>
+        {
+            new Book(ItemSprites.CreateBook(_itemAtlas, itemPosition, 2f), itemPosition),
+            new Key(ItemSprites.CreateKey(_itemAtlas, itemPosition, 2f), itemPosition),
+            new Watch(ItemSprites.CreateWatch(_itemAtlas, itemPosition, 2f), itemPosition),
+            new Heart(ItemSprites.CreateHeart(_itemAtlas, itemPosition, 2f), itemPosition),
+            new Potion(ItemSprites.CreatePotion(_itemAtlas, itemPosition, 2f), itemPosition)
+        });
+        RegisterResettable(_items);
 
-        var arrowSprite = ProjectileSprites.CreateArrow(_projectileAtlas, new Vector2(200, 200), 2f);
-        _projectiles.Add(new Arrow(arrowSprite, new Vector2(200, 200)));
+        _projectileFactory = new ProjectileFactory(_projectileAtlas, _bossAtlas);
+        _projectiles = new ProjectileManager(_projectileFactory, CreateDemoProjectiles);
+        _projectiles.Reset();
+        RegisterResettable(_projectiles);
+    }
 
-        var boomerangSprite = ProjectileSprites.CreateBoomerang(_projectileAtlas, new Vector2(300, 300), 2f);
-        _projectiles.Add(new Boomerang(boomerangSprite, new Vector2(300, 300)));
+    // Fresh instances restore expired shots as well as their timers and animations.
+    private IEnumerable<IProjectile> CreateDemoProjectiles()
+    {
+        var projectiles = new List<IProjectile>
+        {
+            _projectileFactory.CreateBomb(new Vector2(100, 100)),
+            _projectileFactory.CreateArrow(new Vector2(200, 200), Vector2.UnitX),
+            _projectileFactory.CreateBoomerang(new Vector2(300, 300), Vector2.UnitX)
+        };
 
-        var bookSprite = ItemSprites.CreateBook(_itemAtlas, new Vector2(500, 500), 2f);
-        _items.Add(new Book(bookSprite, new Vector2(500, 500)));
-
-        var keySprite = ItemSprites.CreateKey(_itemAtlas, new Vector2(600, 500), 2f);
-        _items.Add(new Key(keySprite, new Vector2(600, 500)));
-
-        var watchSprite = ItemSprites.CreateWatch(_itemAtlas, new Vector2(700, 500), 2f);
-        _items.Add(new Watch(watchSprite, new Vector2(700, 500)));
-
-        var heartSprite = ItemSprites.CreateHeart(_itemAtlas, new Vector2(200, 400), 2f);
-        _items.Add(new Heart(heartSprite, new Vector2(200, 400)));
-
-        var potionSprite = ItemSprites.CreatePotion(_itemAtlas, new Vector2(200, 300), 2f);
-        _items.Add(new Potion(potionSprite, new Vector2(200, 300)));
-
+        return projectiles;
     }
 
     // Update every sprite once per frame
@@ -135,23 +134,14 @@ public class Game1 : Game
 
         _enemies.Update(gameTime);
 
-        foreach(var item in _items)
-        {
-            item.Update(gameTime);
-        }
+        _items.Update(gameTime);
 
-        foreach (var projectile in _projectiles)
-        {
-            projectile.Update(gameTime);
-        }
-
-        _projectiles.RemoveAll(projectile =>
-            projectile is BossProjectile &&
-            projectile.Position.X >= GraphicsDevice.Viewport.Width);
+        _projectiles.Update(gameTime);
+        _projectiles.RemoveOffscreenBossProjectiles(GraphicsDevice.Viewport.Width);
 
         _keyboardController.Update();
         _player.Update(gameTime);
-        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | R: reset | Q: quit";
+        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | U/I: items | R: reset | Q: quit";
         base.Update(gameTime);
     }
 
@@ -167,15 +157,9 @@ public class Game1 : Game
         _enemies.Draw(_spriteBatch);
         _player.Draw(_spriteBatch);
 
-        foreach (var item in _items)
-        {
-            item.Draw(_spriteBatch);
-        }
+        _items.Draw(_spriteBatch);
 
-        foreach (var projectile in _projectiles)
-        {
-            projectile.Draw(_spriteBatch, gameTime);
-        }
+        _projectiles.Draw(_spriteBatch, gameTime);
 
         _spriteBatch.End();
 
@@ -186,7 +170,7 @@ public class Game1 : Game
     public void Reset()
     {
         _resetCoordinator.Reset();
-        _projectiles.RemoveAll(projectile => projectile is BossProjectile);
+
     }
 
     // Add a player or system so the game-wide reset can reach it
@@ -198,17 +182,14 @@ public class Game1 : Game
 
     private void SpawnBossProjectile(Vector2 position)
     {
-        var sprite = ProjectileSprites.CreateBossProjectile(
-            _bossAtlas, position, 2f);
-
-        _projectiles.Add(new BossProjectile(sprite, position));
+        _projectiles.SpawnBossProjectile(position, Vector2.UnitX);
     }
+
+    public void CycleItems(int direction) => _items.Cycle(direction);
+
     protected override void UnloadContent()
     {
-        foreach (var texture in _enemyTextures) texture.Dispose();
-        _enemyTextures.Clear();
-        _blockAtlas.Dispose();
-        _playerSheet.Dispose();
+        // Content owns and disposes the textures loaded through Content.Load.
         _spriteBatch.Dispose();
         base.UnloadContent();
     }}
