@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using escape.Interfaces;
 using escape.Blocks;
+using escape.Projectiles;
 
 namespace escape.Inputs;
 
@@ -14,12 +15,16 @@ public class KeyboardController : IController
     private Dictionary<Keys, ICommand> pressedCommands;
     private Dictionary<Keys, ICommand> heldCommands;
     private BlockManager _blockManager;
+    private ProjectileManager _projectiles;
 
-    public KeyboardController(Game1 game, Player player, BlockManager blockManager)
+
+    public KeyboardController(Game1 game, Player player, BlockManager blockManager, ProjectileManager projectiles)
     {
         _game = game;
         _player = player;
         _blockManager = blockManager;
+        _projectiles = projectiles;
+
         previousState = new KeyboardState();
         currentState = Keyboard.GetState();
         pressedCommands = new Dictionary<Keys, ICommand>();
@@ -56,11 +61,9 @@ public class KeyboardController : IController
         pressedCommands[Keys.T] = new CyclePreviousBlocksCommand(_blockManager);
         pressedCommands[Keys.Y] = new CycleNextBlocksCommand(_blockManager);
         
-        pressedCommands[Keys.D1] = new UseItemCommand(1, _player);
-        pressedCommands[Keys.D2] = new UseItemCommand(2, _player);
-        pressedCommands[Keys.D3] = new UseItemCommand(3, _player);
-        pressedCommands[Keys.D4] = new UseItemCommand(4, _player);
-        pressedCommands[Keys.D5] = new UseItemCommand(5, _player);
+        pressedCommands[Keys.D1] = new UseItemCommand(1, _player, _projectiles);
+        pressedCommands[Keys.D2] = new UseItemCommand(2, _player, _projectiles);
+        pressedCommands[Keys.D3] = new UseItemCommand(3, _player, _projectiles);
     }
     public void Update()
     {
