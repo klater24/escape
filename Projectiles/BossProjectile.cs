@@ -57,8 +57,8 @@ public class BossProjectile : IProjectile
     public void Reset()
     {
         Position = _initialPosition;
-       // _sprite.Reset();
-        _sprite.Position = Position;
+        _sprite.Position = _initialPosition;
         _direction = new Vector2(1, 0);
+        direct = 1;
     }
 }

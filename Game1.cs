@@ -103,6 +103,8 @@ public class Game1 : Game
         });
         RegisterResettable(_items);
 
+
+        //these should be added to the player and boss classes and will need deleted from this file before turn in
         var bombSprite = ProjectileSprites.CreateBomb(_projectileAtlas, new Vector2(100, 100), 2f);
         _projectiles.Add(new Bomb(bombSprite, new Vector2(100, 100)));
 
@@ -170,10 +172,7 @@ public class Game1 : Game
     public void Reset()
     {
         _resetCoordinator.Reset();
-         foreach (var projectile in _projectiles)
-        {
-            projectile.Reset();
-        }
+        
     }
 
     // Add a player or system so the game-wide reset can reach it

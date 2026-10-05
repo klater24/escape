@@ -14,6 +14,5 @@ public interface IProjectile
     //Draw the projectile
     void Draw(SpriteBatch spriteBatch, GameTime gameTime);
 
-    //Reset the projectile
     void Reset();
 }
