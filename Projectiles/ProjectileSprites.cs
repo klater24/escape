@@ -19,15 +19,15 @@ public static ISprite CreateArrow(Texture2D atlas, Vector2 position, float scale
 public static ISprite CreateBomb(Texture2D atlas, Vector2 position, float scale)
     {
         
-        var itemBombFrames = new[]
-        {
-            new Rectangle(129, 185, 8, 16),
-            new Rectangle(138, 185, 16, 16)
-        };
-        return new AnimatedSprite(atlas, itemBombFrames, position, 2f, scale);
+        return new StaticSprite(atlas, new Rectangle(129, 185, 8, 16), position, scale);
         
     }
     
+    public static ISprite CreateBombExplosion(Texture2D atlas, Vector2 position, float scale)
+    {
+        return new StaticSprite(atlas, new Rectangle(138, 185, 16, 16), position, scale);
+    }
+
     public static ISprite CreateBoomerang(Texture2D atlas, Vector2 position, float scale)
     {
         var itemBoomerangFrames = new[]
