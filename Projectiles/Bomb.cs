@@ -17,6 +17,7 @@ public class Bomb : IProjectile
     public BombState State { get; private set; } = BombState.Fuse;
     public bool IsActive => State != BombState.Finished;
     public Vector2 Position { get; set;}
+    private float _timer = 0f;
 
     public Bomb(ISprite sprite, ISprite explosionSprite, Vector2 position)
     {
@@ -28,10 +29,18 @@ public class Bomb : IProjectile
         _explosionSprite.Position = position;
     }
 
+    public void Throw(Vector2 position)
+    {
+        Position = position;
+        _sprite.Position = position;
+        _timer = 0f;
+    }
+
+
     public void Update(GameTime gameTime)
     {
-        if (!IsActive) 
-            return;
+        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        _timer += deltaTime;
 
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         _ageSeconds += deltaTime;
@@ -48,7 +57,9 @@ public class Bomb : IProjectile
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
-        if (State == BombState.Fuse) 
+        float deltaTime = (float)gameTime.TotalGameTime.TotalSeconds;
+
+        if(_timer < 2f) {
             _sprite.Draw(spriteBatch);
         else if (State == BombState.Exploding) 
             _explosionSprite.Draw(spriteBatch);
@@ -61,7 +72,7 @@ public class Bomb : IProjectile
         _sprite.Reset();
         _explosionSprite.Reset();
         _sprite.Position = Position;
-        _explosionSprite.Position = Position;
-        State = BombState.Fuse;
+        _direction = new Vector2(1, 0);
+        _timer = 0f;
     }
 }

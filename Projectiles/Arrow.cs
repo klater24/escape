@@ -13,6 +13,7 @@ public class Arrow : IProjectile
     private float _ageSeconds;
     public bool IsActive => _ageSeconds < 3f;
     public Vector2 Position { get; set;}
+    private float _timer = 0f;
 
 
     public Arrow(ISprite sprite, Vector2 position, Vector2 direction)
@@ -24,27 +25,33 @@ public class Arrow : IProjectile
         _direction = ProjectileFactory.NormalizeDirection(direction);
         
     }
-    
+
+    public void Shoot(Vector2 position)
+    {
+        Position = position;
+        _sprite.Position = position;
+        _timer = 0f;
+    }
+
+
     public void Update(GameTime gameTime)
     {
-        if (!IsActive) return;
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        
-        // Only count the part of this update before movement ends.
-        float movementSeconds = MathHelper.Clamp(2f - _ageSeconds, 0f, deltaTime);
-        _ageSeconds += deltaTime;
-        if (movementSeconds > 0f)
+        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        _timer += deltaTime;
+
+        if (_timer < 2f)
         {
             Position += _direction * movementSeconds * 100;
         }
-        
-        _sprite.Position = Position;
+
         _sprite.Update(gameTime);
     }
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
-        if (IsActive) {
+        float deltaTime = (float)gameTime.TotalGameTime.TotalSeconds;
+
+        if (_timer  < 3f) {
             _sprite.Draw(spriteBatch);
         }
     }
@@ -54,5 +61,7 @@ public class Arrow : IProjectile
         _ageSeconds = 0f;
         _sprite.Reset();
         _sprite.Position = Position;
+        _direction = new Vector2(1, 0);
+        _timer = 0f;
     }
 }

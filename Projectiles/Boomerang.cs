@@ -13,6 +13,7 @@ public class Boomerang : IProjectile
     public bool IsActive => _ageSeconds < 6f;
     public bool IsReturning => IsActive && _ageSeconds >= 3f;
     public Vector2 Position { get; set;}
+    private float _timer = 0f;
 
     public Boomerang(ISprite sprite, Vector2 position, Vector2 direction)
     {
@@ -22,21 +23,25 @@ public class Boomerang : IProjectile
         _sprite.Position = position;
         _direction = ProjectileFactory.NormalizeDirection(direction);
     }
+    public void Throw(Vector2 position)
+    {
+        Position = position;
+        _sprite.Position = position;
+        _timer = 0f;
+    }
 
     public void Update(GameTime gameTime)
     {
         if (!IsActive) return;
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        _timer += deltaTime;
 
-        // Split an update that crosses the turnaround or end time.
-        float nextAge = _ageSeconds + deltaTime;
-        float outboundSeconds = MathHelper.Clamp(nextAge, 0f, 3f)
-            - MathHelper.Clamp(_ageSeconds, 0f, 3f);
-        float returnSeconds = MathHelper.Clamp(nextAge - 3f, 0f, 3f)
-            - MathHelper.Clamp(_ageSeconds - 3f, 0f, 3f);
-        Position += _direction * (outboundSeconds - returnSeconds) * 50;
-        _ageSeconds = nextAge;
-        if (!IsActive) Position = _initialPosition;
+    if (_timer < 3f){
+        _sprite.Position +=  _direction * deltaTime * 50;
+    } else
+        {
+            _sprite.Position -=  _direction * deltaTime * 50;
+        }
 
         _sprite.Position = Position;
         _sprite.Update(gameTime);
@@ -44,7 +49,8 @@ public class Boomerang : IProjectile
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
-        if (IsActive) {
+        float deltaTime = (float)gameTime.TotalGameTime.TotalSeconds;
+        if (_timer < 6f) {
             _sprite.Draw(spriteBatch);
         }
     }
@@ -54,6 +60,7 @@ public class Boomerang : IProjectile
         _ageSeconds = 0f;
         _sprite.Reset();
         _sprite.Position = Position;
-         
+        _direction = new Vector2(1, 0);
+        _timer = 0f;
     }
 }

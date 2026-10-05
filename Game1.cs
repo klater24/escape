@@ -67,8 +67,7 @@ public class Game1 : Game
 
         RegisterResettable(_player);
 
-        _keyboardController = new KeyboardController(this, _player, _blockManager);
-        _keyboardController.Initialize();
+        
 
         // Make ten blocks so the team can see how the factory chooses each block
         var blockTypes = new[]
@@ -93,16 +92,35 @@ public class Game1 : Game
         });
         RegisterResettable(_enemies);
 
-        var itemPosition = new Vector2(700, 260);
-        _items = new ItemManager(new List<IItem>
-        {
-            new Book(ItemSprites.CreateBook(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Key(ItemSprites.CreateKey(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Watch(ItemSprites.CreateWatch(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Heart(ItemSprites.CreateHeart(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Potion(ItemSprites.CreatePotion(_itemAtlas, itemPosition, 2f), itemPosition)
-        });
-        RegisterResettable(_items);
+        var bombSprite = ProjectileSprites.CreateBomb(_projectileAtlas, new Vector2(100, 100), 2f);
+        _projectiles.Add(new Bomb(bombSprite, new Vector2(100, 100)));
+
+        var bomb = new Bomb(bombSprite, new Vector2(100, 100));
+        _projectiles.Add(bomb);
+
+        var arrowSprite = ProjectileSprites.CreateArrow(_projectileAtlas, new Vector2(200, 200), 2f);
+        _projectiles.Add(new Arrow(arrowSprite, new Vector2(200, 200)));
+
+        var arrow = new Arrow(arrowSprite, new Vector2(200, 200));
+        _projectiles.Add(arrow);
+
+        var boomerangSprite = ProjectileSprites.CreateBoomerang(_projectileAtlas, new Vector2(300, 300), 2f);
+        _projectiles.Add(new Boomerang(boomerangSprite, new Vector2(300, 300)));
+
+        var boomerang = new Boomerang(boomerangSprite, new Vector2(300, 300));
+        _projectiles.Add(boomerang);
+
+        var bossProjectileSprite = ProjectileSprites.CreateBossProjectile(_bossAtlas, new Vector2(400, 400), 2f);
+        _projectiles.Add(new BossProjectile(bossProjectileSprite, new Vector2(400, 400)));
+
+        var bookSprite = ItemSprites.CreateBook(_itemAtlas, new Vector2(500, 500), 2f);
+        _items.Add(new Book(bookSprite, new Vector2(500, 500)));
+
+        var keySprite = ItemSprites.CreateKey(_itemAtlas, new Vector2(600, 500), 2f);
+        _items.Add(new Key(keySprite, new Vector2(600, 500)));
+
+        var watchSprite = ItemSprites.CreateWatch(_itemAtlas, new Vector2(700, 500), 2f);
+        _items.Add(new Watch(watchSprite, new Vector2(700, 500)));
 
         _projectileFactory = new ProjectileFactory(_projectileAtlas, _bossAtlas);
         _projectiles = new ProjectileManager(_projectileFactory, CreateDemoProjectiles);
@@ -123,7 +141,8 @@ public class Game1 : Game
             _projectileFactory.CreateBossProjectile(new Vector2(400, 400), new Vector2(1, 1))
         };
 
-        return projectiles;
+        _keyboardController = new KeyboardController(this, _player, _blockManager, arrow, bomb, boomerang);
+        _keyboardController.Initialize();
     }
 
     // Update every sprite once per frame
