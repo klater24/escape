@@ -28,12 +28,8 @@ public class BossProjectile : IProjectile
     {
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         
-
-    
-            _sprite.Position +=  _direction * deltaTime * 100;
-        
-
-    
+         Position +=  _direction * deltaTime * 100f;
+        _sprite.Position = Position;
 
         _sprite.Update(gameTime);
     }
@@ -49,7 +45,7 @@ public class BossProjectile : IProjectile
     public void Reset()
     {
         Position = _initialPosition;
-       // _sprite.Reset();
+       _sprite.Reset();
         _sprite.Position = Position;
         _direction = new Vector2(1, 0);
     }
