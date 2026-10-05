@@ -62,3 +62,7 @@ The game uses a `KeyboardController` and command system to handle keyboard input
 
 Movement inputs can be held for movement. Other actions are handled as individual commands when pressed.
 Use the same cell size and frame order consistently within a sheet.
+
+The keyboard controls for item are 'I' and 'U'. 'I' moves to the next one while 'U' moves to the previous one. 'R' resets them. There are 5 items in total. Eventually, the player will be able to pick them up and use them. They are made using the sprite class and then making them animate in their own respective classes. There are no known issues with items.
+
+The projectiles are used by the player. The number keys 1-3 control which projectile you shoot. Eventually, these will be used as weapons to harm enemies. These are made using the sprite class and then making them animate in their own respective classes. They are then put into the player class and enemy class to use. The only known issues is that the sprites are not smoothly animated.
