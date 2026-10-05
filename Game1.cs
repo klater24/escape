@@ -108,25 +108,11 @@ public class Game1 : Game
         RegisterResettable(_items);
 
         _projectileFactory = new ProjectileFactory(_projectileAtlas, _bossAtlas);
-        _projectiles = new ProjectileManager(_projectileFactory, CreateDemoProjectiles);
-        _projectiles.Reset();
+        _projectiles = new ProjectileManager(_projectileFactory);
         RegisterResettable(_projectiles);
 
         _keyboardController = new KeyboardController(this, _player, _blockManager, _projectiles);
         _keyboardController.Initialize();
-    }
-
-    // Fresh instances restore expired shots as well as their timers and animations.
-    private IEnumerable<IProjectile> CreateDemoProjectiles()
-    {
-        var projectiles = new List<IProjectile>
-        {
-            _projectileFactory.CreateBomb(new Vector2(100, 100)),
-            _projectileFactory.CreateArrow(new Vector2(200, 200), Vector2.UnitX),
-            _projectileFactory.CreateBoomerang(new Vector2(300, 300), Vector2.UnitX)
-        };
-
-        return projectiles;
     }
 
     // Update every sprite once per frame

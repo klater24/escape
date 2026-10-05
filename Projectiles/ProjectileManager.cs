@@ -4,17 +4,15 @@ using escape.Interfaces;
 
 namespace escape.Projectiles;
 
-// Owns active shots and recreates the initial scene when the game resets
+// Owns active shots and clears them when the game resets.
 public class ProjectileManager : IGameResettable
 {
     private readonly List<IProjectile> _projectiles = new();
-    private readonly Func<IEnumerable<IProjectile>> _createInitialProjectiles;
     private readonly ProjectileFactory _factory;
 
-    public ProjectileManager(ProjectileFactory factory, Func<IEnumerable<IProjectile>> createInitialProjectiles)
+    public ProjectileManager(ProjectileFactory factory)
     {
         _factory = factory;
-        _createInitialProjectiles = createInitialProjectiles;
     }
 
     public void Add(IProjectile projectile) => _projectiles.Add(projectile);
@@ -48,6 +46,5 @@ public class ProjectileManager : IGameResettable
     public void Reset()
     {
         _projectiles.Clear();
-        _projectiles.AddRange(_createInitialProjectiles());
     }
 }
