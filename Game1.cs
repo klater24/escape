@@ -129,7 +129,7 @@ public class Game1 : Game
 
         _keyboardController.Update();
         _player.Update(gameTime);
-        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | U/I: items | R: reset | Q: quit";
+        Window.Title = $"Escape | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | O/P: enemies | T/Y: blocks | U/I: items | R: reset | Q: quit | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name}";
         base.Update(gameTime);
     }
 
