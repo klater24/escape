@@ -7,14 +7,11 @@ namespace escape.Sprites;
 // One place for creating the different projectile types
 public static class ProjectileSprites
 {
-public static ISprite CreateArrow(Texture2D atlas, Vector2 position, float scale)
+public static ISprite CreateArrow(Texture2D atlas, Vector2 position, float scale, Vector2 direction)
     {
-        var itemArrowFrames = new[]
-        {
-            new Rectangle(10, 185, 16, 15),
-            new Rectangle(53, 185, 7, 15)
-        };
-        return new AnimatedSprite(atlas, itemArrowFrames, position, 2f, scale);
+        // This frame points up; align its tip with the projectile's travel direction.
+        float rotation = MathF.Atan2(direction.Y, direction.X) + MathHelper.PiOver2;
+        return new StaticSprite(atlas, new Rectangle(1, 185, 8, 16), position, scale, rotation);
     }
 public static ISprite CreateBomb(Texture2D atlas, Vector2 position, float scale)
     {

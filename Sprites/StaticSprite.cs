@@ -10,17 +10,19 @@ public class StaticSprite : ISprite
     private readonly Texture2D _texture;
     private readonly Rectangle _sourceRectangle;
     private readonly float _scale;
+    private readonly float _rotation;
     private readonly Vector2 _initialPosition;
     private SpriteEffects _spriteEffects = SpriteEffects.None;
 
     public Vector2 Position { get; set; }
 
     // Save the texture area and starting position
-    public StaticSprite(Texture2D texture, Rectangle sourceRectangle, Vector2 position, float scale = 3f)
+    public StaticSprite(Texture2D texture, Rectangle sourceRectangle, Vector2 position, float scale = 3f, float rotation = 0f)
     {
         _texture = texture;
         _sourceRectangle = sourceRectangle;
         _scale = scale;
+        _rotation = rotation;
         _initialPosition = position;
         Position = position;
     }
@@ -33,13 +35,15 @@ public class StaticSprite : ISprite
     // Draw the saved texture area
     public void Draw(SpriteBatch spriteBatch)
     {
+        // Rotate around the image center without shifting unrotated sprites.
+        var origin = new Vector2(_sourceRectangle.Width / 2f, _sourceRectangle.Height / 2f);
         spriteBatch.Draw(
             _texture,
-            Position,
+            Position + origin * _scale,
             _sourceRectangle,
             Color.White,
-            0f,
-            Vector2.Zero,
+            _rotation,
+            origin,
             _scale,
             _spriteEffects,
             0f);
