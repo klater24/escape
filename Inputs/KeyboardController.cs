@@ -15,19 +15,16 @@ public class KeyboardController : IController
     private Dictionary<Keys, ICommand> pressedCommands;
     private Dictionary<Keys, ICommand> heldCommands;
     private BlockManager _blockManager;
-    private Arrow _arrow;
-    private Bomb _bomb;
-    private Boomerang _boomerang;
+    private ProjectileManager _projectiles;
 
-    public KeyboardController(Game1 game, Player player, BlockManager blockManager, Arrow arrow,
-                                Bomb bomb, Boomerang boomerang)
+
+    public KeyboardController(Game1 game, Player player, BlockManager blockManager, ProjectileManager projectiles)
     {
         _game = game;
         _player = player;
         _blockManager = blockManager;
-        _arrow = arrow;
-        _bomb = bomb;
-        _boomerang = boomerang;
+        _projectiles = projectiles;
+
         previousState = new KeyboardState();
         currentState = Keyboard.GetState();
         pressedCommands = new Dictionary<Keys, ICommand>();
@@ -64,9 +61,9 @@ public class KeyboardController : IController
         pressedCommands[Keys.T] = new CyclePreviousBlocksCommand(_blockManager);
         pressedCommands[Keys.Y] = new CycleNextBlocksCommand(_blockManager);
         
-        pressedCommands[Keys.D1] = new UseItemCommand(1, _player, _arrow, _bomb, _boomerang);
-        pressedCommands[Keys.D2] = new UseItemCommand(2, _player, _arrow, _bomb, _boomerang);
-        pressedCommands[Keys.D3] = new UseItemCommand(3, _player, _arrow, _bomb, _boomerang);
+        pressedCommands[Keys.D1] = new UseItemCommand(1, _player, _projectiles);
+        pressedCommands[Keys.D2] = new UseItemCommand(2, _player, _projectiles);
+        pressedCommands[Keys.D3] = new UseItemCommand(3, _player, _projectiles);
     }
     public void Update()
     {

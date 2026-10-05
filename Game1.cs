@@ -67,8 +67,7 @@ public class Game1 : Game
 
         RegisterResettable(_player);
 
-        _keyboardController = new KeyboardController(this, _player, _blockManager);
-        _keyboardController.Initialize();
+        
 
         // Make ten blocks so the team can see how the factory chooses each block
         var blockTypes = new[]
@@ -108,6 +107,9 @@ public class Game1 : Game
         _projectiles = new ProjectileManager(_projectileFactory, CreateDemoProjectiles);
         _projectiles.Reset();
         RegisterResettable(_projectiles);
+
+        _keyboardController = new KeyboardController(this, _player, _blockManager, _projectiles);
+        _keyboardController.Initialize();
     }
 
     // Fresh instances restore expired shots as well as their timers and animations.
