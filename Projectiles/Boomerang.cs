@@ -11,6 +11,7 @@ public class Boomerang : IProjectile
     private readonly Vector2 _initialPosition;
     private Vector2 _direction;
     public Vector2 Position { get; set;}
+    private float _timer = 0f;
 
     public Boomerang(ISprite sprite, Vector2 position)
     {
@@ -20,14 +21,20 @@ public class Boomerang : IProjectile
         _sprite.Position = position;
         _direction = new Vector2(1, 0);
     }
+    public void Throw(Vector2 position)
+    {
+        Position = position;
+        _sprite.Position = position;
+        _timer = 0f;
+    }
 
 
     public void Update(GameTime gameTime)
     {
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        
+        _timer += deltaTime;
 
-    if (gameTime.TotalGameTime.TotalSeconds < 3){
+    if (_timer < 3f){
         _sprite.Position +=  _direction * deltaTime * 50;
     } else
         {
@@ -40,7 +47,7 @@ public class Boomerang : IProjectile
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
         float deltaTime = (float)gameTime.TotalGameTime.TotalSeconds;
-        if (deltaTime < 6) {
+        if (_timer < 6f) {
             _sprite.Draw(spriteBatch);
         }
     }
@@ -50,5 +57,6 @@ public class Boomerang : IProjectile
        // _sprite.Reset();
         _sprite.Position = Position;
         _direction = new Vector2(1, 0);
+        _timer = 0f;
     }
 }

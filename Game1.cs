@@ -66,8 +66,7 @@ public class Game1 : Game
 
         RegisterResettable(_player);
 
-        _keyboardController = new KeyboardController(this, _player, _blockManager);
-        _keyboardController.Initialize();
+        
 
         // Make ten blocks so the team can see how the factory chooses each block
         var blockTypes = new[]
@@ -95,11 +94,20 @@ public class Game1 : Game
         var bombSprite = ProjectileSprites.CreateBomb(_projectileAtlas, new Vector2(100, 100), 2f);
         _projectiles.Add(new Bomb(bombSprite, new Vector2(100, 100)));
 
+        var bomb = new Bomb(bombSprite, new Vector2(100, 100));
+        _projectiles.Add(bomb);
+
         var arrowSprite = ProjectileSprites.CreateArrow(_projectileAtlas, new Vector2(200, 200), 2f);
         _projectiles.Add(new Arrow(arrowSprite, new Vector2(200, 200)));
 
+        var arrow = new Arrow(arrowSprite, new Vector2(200, 200));
+        _projectiles.Add(arrow);
+
         var boomerangSprite = ProjectileSprites.CreateBoomerang(_projectileAtlas, new Vector2(300, 300), 2f);
         _projectiles.Add(new Boomerang(boomerangSprite, new Vector2(300, 300)));
+
+        var boomerang = new Boomerang(boomerangSprite, new Vector2(300, 300));
+        _projectiles.Add(boomerang);
 
         var bossProjectileSprite = ProjectileSprites.CreateBossProjectile(_bossAtlas, new Vector2(400, 400), 2f);
         _projectiles.Add(new BossProjectile(bossProjectileSprite, new Vector2(400, 400)));
@@ -119,6 +127,8 @@ public class Game1 : Game
         var potionSprite = ItemSprites.CreatePotion(_itemAtlas, new Vector2(200, 300), 2f);
         _items.Add(new Potion(potionSprite, new Vector2(200, 300)));
 
+        _keyboardController = new KeyboardController(this, _player, _blockManager, arrow, bomb, boomerang);
+        _keyboardController.Initialize();
     }
 
     // Update every sprite once per frame

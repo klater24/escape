@@ -11,6 +11,7 @@ public class Arrow : IProjectile
     private readonly Vector2 _initialPosition;
     private Vector2 _direction;
     public Vector2 Position { get; set;}
+    private float _timer = 0f;
 
 
     public Arrow(ISprite sprite,  Vector2 position)
@@ -23,18 +24,23 @@ public class Arrow : IProjectile
         
     }
 
+    public void Shoot(Vector2 position)
+    {
+        Position = position;
+        _sprite.Position = position;
+        _timer = 0f;
+    }
+
 
     public void Update(GameTime gameTime)
     {
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        
+        _timer += deltaTime;
 
-        if (gameTime.TotalGameTime.TotalSeconds < 2)
+        if (_timer < 2f)
         {
             _sprite.Position +=  _direction * deltaTime * 100;
         }
-
-    
 
         _sprite.Update(gameTime);
     }
@@ -43,7 +49,7 @@ public class Arrow : IProjectile
     {
         float deltaTime = (float)gameTime.TotalGameTime.TotalSeconds;
 
-        if (deltaTime < 3) {
+        if (_timer  < 3f) {
             _sprite.Draw(spriteBatch);
         }
     }
@@ -53,5 +59,6 @@ public class Arrow : IProjectile
        // _sprite.Reset();
         _sprite.Position = Position;
         _direction = new Vector2(1, 0);
+        _timer = 0f;
     }
 }
