@@ -25,19 +25,6 @@
 /processorParam:TextureFormat=Color
 /build:boses.png
 
-#begin Textures/Player/link.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=0,128,0,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Textures/Player/link.png
-
-
 #begin Textures/Blocks/PixelPack_Block_Atlas.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -377,10 +364,6 @@
 #begin Textures/Enemies/SorcererAttack.png
 /importer:TextureImporter
 /processor:TextureProcessor
-/processorParam:ColorKeyColor=47,72,78,255
-#begin Textures/Player/LinkOrganized.png
-/importer:TextureImporter
-/processor:TextureProcessor
 /processorParam:ColorKeyColor=116,116,116,255
 /processorParam:ColorKeyEnabled=True
 /processorParam:GenerateMipmaps=False
@@ -394,7 +377,36 @@
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/Player/Kirby.png
+
+#begin Textures/Player/link.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=0,128,0,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/Player/link.png
+
+#begin Textures/Player/LinkOrganized.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=116,116,116,255
 /processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
 /build:Textures/Player/LinkOrganized.png
 
 #begin zelda.png
@@ -407,7 +419,6 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Textures/Player/Kirby.png
 /build:zelda.png
 
 #begin zeldaitems.png

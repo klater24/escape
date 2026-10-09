@@ -62,7 +62,7 @@ public class Game1 : Game
         // Load the PixelPack block tiles
         _blockAtlas = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
 
-        _playerSheet = Content.Load<Texture2D>("Textures/Player/link");
+        _playerSheet = Content.Load<Texture2D>("Textures/Player/linkOrganized");
         _player = new Player(new Vector2(100, 100), _playerSheet);
 
         RegisterResettable(_player);
