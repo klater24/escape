@@ -30,7 +30,7 @@ public class Player : IGameResettable
     private State currentState;
     private float attackTimer, damageTimer;
     private const float AttackDuration = 0.48f;
-    private const float damageDuration = 0.96f;
+    private const float damageDuration = 0.72f;
     
         public Player(Vector2 intiPos, Texture2D spriteSheet)
         {
@@ -39,74 +39,37 @@ public class Player : IGameResettable
         currentState = State.Idle;
         initialPosition = intiPos;
 
-        Rectangle idleDownFrame = new Rectangle(1, 11, 16, 16); 
-        Rectangle idleSideFrame = new Rectangle(35, 11, 16, 16);
-        Rectangle idleUpFrame = new Rectangle(69, 11, 16, 16);  
-
-        Rectangle[] walkUpFrame =
-        {
-            new Rectangle(69, 11, 16, 16), 
-            new Rectangle(86, 11, 16, 16)  
-        };
-        Rectangle[] walkDownFrame =
-        {
-            new Rectangle(1, 11, 16, 16),   
-            new Rectangle(18, 11, 16, 16)   
-        };
-        Rectangle[] walkSideFrame =
-        {
-            new Rectangle(35, 11, 16, 16), 
-            new Rectangle(52, 11, 16, 16)   
-        };
-        Rectangle[] attackUpFrame =
-        {
-            new Rectangle(1, 109, 16, 16),   
-            new Rectangle(18, 97, 16, 28),  
-            new Rectangle(35, 98, 16, 27),  
-            new Rectangle(52, 106, 16, 19)   
-        };
-        Rectangle[] attackDownFrame =
-        {
-            new Rectangle(1, 47, 16, 16),   
-            new Rectangle(18, 47, 16, 27),  
-            new Rectangle(35, 47, 16, 23),  
-            new Rectangle(52, 47, 16, 19)   
-            
-        };
-        Rectangle[] attackSideFrame =
-        {
-            new Rectangle(1, 77, 16, 16),   
-            new Rectangle(18, 77, 27, 16),  
-            new Rectangle(46, 77, 23, 16),  
-            new Rectangle(70, 77, 19, 16)   
-        };
         //walk
-        Rectangle[] damagedFrame =
-        {
-            new Rectangle(1, 232, 16, 16), 
-            new Rectangle(109, 241, 16, 16),  
-            new Rectangle(200, 241, 16, 16),
-            new Rectangle(223, 241, 16, 16),
-            new Rectangle(109, 241, 16, 16),  
-            new Rectangle(200, 241, 16, 16),
-            new Rectangle(223, 241, 16, 16),
-            new Rectangle(1, 232, 16, 16)     
-        };
-
-        //walk
-        walkingUDS[0] = new AnimatedSprite(spriteSheet, walkUpFrame, intiPos);
-        walkingUDS[1] = new AnimatedSprite(spriteSheet, walkDownFrame, intiPos);
-        walkingUDS[2] = new AnimatedSprite(spriteSheet, walkSideFrame, intiPos);
+        walkingUDS[0] = new AnimatedSprite(spriteSheet, Frames(0, 4, 5), intiPos);
+        walkingUDS[1] = new AnimatedSprite(spriteSheet, Frames(0, 0, 1), intiPos);
+        walkingUDS[2] = new AnimatedSprite(spriteSheet, Frames(0, 2, 3), intiPos);
         //attack
-        attackUDS[0] = new AnimatedSprite(spriteSheet, attackUpFrame, intiPos);
-        attackUDS[1] = new AnimatedSprite(spriteSheet, attackDownFrame, intiPos);
-        attackUDS[2] = new AnimatedSprite(spriteSheet, attackSideFrame, intiPos);
+        attackUDS[0] = new AnimatedSprite(spriteSheet, Frames(6, 0, 3), intiPos);
+        attackUDS[1] = new AnimatedSprite(spriteSheet, Frames(2, 0, 3), intiPos);
+        attackUDS[2] = new AnimatedSprite(spriteSheet, Frames(4, 0, 3), intiPos);
         //idle
-        idleUDS[0] = new StaticSprite(spriteSheet, idleUpFrame, intiPos);
-        idleUDS[1] = new StaticSprite(spriteSheet, idleDownFrame, intiPos);
-        idleUDS[2] = new StaticSprite(spriteSheet, idleSideFrame, intiPos);
+        idleUDS[0] = new StaticSprite(spriteSheet, Frame(4, 0), intiPos);
+        idleUDS[1] = new StaticSprite(spriteSheet, Frame(0, 0), intiPos);
+        idleUDS[2] = new StaticSprite(spriteSheet, Frame(2, 0), intiPos);
         //damage
-        damaged = new AnimatedSprite(spriteSheet, damagedFrame, intiPos);
+        damaged = new AnimatedSprite(spriteSheet, Frames(8, 1, 3), intiPos);
+    }
+
+    private Rectangle Frame(int column, int row)
+    {
+        return new Rectangle(1 + column * 17, 1 + row * 17, 16, 16);
+    }
+
+    private Rectangle[] Frames(int row, int startColumn, int endColumn)
+    {
+        Rectangle[] frames = new Rectangle[endColumn - startColumn + 1];
+
+        for (int x = startColumn; x <= endColumn; x++)
+        {
+            frames[x - startColumn] = Frame(x, row);
+        }
+
+        return frames;
     }
     
     public Vector2 getPosit()
