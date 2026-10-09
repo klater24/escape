@@ -108,25 +108,11 @@ public class Game1 : Game
         RegisterResettable(_items);
 
         _projectileFactory = new ProjectileFactory(_projectileAtlas, _bossAtlas);
-        _projectiles = new ProjectileManager(_projectileFactory, CreateDemoProjectiles);
-        _projectiles.Reset();
+        _projectiles = new ProjectileManager(_projectileFactory);
         RegisterResettable(_projectiles);
 
         _keyboardController = new KeyboardController(this, _player, _blockManager, _projectiles);
         _keyboardController.Initialize();
-    }
-
-    // Fresh instances restore expired shots as well as their timers and animations.
-    private IEnumerable<IProjectile> CreateDemoProjectiles()
-    {
-        var projectiles = new List<IProjectile>
-        {
-            _projectileFactory.CreateBomb(new Vector2(100, 100)),
-            _projectileFactory.CreateArrow(new Vector2(200, 200), Vector2.UnitX),
-            _projectileFactory.CreateBoomerang(new Vector2(300, 300), Vector2.UnitX)
-        };
-
-        return projectiles;
     }
 
     // Update every sprite once per frame
@@ -143,7 +129,7 @@ public class Game1 : Game
 
         _keyboardController.Update();
         _player.Update(gameTime);
-        Window.Title = $"Escape | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name} | O/P: enemies | T/Y: blocks | U/I: items | R: reset | Q: quit";
+        Window.Title = $"Escape | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | O/P: enemies | T/Y: blocks | U/I: items | R: reset | Q: quit | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name}";
         base.Update(gameTime);
     }
 

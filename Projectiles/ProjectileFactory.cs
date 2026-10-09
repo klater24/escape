@@ -17,7 +17,7 @@ public class ProjectileFactory
     }
 
     public Arrow CreateArrow(Vector2 position, Vector2 direction) =>
-        new Arrow(ProjectileSprites.CreateArrow(_projectileAtlas, position, 2f), position, direction);
+        new Arrow(ProjectileSprites.CreateArrow(_projectileAtlas, position, 2f, direction), position, direction);
 
     public Bomb CreateBomb(Vector2 position) =>
         new Bomb(ProjectileSprites.CreateBomb(_projectileAtlas, position, 2f),

@@ -1,89 +1,68 @@
-# game_prototype
-Game Design class CSE 3902
+# Escape — Sprint 2
 
-See [DESIGN.md](DESIGN.md) for the sprite, block, texture, and reset conventions
+CSE 3902 team game prototype. This sprint demonstrates a controllable player, three enemies and a boss, five pickups, four projectile types, ten stationary block types, and coordinated reset.
 
-## Texture and Sprite Sheet Rules
+See [DESIGN.md](DESIGN.md) for architecture, team responsibilities, reset behavior, and the manual verification checklist. The team requirements link is in [REQUIREMENTS.md](REQUIREMENTS.md).
 
-Put PNG art under `Content/Textures` and group it by object type
+## Build and run
 
-```text
-Content/Textures/
-	Blocks/
-	Player/
-	Enemies/
-	Items/
-	Projectiles/
+Use the .NET 9 SDK. The current content project targets Windows; other platforms have not been verified. Initial setup requires network access to restore NuGet packages and MonoGame tools.
+
+Extract the release ZIP or clone the repository. Open a terminal in the folder containing `escape.csproj` and run:
+
+```powershell
+dotnet tool restore
+dotnet build
+dotnet run
 ```
 
-Register each image in `Content/Content.mgcb` using TextureImporter and TextureProcessor. The build compiles these assets to XNB files. Load textures with an extensionless path relative to `Content`; ContentManager caches and disposes them.
+The build compiles the assets listed in `Content/Content.mgcb` into XNB files. Keep the source assets, project file, and tool manifest together. Generated `bin` and `obj` folders are not required in the submission.
 
-```csharp
-var texture = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
-```
+Click the game window to give it keyboard focus. Close the running game before rebuilding if Windows reports that `escape.exe` is locked.
 
-Keep premultiplied alpha enabled for SpriteBatch. Color keying is disabled for transparent PNGs; Link uses green (0, 128, 0), and SorcererAttack uses (47, 72, 78). All current PNGs, including spare sheets and previews, are registered in the content file.
-
-Keep each sprite sheet on a regular grid. The current block atlas uses 32 by 32 pixel cells arranged left to right in this order: grass, dirt, stone, brick, water, wood, sand, ice, metal, platform. `SpriteFactory.CreateBlockSprite` maps each name to its cell
-
-For other sheets, give `SpriteFactory` the exact source rectangle for each sprite. Animated sprites take an ordered list of rectangles, so frames can share a row or come from different rows
-
-```csharp
-var frames = new[]
-{
-		new Rectangle(0, 0, 32, 32),
-		new Rectangle(32, 0, 32, 32)
-};
-
-var sprite = SpriteFactory.CreateAnimatedSprite(texture, frames, position);
-```
-
-## Keyboard Input
-
-The game uses a `KeyboardController` and command system to handle keyboard input, so that input handling is separated from the objects that perform the actions.
-
-### Player Controls
+## Controls
 
 | Key | Action |
-|---|---|
-| `W` / `Up Arrow` | Move up |
-| `A` / `Left Arrow` | Move left |
-| `S` / `Down Arrow` | Move down |
-| `D` / `Right Arrow` | Move right |
-| `Z` / `N` | Attack |
-| `E` | Take damage |
-| `1` - `5` | Use item |
-| `O` | Previous Enemy |
-| `P` | Next Enemy |
-| `T` | Previous Block |
-| `Y` | Next Block |
-| `R` | Reset game |
-| `Q` | Quit game |
+| --- | --- |
+| W / Up arrow | Move up |
+| A / Left arrow | Move left |
+| S / Down arrow | Move down |
+| D / Right arrow | Move right |
+| Z / N | Attack |
+| E | Trigger temporary player damage feedback |
+| 1 | Fire an arrow from the player's position and facing direction |
+| 2 | Place a bomb at the player's position |
+| 3 | Throw a boomerang in the player's facing direction |
+| O / P | Previous / next enemy |
+| U / I | Previous / next pickup |
+| T / Y | Previous / next block |
+| R | Reset the scene and clear active projectiles |
+| Q | Quit |
 
-Movement inputs can be held for movement. Other actions are handled as individual commands when pressed.
-Use the same cell size and frame order consistently within a sheet.
+Movement keys repeat while held. Other actions occur once per press. Use the number row for 1–3; keys 4–5 have no assigned action. The window title also lists controls, but it may be clipped by the window width.
 
-The keyboard controls for item are 'I' and 'U'. 'I' moves to the next one while 'U' moves to the previous one. 'R' resets them. There are 5 items in total. Eventually, the player will be able to pick them up and use them. They are made using the sprite class and then making them animate in their own respective classes. There are no known issues with items.
+## What to demonstrate
 
-The projectiles are used by the player. The number keys 1-3 control which projectile you shoot. Eventually, these will be used as weapons to harm enemies. These are made using the sprite class and then making them animate in their own respective classes. They are then put into the player class and enemy class to use. The only known issues is that the sprites are not smoothly animated.
+- **Player:** starts at (100, 100), moves, faces left/right/up/down, and displays idle, walking, attack, and damaged states. Attack lasts 0.48 seconds; damage normally lasts 0.96 seconds.
+- **Enemies:** O/P cycles among Knight (random cardinal movement), Flying Demon (eight-direction movement with varying speed), Forester (alternating walking and pausing), and Sorcerer (horizontal patrol). Only the selected enemy updates and draws. Selecting another pauses the previous enemy.
+- **Boss:** the selected Sorcerer requests a rightward projectile every two seconds. Existing shots continue after switching enemies until removed or reset.
+- **Pickups:** Book, Key, Watch, Heart, and Potion cycle at the middle-right of the screen. They bob six pixels around their starting positions on a two-second cycle. Heart and Potion also change image frames.
+- **Blocks:** grass, dirt, stone, brick, water, wood, sand, ice, metal, and platform. Only the selected block is shown; blocks remain stationary. All three selectors wrap at either end.
+- **Projectiles:** the scene starts empty. Create shots with 1–3; boss shots are created by the selected boss. Arrow moves for two seconds and expires after three. Bomb has a two-second fuse and a one-second explosion display. Boomerang travels outward for three seconds and returns to its launch point over three seconds. Boss shots expire after six seconds or when they leave the right edge.
+- **Reset:** R restores block/item/enemy selections and their initial state, restores the player's position/facing/state, and clears every active projectile. It does not create demo shots.
 
-## Enemies and Boss
+The sprint does not require pickup collection, inventory effects, projectile collisions, or enemies reacting to the player/environment. These are not implemented.
 
-The enemy demo includes three enemies and one boss.
-Only the selected enemy is displayed and updated
+## Known limitations
 
-### Controls
+- Player reset does not yet rewind all sprite frames, sprite effects, and attack/damage timers.
+- Repeated or interrupted attacks/damage do not explicitly restart their animation frames. Attack can interrupt damage, and item use is not blocked during either state.
+- Holding equivalent movement keys together (such as W and Up) doubles movement commands; simultaneous directions can produce diagonal movement. Player movement is per command rather than scaled by elapsed time.
+- Arrow artwork does not rotate to match travel direction. Variable-size player attack frames may need alignment adjustments; visual verification remains pending.
+- The bomb uses a static fuse image followed by a static explosion image. The boomerang returns to its launch point, not to a moving player.
 
-- O: select the previous enemy.
-- P: select the next enemy.
-- R: reset the game. All enemies return to their starting positions, animations, and movement states. Selection returns to Enemy A. Active boss projectiles are cleared and the boss firing timer restarts.
+## Validation and submission
 
-Enemy selection wraps around the list. Holding O or P doesn't repeatedly change the selection.
+A development build was verified with zero warnings and errors during the documentation review. This does not certify all visual behaviors or a clean-machine setup. Record actual gameplay results using the checklist in [DESIGN.md](DESIGN.md); do not treat planned checks as passed tests.
 
-### Enemy Behaviors
-- Enemy A (Knight): moves in the 4 cardinal directions, randomly
-- Enemy B (Flying Demon): flies in 8 directions with changing speed
-- Enemy C (Forester): alternates between walking and pausing
-- Boss (Sorcerer): moves horizontally and fires projectiles every two seconds, when selected.
-
-Note: switching away from an enemy pauses its behavior until selected again.
+For the sprint submission, merge the intended work into `main`/`master`, create the GitHub release from that branch, and test the downloaded source ZIP separately before uploading it to Carmen. Each member submits their own peer review, including self-review. Coordinate the grader meeting or permitted task-board evidence separately; these tasks are not verified by this repository.
