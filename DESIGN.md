@@ -74,6 +74,29 @@ The ten types are grass, dirt, stone, brick, water, wood, sand, ice, metal, and 
 
 `Block` holds type, position, active status, and a sprite. Updating Position also updates the sprite. Blocks have no autonomous movement or collision. `BlockManager` stores all ten, selects one using T/Y, and wraps selection. Reset restores every block and selects the first. This is a demonstration selector, not a complete level map.
 
+## Sprint 3 collision foundation
+
+`ICollidable` exposes world-coordinate `Bounds`, a `Collision` category, and
+`IsCollisionEnabled`. Categories identify the role of an object; response handlers
+will own damage, pickup collection, and door transitions.
+
+`ISolidCollider` adds `IsSolid` for environmental barriers. `IBlock` extends this
+interface. Block bounds follow Position and include the 32x32 tile's rendering
+scale. IsCollisionEnabled follows IsActive. Solidity is supplied explicitly through
+the Block constructor, independently of the artwork name. The optional parameter
+defaults to false for existing demonstration call sites; room loading must supply
+the appropriate value for each tile.
+
+Player implements ICollidable with a stable 48x48 body hitbox matching its 16x16
+artwork at scale 3. Sword artwork does not enlarge this body hitbox. Player.Position
+allows future collision responses and room loading to change position while
+synchronizing all contained sprites. Existing getPosit() callers remain supported.
+
+Detection will require positive overlap on both axes; touching edges are permitted.
+Detection, the collision manager, environmental resolution, and gameplay tests are
+still pending. Only current-room objects should be registered once rooms exist;
+the overlapping Sprint 2 demonstration blocks are not a room layout.
+
 ## Enemies and boss
 
 All four implement `IEnemy`, including update, draw, position, and reset. They receive `ISprite` instances so movement logic does not need texture coordinates.

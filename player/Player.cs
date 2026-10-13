@@ -1,8 +1,8 @@
 using escape.Interfaces;
+using escape.Collisions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Sprites;
-using System.Security.Cryptography;
 public enum Direction
 {
     Up,
@@ -18,8 +18,25 @@ public enum State
     Damaged
 }
 
-public class Player : IGameResettable
+public class Player : IGameResettable, ICollidable
 {  
+    // The 16x16 body is drawn at scale 3, including during attacks.
+    private const int BodySize = 48;
+    public Rectangle Bounds => new Rectangle((int)position.X, (int)position.Y, BodySize, BodySize);
+    public Collision Category => Collision.Player;
+    public bool IsCollisionEnabled => true;
+
+    // Collision responses and room loading must also move the contained sprites.
+    public Vector2 Position
+    {
+        get => position;
+        set
+        {
+            position = value;
+            UpdateSpritePositions();
+        }
+    }
+
     private Direction facingDirection;
     private Vector2 position, initialPosition;
     //Index 0 for Up, Index 1 for down, Index 2 for side

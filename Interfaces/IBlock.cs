@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 namespace escape.Interfaces;
 
 // The shared rules for a level block
-public interface IBlock : ISprite
+public interface IBlock : ISprite, ISolidCollider
 {
     // The name used to choose the block art
     string BlockType { get; }
