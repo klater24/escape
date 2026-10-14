@@ -97,6 +97,8 @@ Detection, the collision manager, environmental resolution, and gameplay tests a
 still pending. Only current-room objects should be registered once rooms exist;
 the overlapping Sprint 2 demonstration blocks are not a room layout.
 
+AABBCollisionDetector.IsColliding checks enabled objects for positive overlap on both axes. Self-collision and non-positive hitbox dimensions return false. Touching edges do not count as overlap. Solidity and collision responses are handled separately. TestCollision.RunAll provides manual checks for detection behavior.
+
 ## Enemies and boss
 
 All four implement `IEnemy`, including update, draw, position, and reset. They receive `ISprite` instances so movement logic does not need texture coordinates.

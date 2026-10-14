@@ -3,6 +3,7 @@ using escape.Collisions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Sprites;
+using System.Security.Cryptography;
 public enum Direction
 {
     Up,
@@ -20,22 +21,10 @@ public enum State
 
 public class Player : IGameResettable, ICollidable
 {  
-    // The 16x16 body is drawn at scale 3, including during attacks.
-    private const int BodySize = 48;
-    public Rectangle Bounds => new Rectangle((int)position.X, (int)position.Y, BodySize, BodySize);
+    public Rectangle Bounds => new Rectangle((int)position.X, (int)position.Y, 48, 48);
     public Collision Category => Collision.Player;
     public bool IsCollisionEnabled => true;
-
-    // Collision responses and room loading must also move the contained sprites.
-    public Vector2 Position
-    {
-        get => position;
-        set
-        {
-            position = value;
-            UpdateSpritePositions();
-        }
-    }
+    public bool IsSolid => true;
 
     private Direction facingDirection;
     private Vector2 position, initialPosition;
