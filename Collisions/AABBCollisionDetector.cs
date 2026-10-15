@@ -5,7 +5,7 @@ namespace escape.Collisions;
 
 // Detects whether two objects with axis-aligned bounding boxes (AABBs) are colliding
 // Does not handle collision resolution, only detection
-public static class AabbCollisionDetector
+public static class AABBCollisionDetector
 {
     public static bool IsColliding(ICollidable a, ICollidable b)
     {

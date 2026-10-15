@@ -79,7 +79,13 @@ public class Game1 : Game
         for (int i = 0; i < blockTypes.Length; i++)
         {
             var position = new Vector2(448, 238);
-            _blockManager.Add(new Block(_blockAtlas, blockTypes[i], position, 2f));
+            // Add a block to the block manager with the specified type and position (TEMPORARY)
+            _blockManager.Add(new Block(
+                _blockAtlas, 
+                blockTypes[i], 
+                position, 
+                2f,
+                isSolid: blockTypes[i] == "brick"));
         }
 
         var enemyPosition = new Vector2(450, 260);
@@ -126,6 +132,11 @@ public class Game1 : Game
 
         _projectiles.Update(gameTime);
         _projectiles.RemoveOffscreenBossProjectiles(GraphicsDevice.Viewport.Width);
+
+        // Update the player's obstacles based on the current block in the block manager
+        _player.Obstacles = _blockManager.CurrentBlock is { } block
+            ? new List<ISolidCollider> { block }
+            : new List<ISolidCollider>();
 
         _keyboardController.Update();
         _player.Update(gameTime);

@@ -19,13 +19,23 @@ public enum State
     Damaged
 }
 
-public class Player : IGameResettable, ICollidable
+public class Player : IGameResettable, IMoveCollider
 {  
     public Rectangle Bounds => new Rectangle((int)position.X, (int)position.Y, 48, 48);
     public Collision Category => Collision.Player;
     public bool IsCollisionEnabled => true;
-    public bool IsSolid => true;
-
+    public Vector2 Position
+    {
+        get => position;
+        set
+        {
+            position = value;
+            UpdateSpritePositions();
+        }
+    }
+    // The obstacles that the player can collide with
+    public IReadOnlyList<ISolidCollider> Obstacles { get; set; }
+        = Array.Empty<ISolidCollider>();
     private Direction facingDirection;
     private Vector2 position, initialPosition;
     //Index 0 for Up, Index 1 for down, Index 2 for side
@@ -128,29 +138,31 @@ public class Player : IGameResettable, ICollidable
         currentState = State.Walking;
         facingDirection = direct;
 
-        if(direct == Direction.Up)
+        // Now movement is based on a requested direction
+        Vector2 movement = direct switch
         {
-            position.Y -= 1;
-        }
-        else if (direct == Direction.Down)
+            Direction.Up => new Vector2(0, -1),
+            Direction.Down => new Vector2(0, 1),
+            Direction.Left => new Vector2(-1, 0),
+            Direction.Right => new Vector2(1, 0),
+            _ => Vector2.Zero
+        };
+
+        // Directional movement speed
+        if (direct == Direction.Left || direct == Direction.Right)
         {
-            position.Y += 1;
+            // Adjust the movement speed for horizontal movement
+            SpriteEffects effects = direct == Direction.Left
+                ? SpriteEffects.FlipHorizontally
+                : SpriteEffects.None;
+
+            walkingUDS[2].SetSpriteEffects(effects);
+            attackUDS[2].SetSpriteEffects(effects);
+            idleUDS[2].SetSpriteEffects(effects);
         }
-        else if (direct == Direction.Right)
-        {
-            position.X += 1;
-            walkingUDS[2].SetSpriteEffects(SpriteEffects.None);
-            attackUDS[2].SetSpriteEffects(SpriteEffects.None);
-            idleUDS[2].SetSpriteEffects(SpriteEffects.None);
-        }
-        else if (direct == Direction.Left)
-        {
-            position.X -= 1;
-            walkingUDS[2].SetSpriteEffects(SpriteEffects.FlipHorizontally);
-            attackUDS[2].SetSpriteEffects(SpriteEffects.FlipHorizontally);
-            idleUDS[2].SetSpriteEffects(SpriteEffects.FlipHorizontally);
-        }
-        UpdateSpritePositions();
+
+        // Move the player while resolving collisions with obstacles
+        EnvironmentCollisionResolver.Move(this, movement, Obstacles);
     }
     public Direction GetFacingDirection()
     {

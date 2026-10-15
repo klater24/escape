@@ -50,13 +50,13 @@
 //         };
 
 //         Expect("Disabled second object",
-//             AabbCollisionDetector.IsColliding(first, second), false);
+//             AABBCollisionDetector.IsColliding(first, second), false);
 
 //         Expect("Disabled first object",
-//             AabbCollisionDetector.IsColliding(second, first), false);
+//             AABBCollisionDetector.IsColliding(second, first), false);
 
 //         Expect("Self-collision",
-//             AabbCollisionDetector.IsColliding(first, first), false);
+//             AABBCollisionDetector.IsColliding(first, first), false);
 //     }
 
 //     private static void Check(
@@ -66,11 +66,11 @@
 //         var second = new TestCollider { Bounds = b };
 
 //         Expect(name,
-//             AabbCollisionDetector.IsColliding(first, second),
+//             AABBCollisionDetector.IsColliding(first, second),
 //             expected);
 
 //         Expect(name + " (reversed)",
-//             AabbCollisionDetector.IsColliding(second, first),
+//             AABBCollisionDetector.IsColliding(second, first),
 //             expected);
 //     }
 
