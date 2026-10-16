@@ -38,14 +38,12 @@ public class Room
     }
     public bool TryTransition(IMoveCollider player, Door door)
     {
-        if (!rooms.TryGetValue(
-                door.NextRoom, out Room destination))
+        if (!rooms.TryGetValue(door.NextRoom, out Room destination))
         {
             return false;
         }
 
-        if (!destination.Entrances.TryGetValue(
-                door.NextDoor, out Vector2 spawnPosition))
+        if (!destination.Entrances.TryGetValue(door.NextDoor, out Vector2 spawnPosition))
         {
             return false;
         }
