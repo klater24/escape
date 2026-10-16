@@ -1,0 +1,25 @@
+
+{
+  "Name": "Room1",
+  "Blocks": [
+    { "Type": "grass", "X": 0, "Y": 0 },
+    { "Type": "grass", "X": 64, "Y": 0 },
+    { "Type": "grass", "X": 128, "Y": 0 },
+    { "Type": "stone", "X": 192, "Y": 0 },
+    { "Type": "stone", "X": 256, "Y": 0 },
+    { "Type": "grass", "X": 0, "Y": 64 },
+    { "Type": "grass", "X": 256, "Y": 64 },
+    { "Type": "grass", "X": 0, "Y": 128 },
+    { "Type": "grass", "X": 64, "Y": 128 },
+    { "Type": "grass", "X": 128, "Y": 128 },
+    { "Type": "grass", "X": 192, "Y": 128 },
+    { "Type": "grass", "X": 256, "Y": 128 }
+  ],
+  "Enemies": [
+    { "Type": "Run", "X": 160, "Y": 64 }
+  ],
+  "Items": [
+    { "Type": "Heart", "X": 224, "Y": 64 }
+  ],
+  "Doors": []
+}

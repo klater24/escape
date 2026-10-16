@@ -7,6 +7,8 @@ using escape.Sprites;
 using escape.Inputs;
 using escape.Projectiles;
 using escape.Items;
+using escape.Levels;
+using System.IO;
 
 namespace escape;
 
@@ -28,6 +30,7 @@ public class Game1 : Game
     private ItemManager _items = null!;
     private ProjectileManager _projectiles = null!;
     private ProjectileFactory _projectileFactory = null!;
+    private LevelManager _levelManager = null!;
 
 
 
@@ -61,6 +64,7 @@ public class Game1 : Game
 
         // Load the PixelPack block tiles
         _blockAtlas = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
+        _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"), Content, _itemAtlas);
 
         _playerSheet = Content.Load<Texture2D>("Textures/Player/linkOrganized");
         _player = new Player(new Vector2(100, 100), _playerSheet);
@@ -70,6 +74,7 @@ public class Game1 : Game
         
 
         // Make ten blocks so the team can see how the factory chooses each block
+        /*
         var blockTypes = new[]
         {
             "grass", "dirt", "stone", "brick", "water",
@@ -80,7 +85,7 @@ public class Game1 : Game
         {
             var position = new Vector2(448, 238);
             _blockManager.Add(new Block(_blockAtlas, blockTypes[i], position, 2f));
-        }
+        }*/
 
         var enemyPosition = new Vector2(450, 260);
         var boss = new Boss(
@@ -118,6 +123,8 @@ public class Game1 : Game
     // Update every sprite once per frame
     protected override void Update(GameTime gameTime)
     {
+        _levelManager.Update(gameTime);
+
         _blockManager.Update(gameTime);
 
         _enemies.Update(gameTime);
@@ -148,6 +155,8 @@ public class Game1 : Game
         _items.Draw(_spriteBatch);
 
         _projectiles.Draw(_spriteBatch, gameTime);
+
+        _levelManager.Draw(_spriteBatch);
 
         _spriteBatch.End();
 
