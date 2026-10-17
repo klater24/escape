@@ -49,11 +49,10 @@ public class Room
         {
             Vector2 position = new(blockData.X, blockData.Y);
 
+            bool isSolid = blockData.Type is "stone" or "brick" or "metal" or "grass" or "dirt";
+
             _blocks.Add(new Block(
-                _blockAtlas,
-                blockData.Type,
-                position,
-                2f));
+                _blockAtlas, blockData.Type, position, 2f, isSolid));
         }
     }
 
