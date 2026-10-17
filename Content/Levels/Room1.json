@@ -11,9 +11,10 @@
     { "Type": "grass", "X": 256, "Y": 64 },
     { "Type": "grass", "X": 0, "Y": 128 },
     { "Type": "grass", "X": 64, "Y": 128 },
-    { "Type": "grass", "X": 128, "Y": 128 },
+    { "Type": "door_up", "X": 128, "Y": 128 },
     { "Type": "grass", "X": 192, "Y": 128 },
     { "Type": "grass", "X": 256, "Y": 128 }
+    
   ],
   "Enemies": [
     { "Type": "Run", "X": 160, "Y": 64 }
