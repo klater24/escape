@@ -1,17 +1,4 @@
-# Sprint 3 combat update
-
-This section describes the current combat implementation. The Sprint 2 material below is historical and does not describe the current room controls.
-
-- F1 loads Room1 (knight), F2 loads Room2 (demon), and F3 loads Room3 (both). O/P, T/Y, and U/I cycling is removed.
-- Z/N swings the sword in Link's facing direction. Enemy A blinks when hit and disappears after three separate successful swings. Only Enemy A supports combat.
-- Link starts with 3 health, shown in the window title. Knight contact or the E debug key removes one health and triggers damage feedback. Further damage is ignored for 5 seconds.
-- At zero health, Link cannot move, attack, use items, or take additional damage. The title prompts R to restart.
-- R restores Link's health and position, clears combat timers and projectiles, and restores enemies in the current room. Room switching cancels attacks but preserves player health; rooms are recreated on entry.
-- Three health points and the five-second cooldown are gameplay choices, not specified assignment values. Boss/projectile combat and pickup effects remain deferred.
-
-Manual combat checks: test sword hits in all four directions in F1/F3, misses when facing away, one hit per swing, knight defeat, R restoration, and switching rooms mid-swing. Press E three times at least five seconds apart to verify 3 → 2 → 1 → 0 health, disabled actions at zero, and R restoring 3 health. These health checks still need visual play-testing.
-
-# Escape — Sprint 2
+# Escape — Sprint 3
 
 CSE 3902 team game prototype. This sprint demonstrates a controllable player, three enemies and a boss, five pickups, four projectile types, ten stationary block types, and coordinated reset.
 
@@ -79,3 +66,10 @@ The sprint does not require pickup collection, inventory effects, projectile col
 A development build was verified with zero warnings and errors during the documentation review. This does not certify all visual behaviors or a clean-machine setup. Record actual gameplay results using the checklist in [DESIGN.md](DESIGN.md); do not treat planned checks as passed tests.
 
 For the sprint submission, merge the intended work into `main`/`master`, create the GitHub release from that branch, and test the downloaded source ZIP separately before uploading it to Carmen. Each member submits their own peer review, including self-review. Coordinate the grader meeting or permitted task-board evidence separately; these tasks are not verified by this repository.
+
+## Sprint 3 - Combat (Samiya)
+
+- Z/N attacks Enemy A with the sword. It flashes when hit and is defeated after three hits.
+- Link has 3 health and loses one on enemy contact, with damage feedback and a 5-second cooldown. Health appears in the window title.
+- At zero health, Link cannot move, attack, or use items. R restores player/enemy health and clears combat timers.
+- Test attacks in all four directions, repeated contact, defeat, and reset. Combat applies only to Enemy A.
