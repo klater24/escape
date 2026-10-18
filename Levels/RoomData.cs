@@ -6,6 +6,8 @@ namespace escape.Levels;
 public class RoomData
 {
     public string Name { get; set; } = "";
+    public float SpawnX { get; set; } = 100;
+    public float SpawnY { get; set; } = 100;
 
     public List<GameObjectData> Blocks { get; set; } = new();
 

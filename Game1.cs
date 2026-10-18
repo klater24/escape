@@ -97,11 +97,11 @@ public class Game1 : Game
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-        _player.Draw(_spriteBatch);
-
         _projectiles.Draw(_spriteBatch, gameTime);
 
         _levelManager.Draw(_spriteBatch);
+
+        _player.Draw(_spriteBatch);
 
         _spriteBatch.End();
 

@@ -15,6 +15,7 @@ public class LevelManager : IGameResettable
     private readonly ContentManager _content;
     private readonly Texture2D _itemAtlas;
     private readonly Player _player;
+    private Vector2 _currentSpawn;
 
     public Room CurrentRoom { get; private set; }
 
@@ -36,18 +37,20 @@ public class LevelManager : IGameResettable
 
     public void LoadRoom(string roomId)
     {
-        string filePath = Path.Combine(
-            _levelsDirectory,
-            $"{roomId}.json");
-
+        string filePath = Path.Combine(_levelsDirectory, $"{roomId}.json");
         RoomData data = RoomParser.Load(filePath);
+
         CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas);
+
+        _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
+        _player.Position = _currentSpawn;
     }
 
     public void ChangeRoom(string roomId, Vector2 spawnPosition)
     {
         LoadRoom(roomId);
-        _player.Position = spawnPosition;
+        _currentSpawn = spawnPosition;
+        _player.Position = _currentSpawn;
     }
     public void Update(GameTime gameTime)
     {
@@ -59,12 +62,9 @@ public class LevelManager : IGameResettable
         CurrentRoom.Draw(spriteBatch);
     }
 
-    public void ResetCurrentRoom()
-    {
-        CurrentRoom.Reset();
-    }
     public void Reset()
     {
-        ResetCurrentRoom();
+        CurrentRoom.Reset();
+        _player.Position = _currentSpawn;
     }
 }
