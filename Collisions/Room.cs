@@ -1,5 +1,6 @@
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace escape.Interfaces;
 
@@ -53,14 +54,16 @@ public class Room
 
         return true;
     }
-    public bool CheckDoorTransition(IMoveCollider player,Room roomManager)
+    public bool CheckDoorTransition(Player player, Room room, MouseState mouse)
 {
-    foreach (Door door in roomManager.CurrentRoom.Doors)
-    {
-        if (!player.Bounds.Intersects(door.Bounds))
-            continue;
+    mouse = Mouse.GetState(); 
+    Point mousePosition = new Point(mouse.X, mouse.Y);
 
-        return roomManager.TryTransition(player, door);
+    foreach (Door door in room.CurrentRoom.Doors)
+    {
+        if (!player.Bounds.Intersects(door.Bounds)|| !door.Bounds.Contains(mousePosition))
+            continue;
+        return room.TryTransition(player, door);
     }
 
     return false;
