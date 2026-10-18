@@ -7,6 +7,8 @@ using escape.Sprites;
 using escape.Inputs;
 using escape.Projectiles;
 using escape.Items;
+using escape.Collisions;
+using Microsoft.Xna.Framework.Input;
 
 namespace escape;
 
@@ -28,6 +30,8 @@ public class Game1 : Game
     private ItemManager _items = null!;
     private ProjectileManager _projectiles = null!;
     private ProjectileFactory _projectileFactory = null!;
+    private Room _currentRoom;
+    private MouseState _previousMouseState;
 
 
 
@@ -79,7 +83,13 @@ public class Game1 : Game
         for (int i = 0; i < blockTypes.Length; i++)
         {
             var position = new Vector2(448, 238);
-            _blockManager.Add(new Block(_blockAtlas, blockTypes[i], position, 2f));
+            // Add a block to the block manager with the specified type and position (TEMPORARY)
+            _blockManager.Add(new Block(
+                _blockAtlas, 
+                blockTypes[i], 
+                position, 
+                2f,
+                isSolid: blockTypes[i] == "brick"));
         }
 
         var enemyPosition = new Vector2(450, 260);
@@ -126,6 +136,27 @@ public class Game1 : Game
 
         _projectiles.Update(gameTime);
         _projectiles.RemoveOffscreenBossProjectiles(GraphicsDevice.Viewport.Width);
+
+        // Update the player's obstacles based on the current block in the block manager
+        _player.Obstacles = _blockManager.CurrentBlock is { } block
+            ? new List<ISolidCollider> { block }
+            : new List<ISolidCollider>();
+
+
+        //probs need to fix this at some point 
+        Vector2 prevPlayerPos = _player.getPosit();
+        Vector2 currPlayerPos = _player.getPosit();
+        MouseState currentMouseState = Mouse.GetState();
+        if (prevPlayerPos != currPlayerPos)
+        {
+            Vector2 movement = currPlayerPos - prevPlayerPos;
+            //need a thing of obstacles
+            EnvironmentCollisionResolver.Move(_player, movement, null);
+           _currentRoom.CheckDoorTransition(_player, _currentRoom, currentMouseState, _previousMouseState);
+           _previousMouseState = currentMouseState; 
+        }
+
+
 
         _keyboardController.Update();
         _player.Update(gameTime);
