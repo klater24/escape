@@ -22,7 +22,10 @@ public class Player : IGameResettable, IMoveCollider
 {
     public Rectangle Bounds => new Rectangle((int)position.X, (int)position.Y, 48, 48);
     public Collision Category => Collision.Player;
-    public bool IsCollisionEnabled => true;
+    public const int MaxHealth = 3;
+    public int Health { get; private set; } = MaxHealth;
+    public bool IsDefeated => Health == 0;
+    public bool IsCollisionEnabled => !IsDefeated;
     public Vector2 Position
     {
         get => position;
@@ -52,7 +55,7 @@ public class Player : IGameResettable, IMoveCollider
     private const float SwordActiveStart = 0.12f;
     private const float SwordActiveEnd = 0.36f;
     public SwordHitbox Sword { get; }
-    public bool IsSwordActive => currentState == State.Attacking &&
+    public bool IsSwordActive => !IsDefeated && currentState == State.Attacking &&
         attackTimer >= SwordActiveStart && attackTimer < SwordActiveEnd;
 
         public Player(Vector2 intiPos, Texture2D spriteSheet, Texture2D attackSheet)
@@ -109,6 +112,7 @@ public class Player : IGameResettable, IMoveCollider
     }
     public void Move(Direction direct)
     {
+        if (IsDefeated) return;
         if (currentState == State.Attacking || currentState == State.Damaged)
         {
             return;
@@ -149,6 +153,7 @@ public class Player : IGameResettable, IMoveCollider
     }
     public void Attack()
     {
+        if (IsDefeated) return;
         if (currentState == State.Attacking || currentState == State.Damaged)
             return;
 
@@ -161,16 +166,20 @@ public class Player : IGameResettable, IMoveCollider
     }
     public void Walk()
     {
+        if (IsDefeated) return;
         currentState = State.Walking;
     }
     public void Idle()
     {
+        if (IsDefeated) return;
         currentState = State.Idle;
     }
     public void Damage()
     {
-        if (damageCooldownTimer > 0f)
+        if (IsDefeated || damageCooldownTimer > 0f)
             return;
+        Health--;
+        CancelAttack();
         damageCooldownTimer = DamageCooldown;
         currentState = State.Damaged;
         damageTimer = 0f;
@@ -186,6 +195,7 @@ public class Player : IGameResettable, IMoveCollider
     }
     public void Reset()
     {
+        Health = MaxHealth;
         position = initialPosition;
         facingDirection = Direction.Down;
         currentState = State.Idle;
@@ -218,6 +228,7 @@ public class Player : IGameResettable, IMoveCollider
 
     public void Update(GameTime gameTime)
     {
+        if (IsDefeated) return;
         damageCooldownTimer = MathF.Max(
             0f,
             damageCooldownTimer - (float)gameTime.ElapsedGameTime.TotalSeconds

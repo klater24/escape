@@ -1,3 +1,19 @@
+# Sprint 3 combat architecture
+
+This section supersedes the historical Sprint 2 combat and selection behavior below.
+
+Game1 resolves combat after player updates against every EnemyA in LevelManager.CurrentRoom.Enemies. CombatCollisionHandler uses the shared AABBCollisionDetector for sword and body overlap; it does not implement its own detection. Defeated enemies disable collisions, movement, and drawing.
+
+SwordHitbox implements ICollidable and derives bounds from the player's body and facing. It is active from 0.12 to 0.36 seconds of a 0.48-second attack. A per-swing set tracks targets already hit, allowing one hit per enemy per swing. Starting an attack resets its animation and target set; damage and room changes cancel the attack.
+
+Player owns health (initially 3) and a five-second damage cooldown independent of animation state. Accepted damage subtracts one health and restarts feedback; health cannot fall below zero. At zero health, movement, attacks, item use, and collisions are disabled until reset. Health persists across room changes. The window title displays health and the reset prompt. EnemyA owns three health points and a brief blinking timer; reset restores health and movement state.
+
+The organized sheet supplies walking, idle, and damage frames. The original player sheet supplies complete sword frames; AnimatedSprite anchors extended upward/leftward frames to keep the body stationary. Gameplay hitboxes remain separate from sprite rectangles.
+
+LevelManager refreshes player obstacles and cancels active attacks when loading a room. Room.Reset restores its enemies; the reset coordinator also restores Player and clears projectiles. The existing room loader recreates enemies on re-entry. Room transitions, collision walls, and their layouts retain their teammates' ownership.
+
+Validation: build and combat logic checks must pass after changes. Manual acceptance includes four attack directions, cooldown, zero health, disabled actions, reset, and room changes. Historical test statuses below are not current Sprint 3 results.
+
 # Escape — Sprint 2 Design
 
 This document describes the current implementation, its relationship to the team's sprint responsibilities, and remaining limitations. It does not claim that every planned behavior has been tested.
