@@ -7,6 +7,7 @@ using escape.Sprites;
 using escape.Inputs;
 using escape.Projectiles;
 using escape.Items;
+using escape.Collisions;
 
 namespace escape;
 
@@ -140,6 +141,10 @@ public class Game1 : Game
 
         _keyboardController.Update();
         _player.Update(gameTime);
+        if (_enemies.Current is EnemyA enemy)
+        {
+            CombatCollisionHandler.Resolve(_player, enemy);
+        }
         Window.Title = $"Escape | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | O/P: enemies | T/Y: blocks | U/I: items | R: reset | Q: quit | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name}";
         base.Update(gameTime);
     }

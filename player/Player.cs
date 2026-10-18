@@ -3,7 +3,6 @@ using escape.Collisions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Sprites;
-using System.Security.Cryptography;
 public enum Direction
 {
     Up,
@@ -46,7 +45,15 @@ public class Player : IGameResettable, IMoveCollider
     private State currentState;
     private float attackTimer, damageTimer;
     private const float AttackDuration = 0.48f;
+    private const float MovementSpeed = 1.5f;
     private const float damageDuration = 0.96f;
+    private const float DamageCooldown = 5f;
+    private float damageCooldownTimer;
+    private const float SwordActiveStart = 0.12f;
+    private const float SwordActiveEnd = 0.36f;
+    public SwordHitbox Sword { get; }
+    public bool IsSwordActive => currentState == State.Attacking &&
+        attackTimer >= SwordActiveStart && attackTimer < SwordActiveEnd;
     
         public Player(Vector2 intiPos, Texture2D spriteSheet)
         {
@@ -54,6 +61,7 @@ public class Player : IGameResettable, IMoveCollider
         position = intiPos; 
         currentState = State.Idle;
         initialPosition = intiPos;
+        Sword = new SwordHitbox(this);
 
         Rectangle idleDownFrame = new Rectangle(1, 11, 16, 16); 
         Rectangle idleSideFrame = new Rectangle(35, 11, 16, 16);
@@ -117,6 +125,9 @@ public class Player : IGameResettable, IMoveCollider
         attackUDS[0] = new AnimatedSprite(spriteSheet, attackUpFrame, intiPos);
         attackUDS[1] = new AnimatedSprite(spriteSheet, attackDownFrame, intiPos);
         attackUDS[2] = new AnimatedSprite(spriteSheet, attackSideFrame, intiPos);
+        foreach (var sprite in attackUDS)
+            sprite.AnchorBodySize = new Vector2(16, 16);
+        attackUDS[0].FrameAnchor = new Vector2(0, 1);
         //idle
         idleUDS[0] = new StaticSprite(spriteSheet, idleUpFrame, intiPos);
         idleUDS[1] = new StaticSprite(spriteSheet, idleDownFrame, intiPos);
@@ -158,11 +169,12 @@ public class Player : IGameResettable, IMoveCollider
 
             walkingUDS[2].SetSpriteEffects(effects);
             attackUDS[2].SetSpriteEffects(effects);
+            attackUDS[2].FrameAnchor = direct == Direction.Left ? Vector2.UnitX : Vector2.Zero;
             idleUDS[2].SetSpriteEffects(effects);
         }
 
         // Move the player while resolving collisions with obstacles
-        EnvironmentCollisionResolver.Move(this, movement, Obstacles);
+        EnvironmentCollisionResolver.Move(this, movement * MovementSpeed, Obstacles);
     }
     public Direction GetFacingDirection()
     {
@@ -170,11 +182,15 @@ public class Player : IGameResettable, IMoveCollider
     }
     public void Attack()
     {
-        if (currentState == State.Attacking)
+        if (currentState == State.Attacking || currentState == State.Damaged)
             return;
 
         currentState = State.Attacking; 
         attackTimer = 0f;
+        Sword.Reset();
+        foreach (var sprite in attackUDS)
+            sprite.Reset();
+        UpdateSpritePositions();
     }
     public void Walk()
     {
@@ -186,10 +202,13 @@ public class Player : IGameResettable, IMoveCollider
     }
     public void Damage()
     {
-        if (currentState == State.Damaged)
+        if (damageCooldownTimer > 0f)
             return;
+        damageCooldownTimer = DamageCooldown;
         currentState = State.Damaged;   
         damageTimer = 0f;
+        damaged.Reset();
+        damaged.Position = position;
     }
     public void StopMoving()
     {
@@ -203,11 +222,32 @@ public class Player : IGameResettable, IMoveCollider
         position = initialPosition;
         facingDirection = Direction.Down;
         currentState = State.Idle;
+        damageCooldownTimer = 0f;
+        damageTimer = 0f;
+        attackTimer = 0f;
+        Sword.Reset();
+        foreach (var sprite in attackUDS)
+        {
+            sprite.Reset();
+            sprite.SetSpriteEffects(SpriteEffects.None);
+        }
+        foreach (var sprite in walkingUDS)
+        {
+            sprite.Reset();
+            sprite.SetSpriteEffects(SpriteEffects.None);
+        }
+        damaged.Reset();
+        attackUDS[2].FrameAnchor = Vector2.Zero;
         UpdateSpritePositions();
     }
 
     public void Update(GameTime gameTime)
     {
+        damageCooldownTimer = MathF.Max(
+            0f,
+            damageCooldownTimer - (float)gameTime.ElapsedGameTime.TotalSeconds
+        );
+
         if (currentState == State.Walking)
         {
             if (facingDirection == Direction.Up)

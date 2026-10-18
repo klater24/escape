@@ -2,10 +2,11 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
 using System;
+using escape.Collisions;
 
 namespace escape.Enemies;
 
-public class EnemyA : IEnemy
+public class EnemyA : IEnemy, ICollidable
 {
 
     private readonly ISprite _sprite;
@@ -20,6 +21,35 @@ public class EnemyA : IEnemy
     private const int SpriteHeight = 64;
     private const float MovementSpeed = 100f;
     private const float DirectionChangeInterval = 2f;
+    private const int HitboxOffsetX = 40;
+    private const int HitboxOffsetY = 14;
+    private const int HitboxWidth = 24;
+    private const int HitboxHeight = 32;
+
+    public Rectangle Bounds => new Rectangle(
+        (int)Position.X + HitboxOffsetX,
+        (int)Position.Y + HitboxOffsetY,
+        HitboxWidth,
+        HitboxHeight
+    );
+
+    public Collision Category => Collision.Enemy;
+
+    private const int StartingHealth = 3;
+    private const float DamageFlashDuration = 0.4f;
+    private const float FlashInterval = 0.08f;
+    private float _damageFlashTimer;
+    public int Health { get; private set; } = StartingHealth;
+    public bool IsDefeated => Health == 0;
+    public bool IsCollisionEnabled => !IsDefeated;
+
+    public void TakeDamage()
+    {
+        if (IsDefeated)
+            return;
+        Health--;
+        _damageFlashTimer = DamageFlashDuration;
+    }
 
     public EnemyA(ISprite sprite, Vector2 position)
     {
@@ -34,7 +64,10 @@ public class EnemyA : IEnemy
 
     public void Update(GameTime gameTime)
     {
+        if (IsDefeated)
+            return;
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        _damageFlashTimer = MathF.Max(0f, _damageFlashTimer - deltaTime);
 
         Position += _direction * MovementSpeed * deltaTime;
 
@@ -86,10 +119,15 @@ public class EnemyA : IEnemy
     }
     public void Draw(SpriteBatch spriteBatch)
     {
+        if (IsDefeated || (_damageFlashTimer > 0f &&
+            (int)(_damageFlashTimer / FlashInterval) % 2 == 0))
+            return;
         _sprite.Draw(spriteBatch);
     }
     public void Reset()
     {
+        Health = StartingHealth;
+        _damageFlashTimer = 0f;
         Position = _initialPosition;
         _sprite.Reset();
         _sprite.Position = Position;
