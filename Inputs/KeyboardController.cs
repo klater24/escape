@@ -1,8 +1,8 @@
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using escape.Interfaces;
-using escape.Blocks;
 using escape.Projectiles;
+using escape.Levels;
 
 namespace escape.Inputs;
 
@@ -14,16 +14,16 @@ public class KeyboardController : IController
     private KeyboardState currentState;
     private Dictionary<Keys, ICommand> pressedCommands;
     private Dictionary<Keys, ICommand> heldCommands;
-    private BlockManager _blockManager;
     private ProjectileManager _projectiles;
+    private readonly LevelManager _levelManager;
 
 
-    public KeyboardController(Game1 game, Player player, BlockManager blockManager, ProjectileManager projectiles)
+    public KeyboardController(Game1 game, Player player, ProjectileManager projectiles, LevelManager levelManager)
     {
         _game = game;
         _player = player;
-        _blockManager = blockManager;
         _projectiles = projectiles;
+        _levelManager = levelManager;
 
         previousState = new KeyboardState();
         currentState = Keyboard.GetState();
@@ -47,23 +47,18 @@ public class KeyboardController : IController
         pressedCommands[Keys.Z] = new AttackCommand(_player);
         pressedCommands[Keys.N] = new AttackCommand(_player);
 
-        pressedCommands[Keys.O] = new CycleEnemyCommand(_game, -1);
-        pressedCommands[Keys.P] = new CycleEnemyCommand(_game, 1);
-
-        pressedCommands[Keys.U] = new CycleItemsCommand(_game, -1);
-        pressedCommands[Keys.I] = new CycleItemsCommand(_game, 1);
-
         pressedCommands[Keys.Q] = new QuitCommand(_game);
         pressedCommands[Keys.R] = new ResetCommand(_game.Reset);
 
         pressedCommands[Keys.E] = new DamageSelfCommand(_player);
-
-        pressedCommands[Keys.T] = new CyclePreviousBlocksCommand(_blockManager);
-        pressedCommands[Keys.Y] = new CycleNextBlocksCommand(_blockManager);
         
         pressedCommands[Keys.D1] = new UseItemCommand(1, _player, _projectiles);
         pressedCommands[Keys.D2] = new UseItemCommand(2, _player, _projectiles);
         pressedCommands[Keys.D3] = new UseItemCommand(3, _player, _projectiles);
+
+        pressedCommands[Keys.F1] = new ChangeRoomCommand(_levelManager, "Room1", new Vector2(100, 100));
+        pressedCommands[Keys.F2] = new ChangeRoomCommand(_levelManager, "Room2", new Vector2(100, 100));
+        pressedCommands[Keys.F3] = new ChangeRoomCommand(_levelManager, "Room3", new Vector2(100, 100));
     }
     public void Update()
     {
