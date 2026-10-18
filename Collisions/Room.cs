@@ -2,7 +2,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace escape.Interfaces;
+namespace escape.Interfaces; 
 
 public class Room
 {
@@ -54,17 +54,23 @@ public class Room
 
         return true;
     }
-    public bool CheckDoorTransition(Player player, Room room, MouseState mouse)
+    public bool CheckDoorTransition(Player player, Room room, MouseState currentMouse, MouseState prevMouse)
 {
-    mouse = Mouse.GetState(); 
-    Point mousePosition = new Point(mouse.X, mouse.Y);
-
     foreach (Door door in room.CurrentRoom.Doors)
     {
-        if (!player.Bounds.Intersects(door.Bounds)|| !door.Bounds.Contains(mousePosition))
+        if (!player.Bounds.Intersects(door.Bounds))
             continue;
         return room.TryTransition(player, door);
     }
+    if(currentMouse.LeftButton == ButtonState.Pressed && prevMouse.LeftButton == ButtonState.Released)
+        {
+           Point mousePosition = new Point(currentMouse.X, currentMouse.Y);
+            foreach (Door door in room.CurrentRoom.Doors)
+             {
+                if (door.Bounds.Contains(mousePosition)) continue;
+                 return room.TryTransition(player, door);
+    }
+        }
 
     return false;
 }
