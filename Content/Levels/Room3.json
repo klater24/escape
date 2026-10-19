@@ -1,0 +1,38 @@
+{
+  "Name": "Room3",
+  "SpawnX": 250,
+  "SpawnY": 150,
+  "Blocks": [
+      { "Type": "stone", "X": 0, "Y": 0 },
+      { "Type": "stone", "X": 64, "Y": 0 },
+      { "Type": "stone", "X": 128, "Y": 0 },
+      { "Type": "stone", "X": 192, "Y": 0 },
+      { "Type": "stone", "X": 256, "Y": 0 },
+      { "Type": "stone", "X": 320, "Y": 0 },
+      { "Type": "stone", "X": 384, "Y": 0 },
+
+      { "Type": "stone", "X": 0, "Y": 64 },
+      { "Type": "stone", "X": 0, "Y": 128 },
+      { "Type": "stone", "X": 0, "Y": 192 },
+      { "Type": "stone", "X": 0, "Y": 256 },
+
+      { "Type": "stone", "X": 384, "Y": 64 },
+      { "Type": "door_left", "X": 384, "Y": 128 },
+      { "Type": "stone", "X": 384, "Y": 192 },
+      { "Type": "stone", "X": 384, "Y": 256 },
+
+      { "Type": "stone", "X": 64, "Y": 256 },
+      { "Type": "stone", "X": 128, "Y": 256 },
+      { "Type": "stone", "X": 192, "Y": 256 },
+      { "Type": "stone", "X": 256, "Y": 256 },
+      { "Type": "stone", "X": 320, "Y": 256 }
+  ],
+  "Enemies": [
+    { "Type": "Run", "X": 160, "Y": 64 },
+    { "Type": "DemonFlying", "X": 192, "Y": 64 }
+  ],
+  "Items": [
+    { "Type": "Potion", "X": 224, "Y": 64 }
+  ],
+  "Doors": []
+}

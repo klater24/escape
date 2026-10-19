@@ -37,6 +37,10 @@ public static class SpriteFactory
             "ice" => new Rectangle(224, 0, 32, 32),
             "metal" => new Rectangle(256, 0, 32, 32),
             "platform" => new Rectangle(288, 0, 32, 32),
+            "door_down"  => new Rectangle(320, 0, 32, 32),
+            "door_right" => new Rectangle(352, 0, 32, 32),
+            "door_left"  => new Rectangle(384, 0, 32, 32),
+            "door_up"    => new Rectangle(416, 0, 32, 32),
             _ => new Rectangle(0, 0, 32, 32)
         };
 
