@@ -4,6 +4,8 @@ using escape.Interfaces;
 using escape.Inputs;
 using escape.Projectiles;
 using escape.Levels;
+using escape.Enemies;
+using escape.Collisions;
 
 namespace escape;
 
@@ -54,9 +56,9 @@ public class Game1 : Game
         _blockAtlas = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
 
         _playerSheet = Content.Load<Texture2D>("Textures/Player/linkOrganized");
-        _player = new Player(new Vector2(100, 100), _playerSheet);
+        _player = new Player(new Vector2(100, 100), _playerSheet, Content.Load<Texture2D>("Textures/Player/link"));
 
-        _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"), 
+        _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
                                             Content, _itemAtlas, _player);
 
         RegisterResettable(_player);
@@ -86,7 +88,9 @@ public class Game1 : Game
 
         _keyboardController.Update();
         _player.Update(gameTime);
-        Window.Title = "Escape | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | F1-F3: change room | R: reset | Q: quit";
+        foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<EnemyA>())
+            CombatCollisionHandler.Resolve(_player, enemy);
+        Window.Title = $"Escape | HP: {_player.Health}/{Player.MaxHealth}{(_player.IsDefeated ? " - Defeated: press R" : "")} | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | F1-F3: change room | R: reset | Q: quit";
         base.Update(gameTime);
     }
 
