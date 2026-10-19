@@ -7,8 +7,9 @@ using escape.Levels;
 using escape.Enemies;
 using escape.Collisions;
 using escape.Items;
-using escape.Collisions;
 using Microsoft.Xna.Framework.Input;
+using escape.Sprites;
+using escape.Blocks;
 
 namespace escape;
 
@@ -18,18 +19,20 @@ public class Game1 : Game
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch = null!;
     private Texture2D _blockAtlas = null!;
+    private readonly BlockManager _blockManager = new();
     private readonly GameResetCoordinator _resetCoordinator = new();
     private IController _keyboardController = null!;
     private Player _player = null!;
     private Texture2D _playerSheet = null!;
     private Texture2D _itemAtlas = null!;
+     private ItemManager _items = null!;
     private Texture2D _projectileAtlas = null!;
     private Texture2D _bossAtlas = null!;
      private readonly List<ISprite> _sprites = new();
     private ProjectileManager _projectiles = null!;
     private ProjectileFactory _projectileFactory = null!;
     private LevelManager _levelManager = null!;
-    private Room _currentRoom;
+    private Rooms _currentRoom;
     private MouseState _previousMouseState;
 
 
@@ -96,7 +99,7 @@ public class Game1 : Game
         var boss = new Boss(
             SpriteFactory.CreateEnemySprite(Content, "SorcererAttack", enemyPosition),
             enemyPosition);
-        boss.FireRequested += SpawnBossProjectile;
+        //boss.FireRequested += SpawnBossProjectile;
         _enemies = new EnemyManager(new IEnemy[]
         {
             new EnemyA(SpriteFactory.CreateEnemySprite(Content, "Run", enemyPosition), enemyPosition),
