@@ -35,12 +35,18 @@ public class LevelManager : IGameResettable
         LoadRoom("Room1");
     }
 
+    [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(CurrentRoom))]
     public void LoadRoom(string roomId)
     {
         string filePath = Path.Combine(_levelsDirectory, $"{roomId}.json");
         RoomData data = RoomParser.Load(filePath);
 
         CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas);
+        _player.CancelAttack();
+        _player.Obstacles = CurrentRoom.Blocks
+            .Where(block => block.IsSolid)
+            .Cast<ISolidCollider>()
+            .ToList();
 
         _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
         _player.Position = _currentSpawn;

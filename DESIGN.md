@@ -1,4 +1,4 @@
-# Escape — Sprint 2 Design
+# Escape — Sprint 3 Design
 
 This document describes the current implementation, its relationship to the team's sprint responsibilities, and remaining limitations. It does not claim that every planned behavior has been tested.
 
@@ -205,3 +205,9 @@ The development build was verified with zero errors/warnings during the document
 Use feature branches, small PRs, and review before merging into main. Build and exercise affected controls after integration. Subsystem tests and documented manual checks remain each owner's responsibility.
 
 One teammate creates the final GitHub release from main/master, verifies its source ZIP, and uploads it to the sprint assignment on Carmen. Every teammate submits the separate peer review including themselves. Coordinate the grader meeting or permitted task-board evidence. Repository documentation does not establish that these external submissions are complete. Any approved extension should be documented accurately in the release without assuming it changes other deadlines.
+
+## Sprint 3 - Combat (Samiya)
+
+CombatCollisionHandler uses the shared AABBCollisionDetector to resolve player/enemy and sword/enemy collisions for Enemy A in the current room. SwordHitbox implements ICollidable, follows Link's facing direction, and allows one hit per enemy per swing during the active attack window.
+
+Player manages health and a damage cooldown. EnemyA manages health, flashing, and defeat. Reset restores health and combat state; changing rooms cancels active sword attacks.

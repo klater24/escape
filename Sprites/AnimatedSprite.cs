@@ -18,6 +18,8 @@ public class AnimatedSprite : ISprite
     private float _elapsed;
 
     public Vector2 Position { get; set; }
+    public Vector2 FrameAnchor { get; set; }
+    public Vector2 AnchorBodySize { get; set; }
 
     // Set up the animation and remember where it starts
     public AnimatedSprite(Texture2D texture, Rectangle[] frames, Vector2 position, float frameSeconds = 0.12f, float scale = 3f)
@@ -49,7 +51,9 @@ public class AnimatedSprite : ISprite
     {
         spriteBatch.Draw(
             _texture,
-            Position,
+            Position - new Vector2(
+                MathHelper.Max(0, _frames[_currentFrame].Width - AnchorBodySize.X) * FrameAnchor.X,
+                MathHelper.Max(0, _frames[_currentFrame].Height - AnchorBodySize.Y) * FrameAnchor.Y) * _scale,
             _frames[_currentFrame],
             Color.White,
             0f,
