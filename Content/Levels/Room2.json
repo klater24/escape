@@ -1,18 +1,31 @@
 {
   "Name": "Room2",
+  "SpawnX": 150,
+  "SpawnY": 250,
   "Blocks": [
-    { "Type": "grass", "X": 0, "Y": 0 },
-    { "Type": "grass", "X": 64, "Y": 0 },
-    { "Type": "grass", "X": 128, "Y": 0 },
-    { "Type": "grass", "X": 192, "Y": 0 },
-    { "Type": "grass", "X": 256, "Y": 0 },
-    { "Type": "door_right", "X": 0, "Y": 64 },
-    { "Type": "stone", "X": 256, "Y": 64 },
-    { "Type": "grass", "X": 0, "Y": 128 },
-    { "Type": "grass", "X": 64, "Y": 128 },
-    { "Type": "grass", "X": 128, "Y": 128 },
-    { "Type": "grass", "X": 192, "Y": 128 },
-    { "Type": "grass", "X": 256, "Y": 128 }
+      { "Type": "stone", "X": 0, "Y": 0 },
+      { "Type": "stone", "X": 64, "Y": 0 },
+      { "Type": "stone", "X": 128, "Y": 0 },
+      { "Type": "door_down", "X": 192, "Y": 0 },
+      { "Type": "stone", "X": 256, "Y": 0 },
+      { "Type": "stone", "X": 320, "Y": 0 },
+      { "Type": "stone", "X": 384, "Y": 0 },
+
+      { "Type": "stone", "X": 0, "Y": 64 },
+      { "Type": "door_right", "X": 0, "Y": 128 },
+      { "Type": "stone", "X": 0, "Y": 192 },
+      { "Type": "stone", "X": 0, "Y": 256 },
+
+      { "Type": "stone", "X": 384, "Y": 64 },
+      { "Type": "stone", "X": 384, "Y": 128 },
+      { "Type": "stone", "X": 384, "Y": 192 },
+      { "Type": "stone", "X": 384, "Y": 256 },
+
+      { "Type": "stone", "X": 64, "Y": 256 },
+      { "Type": "stone", "X": 128, "Y": 256 },
+      { "Type": "stone", "X": 192, "Y": 256 },
+      { "Type": "stone", "X": 256, "Y": 256 },
+      { "Type": "stone", "X": 320, "Y": 256 }
   ],
   "Enemies": [
     { "Type": "DemonFlying", "X": 160, "Y": 64 }
