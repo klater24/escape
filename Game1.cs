@@ -1,11 +1,11 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using escape.Blocks;
-using escape.Enemies;
 using escape.Interfaces;
-using escape.Sprites;
 using escape.Inputs;
 using escape.Projectiles;
+using escape.Levels;
+using escape.Enemies;
+using escape.Collisions;
 using escape.Items;
 using escape.Collisions;
 using Microsoft.Xna.Framework.Input;
@@ -18,7 +18,6 @@ public class Game1 : Game
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch = null!;
     private Texture2D _blockAtlas = null!;
-    private readonly BlockManager _blockManager = new();
     private readonly GameResetCoordinator _resetCoordinator = new();
     private IController _keyboardController = null!;
     private Player _player = null!;
@@ -27,9 +26,9 @@ public class Game1 : Game
     private Texture2D _projectileAtlas = null!;
     private Texture2D _bossAtlas = null!;
      private readonly List<ISprite> _sprites = new();
-    private ItemManager _items = null!;
     private ProjectileManager _projectiles = null!;
     private ProjectileFactory _projectileFactory = null!;
+    private LevelManager _levelManager = null!;
     private Room _currentRoom;
     private MouseState _previousMouseState;
 
@@ -46,7 +45,6 @@ public class Game1 : Game
 
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-        _resetCoordinator.Register(_blockManager);
     }
 
     protected override void Initialize()
@@ -66,11 +64,13 @@ public class Game1 : Game
         // Load the PixelPack block tiles
         _blockAtlas = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
 
-        _playerSheet = Content.Load<Texture2D>("Textures/Player/link");
-        _player = new Player(new Vector2(100, 100), _playerSheet);
+        _playerSheet = Content.Load<Texture2D>("Textures/Player/linkOrganized");
+        _player = new Player(new Vector2(100, 100), _playerSheet, Content.Load<Texture2D>("Textures/Player/link"));
+
+        _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
+                                            Content, _itemAtlas, _player);
 
         RegisterResettable(_player);
-
         
 
         // Make ten blocks so the team can see how the factory chooses each block
@@ -120,24 +120,25 @@ public class Game1 : Game
         _projectileFactory = new ProjectileFactory(_projectileAtlas, _bossAtlas);
         _projectiles = new ProjectileManager(_projectileFactory);
         RegisterResettable(_projectiles);
+        RegisterResettable(_levelManager);
 
-        _keyboardController = new KeyboardController(this, _player, _blockManager, _projectiles);
+        _keyboardController = new KeyboardController(this, _player, _projectiles, _levelManager);
         _keyboardController.Initialize();
     }
 
     // Update every sprite once per frame
     protected override void Update(GameTime gameTime)
     {
-        _blockManager.Update(gameTime);
-
-        _enemies.Update(gameTime);
-
-        _items.Update(gameTime);
+        _levelManager.Update(gameTime);
 
         _projectiles.Update(gameTime);
         _projectiles.RemoveOffscreenBossProjectiles(GraphicsDevice.Viewport.Width);
 
         // Update the player's obstacles based on the current block in the block manager
+        _player.Obstacles = _levelManager.CurrentRoom.Blocks
+            .Where(block => block.IsSolid)
+            .Cast<ISolidCollider>()
+            .ToList();
         _player.Obstacles = _blockManager.CurrentBlock is { } block
             ? new List<ISolidCollider> { block }
             : new List<ISolidCollider>();
@@ -160,7 +161,9 @@ public class Game1 : Game
 
         _keyboardController.Update();
         _player.Update(gameTime);
-        Window.Title = $"Escape | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | O/P: enemies | T/Y: blocks | U/I: items | R: reset | Q: quit | Enemy {_enemies.SelectedIndex + 1}/4: {_enemies.Current.GetType().Name}";
+        foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<EnemyA>())
+            CombatCollisionHandler.Resolve(_player, enemy);
+        Window.Title = $"Escape | HP: {_player.Health}/{Player.MaxHealth}{(_player.IsDefeated ? " - Defeated: press R" : "")} | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | F1-F3: change room | R: reset | Q: quit";
         base.Update(gameTime);
     }
 
@@ -171,14 +174,11 @@ public class Game1 : Game
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-        _blockManager.Draw(_spriteBatch);
-
-        _enemies.Draw(_spriteBatch);
-        _player.Draw(_spriteBatch);
-
-        _items.Draw(_spriteBatch);
-
         _projectiles.Draw(_spriteBatch, gameTime);
+
+        _levelManager.Draw(_spriteBatch);
+
+        _player.Draw(_spriteBatch);
 
         _spriteBatch.End();
 
@@ -189,7 +189,6 @@ public class Game1 : Game
     public void Reset()
     {
         _resetCoordinator.Reset();
-
     }
 
     // Add a player or system so the game-wide reset can reach it
@@ -197,14 +196,6 @@ public class Game1 : Game
     {
         _resetCoordinator.Register(system);
     }
-    public void CycleEnemy(int direction) => _enemies.Cycle(direction);
-
-    private void SpawnBossProjectile(Vector2 position)
-    {
-        _projectiles.SpawnBossProjectile(position, Vector2.UnitX);
-    }
-
-    public void CycleItems(int direction) => _items.Cycle(direction);
 
     protected override void UnloadContent()
     {

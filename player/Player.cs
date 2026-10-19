@@ -18,15 +18,14 @@ public enum State
     Damaged
 }
 
-public class Player : IGameResettable, ICollidable
-{  
-    // The 16x16 body is drawn at scale 3, including during attacks.
-    private const int BodySize = 48;
-    public Rectangle Bounds => new Rectangle((int)position.X, (int)position.Y, BodySize, BodySize);
+public class Player : IGameResettable, IMoveCollider
+{
+    public Rectangle Bounds => new Rectangle((int)position.X, (int)position.Y, 48, 48);
     public Collision Category => Collision.Player;
-    public bool IsCollisionEnabled => true;
-
-    // Collision responses and room loading must also move the contained sprites.
+    public const int MaxHealth = 3;
+    public int Health { get; private set; } = MaxHealth;
+    public bool IsDefeated => Health == 0;
+    public bool IsCollisionEnabled => !IsDefeated;
     public Vector2 Position
     {
         get => position;
@@ -36,7 +35,9 @@ public class Player : IGameResettable, ICollidable
             UpdateSpritePositions();
         }
     }
-
+    // The obstacles that the player can collide with
+    public IReadOnlyList<ISolidCollider> Obstacles { get; set; }
+        = Array.Empty<ISolidCollider>();
     private Direction facingDirection;
     private Vector2 position, initialPosition;
     //Index 0 for Up, Index 1 for down, Index 2 for side
@@ -47,91 +48,71 @@ public class Player : IGameResettable, ICollidable
     private State currentState;
     private float attackTimer, damageTimer;
     private const float AttackDuration = 0.48f;
-    private const float damageDuration = 0.96f;
-    
-        public Player(Vector2 intiPos, Texture2D spriteSheet)
+    private const float MovementSpeed = 1.5f;
+    private const float damageDuration = 0.72f;
+    private const float DamageCooldown = 5f;
+    private float damageCooldownTimer;
+    private const float SwordActiveStart = 0.12f;
+    private const float SwordActiveEnd = 0.36f;
+    public SwordHitbox Sword { get; }
+    public bool IsSwordActive => !IsDefeated && currentState == State.Attacking &&
+        attackTimer >= SwordActiveStart && attackTimer < SwordActiveEnd;
+
+        public Player(Vector2 intiPos, Texture2D spriteSheet, Texture2D attackSheet)
         {
         facingDirection = Direction.Down;
-        position = intiPos; 
+        position = intiPos;
         currentState = State.Idle;
         initialPosition = intiPos;
-
-        Rectangle idleDownFrame = new Rectangle(1, 11, 16, 16); 
-        Rectangle idleSideFrame = new Rectangle(35, 11, 16, 16);
-        Rectangle idleUpFrame = new Rectangle(69, 11, 16, 16);  
-
-        Rectangle[] walkUpFrame =
-        {
-            new Rectangle(69, 11, 16, 16), 
-            new Rectangle(86, 11, 16, 16)  
-        };
-        Rectangle[] walkDownFrame =
-        {
-            new Rectangle(1, 11, 16, 16),   
-            new Rectangle(18, 11, 16, 16)   
-        };
-        Rectangle[] walkSideFrame =
-        {
-            new Rectangle(35, 11, 16, 16), 
-            new Rectangle(52, 11, 16, 16)   
-        };
-        Rectangle[] attackUpFrame =
-        {
-            new Rectangle(1, 109, 16, 16),   
-            new Rectangle(18, 97, 16, 28),  
-            new Rectangle(35, 98, 16, 27),  
-            new Rectangle(52, 106, 16, 19)   
-        };
-        Rectangle[] attackDownFrame =
-        {
-            new Rectangle(1, 47, 16, 16),   
-            new Rectangle(18, 47, 16, 27),  
-            new Rectangle(35, 47, 16, 23),  
-            new Rectangle(52, 47, 16, 19)   
-            
-        };
-        Rectangle[] attackSideFrame =
-        {
-            new Rectangle(1, 77, 16, 16),   
-            new Rectangle(18, 77, 27, 16),  
-            new Rectangle(46, 77, 23, 16),  
-            new Rectangle(70, 77, 19, 16)   
-        };
-        //walk
-        Rectangle[] damagedFrame =
-        {
-            new Rectangle(1, 232, 16, 16), 
-            new Rectangle(109, 241, 16, 16),  
-            new Rectangle(200, 241, 16, 16),
-            new Rectangle(223, 241, 16, 16),
-            new Rectangle(109, 241, 16, 16),  
-            new Rectangle(200, 241, 16, 16),
-            new Rectangle(223, 241, 16, 16),
-            new Rectangle(1, 232, 16, 16)     
-        };
+        Sword = new SwordHitbox(this);
 
         //walk
-        walkingUDS[0] = new AnimatedSprite(spriteSheet, walkUpFrame, intiPos);
-        walkingUDS[1] = new AnimatedSprite(spriteSheet, walkDownFrame, intiPos);
-        walkingUDS[2] = new AnimatedSprite(spriteSheet, walkSideFrame, intiPos);
+        walkingUDS[0] = new AnimatedSprite(spriteSheet, Frames(0, 4, 5), intiPos);
+        walkingUDS[1] = new AnimatedSprite(spriteSheet, Frames(0, 0, 1), intiPos);
+        walkingUDS[2] = new AnimatedSprite(spriteSheet, Frames(0, 2, 3), intiPos);
+        Texture2D swordSheet = attackSheet;
+        Rectangle[] attackUpFrame = { new(1, 109, 16, 16), new(18, 97, 16, 28), new(35, 98, 16, 27), new(52, 106, 16, 19) };
+        Rectangle[] attackDownFrame = { new(1, 47, 16, 16), new(18, 47, 16, 27), new(35, 47, 16, 23), new(52, 47, 16, 19) };
+        Rectangle[] attackSideFrame = { new(1, 77, 16, 16), new(18, 77, 27, 16), new(46, 77, 23, 16), new(70, 77, 19, 16) };
         //attack
-        attackUDS[0] = new AnimatedSprite(spriteSheet, attackUpFrame, intiPos);
-        attackUDS[1] = new AnimatedSprite(spriteSheet, attackDownFrame, intiPos);
-        attackUDS[2] = new AnimatedSprite(spriteSheet, attackSideFrame, intiPos);
+        attackUDS[0] = new AnimatedSprite(swordSheet, attackUpFrame, intiPos);
+        attackUDS[1] = new AnimatedSprite(swordSheet, attackDownFrame, intiPos);
+        attackUDS[2] = new AnimatedSprite(swordSheet, attackSideFrame, intiPos);
+        foreach (var sprite in attackUDS)
+            sprite.AnchorBodySize = new Vector2(16, 16);
+        attackUDS[0].FrameAnchor = new Vector2(0, 1);
         //idle
-        idleUDS[0] = new StaticSprite(spriteSheet, idleUpFrame, intiPos);
-        idleUDS[1] = new StaticSprite(spriteSheet, idleDownFrame, intiPos);
-        idleUDS[2] = new StaticSprite(spriteSheet, idleSideFrame, intiPos);
+        idleUDS[0] = new StaticSprite(spriteSheet, Frame(4, 0), intiPos);
+        idleUDS[1] = new StaticSprite(spriteSheet, Frame(0, 0), intiPos);
+        idleUDS[2] = new StaticSprite(spriteSheet, Frame(2, 0), intiPos);
         //damage
-        damaged = new AnimatedSprite(spriteSheet, damagedFrame, intiPos);
+        damaged = new AnimatedSprite(spriteSheet, Frames(8, 1, 3), intiPos);
     }
-    
+
+    private Rectangle Frame(int column, int row)
+    {
+        return new Rectangle(1 + column * 17, 1 + row * 17, 16, 16);
+    }
+
+    private Rectangle[] Frames(int row, int startColumn, int endColumn)
+    {
+        Rectangle[] frames = new Rectangle[endColumn - startColumn + 1];
+
+        for (int x = startColumn; x <= endColumn; x++)
+        {
+            frames[x - startColumn] = Frame(x, row);
+        }
+
+        return frames;
+    }
+
     public Vector2 getPosit()
     {
         return position;
     }
     public void Move(Direction direct)
     {
+        if (IsDefeated) return;
         if (currentState == State.Attacking || currentState == State.Damaged)
         {
             return;
@@ -139,29 +120,32 @@ public class Player : IGameResettable, ICollidable
         currentState = State.Walking;
         facingDirection = direct;
 
-        if(direct == Direction.Up)
+        // Now movement is based on a requested direction
+        Vector2 movement = direct switch
         {
-            position.Y -= 1;
-        }
-        else if (direct == Direction.Down)
+            Direction.Up => new Vector2(0, -1),
+            Direction.Down => new Vector2(0, 1),
+            Direction.Left => new Vector2(-1, 0),
+            Direction.Right => new Vector2(1, 0),
+            _ => Vector2.Zero
+        };
+
+        // Directional movement speed
+        if (direct == Direction.Left || direct == Direction.Right)
         {
-            position.Y += 1;
+            // Adjust the movement speed for horizontal movement
+            SpriteEffects effects = direct == Direction.Left
+                ? SpriteEffects.FlipHorizontally
+                : SpriteEffects.None;
+
+            walkingUDS[2].SetSpriteEffects(effects);
+            attackUDS[2].SetSpriteEffects(effects);
+            attackUDS[2].FrameAnchor = direct == Direction.Left ? Vector2.UnitX : Vector2.Zero;
+            idleUDS[2].SetSpriteEffects(effects);
         }
-        else if (direct == Direction.Right)
-        {
-            position.X += 1;
-            walkingUDS[2].SetSpriteEffects(SpriteEffects.None);
-            attackUDS[2].SetSpriteEffects(SpriteEffects.None);
-            idleUDS[2].SetSpriteEffects(SpriteEffects.None);
-        }
-        else if (direct == Direction.Left)
-        {
-            position.X -= 1;
-            walkingUDS[2].SetSpriteEffects(SpriteEffects.FlipHorizontally);
-            attackUDS[2].SetSpriteEffects(SpriteEffects.FlipHorizontally);
-            idleUDS[2].SetSpriteEffects(SpriteEffects.FlipHorizontally);
-        }
-        UpdateSpritePositions();
+
+        // Move the player while resolving collisions with obstacles
+        EnvironmentCollisionResolver.Move(this, movement * MovementSpeed, Obstacles);
     }
     public Direction GetFacingDirection()
     {
@@ -169,26 +153,38 @@ public class Player : IGameResettable, ICollidable
     }
     public void Attack()
     {
-        if (currentState == State.Attacking)
+        if (IsDefeated) return;
+        if (currentState == State.Attacking || currentState == State.Damaged)
             return;
 
-        currentState = State.Attacking; 
+        currentState = State.Attacking;
         attackTimer = 0f;
+        Sword.Reset();
+        foreach (var sprite in attackUDS)
+            sprite.Reset();
+        UpdateSpritePositions();
     }
     public void Walk()
     {
-        currentState = State.Walking; 
+        if (IsDefeated) return;
+        currentState = State.Walking;
     }
     public void Idle()
     {
+        if (IsDefeated) return;
         currentState = State.Idle;
     }
     public void Damage()
     {
-        if (currentState == State.Damaged)
+        if (IsDefeated || damageCooldownTimer > 0f)
             return;
-        currentState = State.Damaged;   
+        Health--;
+        CancelAttack();
+        damageCooldownTimer = DamageCooldown;
+        currentState = State.Damaged;
         damageTimer = 0f;
+        damaged.Reset();
+        damaged.Position = position;
     }
     public void StopMoving()
     {
@@ -199,14 +195,45 @@ public class Player : IGameResettable, ICollidable
     }
     public void Reset()
     {
+        Health = MaxHealth;
         position = initialPosition;
         facingDirection = Direction.Down;
         currentState = State.Idle;
+        damageCooldownTimer = 0f;
+        damageTimer = 0f;
+        attackTimer = 0f;
+        Sword.Reset();
+        foreach (var sprite in attackUDS)
+        {
+            sprite.Reset();
+            sprite.SetSpriteEffects(SpriteEffects.None);
+        }
+        foreach (var sprite in walkingUDS)
+        {
+            sprite.Reset();
+            sprite.SetSpriteEffects(SpriteEffects.None);
+        }
+        damaged.Reset();
+        attackUDS[2].FrameAnchor = Vector2.Zero;
         UpdateSpritePositions();
+    }
+
+    public void CancelAttack()
+    {
+        attackTimer = 0f;
+        Sword.Reset();
+        if (currentState == State.Attacking)
+            currentState = State.Idle;
     }
 
     public void Update(GameTime gameTime)
     {
+        if (IsDefeated) return;
+        damageCooldownTimer = MathF.Max(
+            0f,
+            damageCooldownTimer - (float)gameTime.ElapsedGameTime.TotalSeconds
+        );
+
         if (currentState == State.Walking)
         {
             if (facingDirection == Direction.Up)
@@ -291,7 +318,7 @@ public class Player : IGameResettable, ICollidable
             {
                 idleUDS[2].Draw(spriteBatch);
             }
-       } 
+       }
        else if(currentState == State.Walking)
        {
            if (facingDirection == Direction.Up)
@@ -306,7 +333,7 @@ public class Player : IGameResettable, ICollidable
             {
                 walkingUDS[2].Draw(spriteBatch);
             }
-       } 
+       }
        else if(currentState == State.Attacking)
        {
            if (facingDirection == Direction.Up)
@@ -328,4 +355,3 @@ public class Player : IGameResettable, ICollidable
         }
     }
 }
-

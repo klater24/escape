@@ -1,4 +1,4 @@
-# Escape — Sprint 2
+# Escape — Sprint 3
 
 CSE 3902 team game prototype. This sprint demonstrates a controllable player, three enemies and a boss, five pickups, four projectile types, ten stationary block types, and coordinated reset.
 
@@ -66,3 +66,10 @@ The sprint does not require pickup collection, inventory effects, projectile col
 A development build was verified with zero warnings and errors during the documentation review. This does not certify all visual behaviors or a clean-machine setup. Record actual gameplay results using the checklist in [DESIGN.md](DESIGN.md); do not treat planned checks as passed tests.
 
 For the sprint submission, merge the intended work into `main`/`master`, create the GitHub release from that branch, and test the downloaded source ZIP separately before uploading it to Carmen. Each member submits their own peer review, including self-review. Coordinate the grader meeting or permitted task-board evidence separately; these tasks are not verified by this repository.
+
+## Sprint 3 - Combat (Samiya)
+
+- Z/N attacks Enemy A with the sword. It flashes when hit and is defeated after three hits.
+- Link has 3 health and loses one on enemy contact, with damage feedback and a 5-second cooldown. Health appears in the window title.
+- At zero health, Link cannot move, attack, or use items. R restores player/enemy health and clears combat timers.
+- Test attacks in all four directions, repeated contact, defeat, and reset. Combat applies only to Enemy A.

@@ -1,4 +1,4 @@
-# Escape — Sprint 2 Design
+# Escape — Sprint 3 Design
 
 This document describes the current implementation, its relationship to the team's sprint responsibilities, and remaining limitations. It does not claim that every planned behavior has been tested.
 
@@ -87,15 +87,32 @@ the Block constructor, independently of the artwork name. The optional parameter
 defaults to false for existing demonstration call sites; room loading must supply
 the appropriate value for each tile.
 
-Player implements ICollidable with a stable 48x48 body hitbox matching its 16x16
+Player implements IMoveCollider (which extends ICollidable) with a stable 48x48 body hitbox matching its 16x16
 artwork at scale 3. Sword artwork does not enlarge this body hitbox. Player.Position
-allows future collision responses and room loading to change position while
+allows collision responses and room loading to change position while
 synchronizing all contained sprites. Existing getPosit() callers remain supported.
 
-Detection will require positive overlap on both axes; touching edges are permitted.
-Detection, the collision manager, environmental resolution, and gameplay tests are
-still pending. Only current-room objects should be registered once rooms exist;
+Detection requires positive overlap on both axes; touching edges are permitted.
+A general collision manager and current-room integration are still pending.
+Only current-room objects should be registered once rooms exist;
 the overlapping Sprint 2 demonstration blocks are not a room layout.
+
+AABBCollisionDetector.IsColliding checks enabled objects for positive overlap on both axes. Self-collision and non-positive hitbox dimensions return false. Touching edges do not count as overlap. Solidity and collision responses are handled separately. TestCollision.RunAll provides manual checks for detection behavior.
+
+### Environmental movement
+
+`Player.Move` uses `EnvironmentCollisionResolver` to stop at solid tiles. Movement
+is split into steps of at most one pixel, with X and Y resolved separately so the
+player can slide along walls. `IMoveCollider.Position` keeps the sprites in sync.
+
+For now, Game1 checks only the selected demo block: brick blocks movement and the
+other tiles allow it. This still needs to be connected to the current room's tiles.
+The resolver does not handle starting inside a solid tile.
+
+Manual checks passed by Katelynn on October 14, 2026 (working tree based on
+`bf0060d`): brick blocks all four sides, sliding works, the player can move away,
+and grass is walkable. Multiple-wall corners, obstacle order, large movements,
+and starting overlaps still need testing.
 
 ## Enemies and boss
 
@@ -188,3 +205,9 @@ The development build was verified with zero errors/warnings during the document
 Use feature branches, small PRs, and review before merging into main. Build and exercise affected controls after integration. Subsystem tests and documented manual checks remain each owner's responsibility.
 
 One teammate creates the final GitHub release from main/master, verifies its source ZIP, and uploads it to the sprint assignment on Carmen. Every teammate submits the separate peer review including themselves. Coordinate the grader meeting or permitted task-board evidence. Repository documentation does not establish that these external submissions are complete. Any approved extension should be documented accurately in the release without assuming it changes other deadlines.
+
+## Sprint 3 - Combat (Samiya)
+
+CombatCollisionHandler uses the shared AABBCollisionDetector to resolve player/enemy and sword/enemy collisions for Enemy A in the current room. SwordHitbox implements ICollidable, follows Link's facing direction, and allows one hit per enemy per swing during the active attack window.
+
+Player manages health and a damage cooldown. EnemyA manages health, flashing, and defeat. Reset restores health and combat state; changing rooms cancels active sword attacks.

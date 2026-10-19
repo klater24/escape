@@ -19,6 +19,7 @@ public class UseItemCommand : ICommand
     }
     public void Execute()
     {
+        if (_player.IsDefeated) return;
         Vector2 position = _player.getPosit();
         Vector2 direction = GetDirection();
         if (_itemSlot == 1)
