@@ -64,8 +64,7 @@ public class Rooms
                 if (door.Bounds.Contains(mousePosition))
                  return room.TryTransition(player, door);
         }
-        if (!player.Bounds.Intersects(door.Bounds))
-            continue;
+        if (player.Bounds.Intersects(door.Bounds))
         return room.TryTransition(player, door);
     }
 
