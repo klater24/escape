@@ -156,7 +156,7 @@ public class Game1 : Game
             Vector2 movement = currPlayerPos - prevPlayerPos;
             //need a thing of obstacles
             EnvironmentCollisionResolver.Move(_player, movement, null);
-           _currentRoom.CheckDoorTransition(_player, _currentRoom, currentMouseState, _previousMouseState);
+           _currentRoom.CheckDoorTransition(_player, currentMouseState, _previousMouseState);
            _previousMouseState = currentMouseState; 
         }
 
