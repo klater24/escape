@@ -154,14 +154,10 @@ public class Game1 : Game
         if (prevPlayerPos != currPlayerPos)
         {
             Vector2 movement = currPlayerPos - prevPlayerPos;
-            //need a thing of obstacles
-            EnvironmentCollisionResolver.Move(_player, movement, null);
-           _currentRoom.CheckDoorTransition(_player, currentMouseState, _previousMouseState);
-           _previousMouseState = currentMouseState; 
+            EnvironmentCollisionResolver.Move(_player, movement, _player.Obstacles);
         }
-
-
-
+         _currentRoom.CheckDoorTransition(_player, currentMouseState, _previousMouseState);
+        _previousMouseState = currentMouseState; 
         _keyboardController.Update();
         _player.Update(gameTime);
         foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<EnemyA>())
