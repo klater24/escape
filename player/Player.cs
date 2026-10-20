@@ -39,7 +39,7 @@ public class Player : IGameResettable, IMoveCollider
     public IReadOnlyList<ISolidCollider> Obstacles { get; set; }
         = Array.Empty<ISolidCollider>();
     private Direction facingDirection;
-    private Vector2 position, initialPosition;
+    public Vector2 position, initialPosition;
     //Index 0 for Up, Index 1 for down, Index 2 for side
     private AnimatedSprite[] attackUDS = new AnimatedSprite[3];
     private AnimatedSprite[] walkingUDS = new AnimatedSprite[3];
