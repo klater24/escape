@@ -54,18 +54,19 @@ public class Rooms
 
         return true;
     }
-    public bool CheckDoorTransition(Player player, Rooms room, MouseState currentMouse, MouseState prevMouse)
+    public bool CheckDoorTransition(Player player, MouseState currentMouse, MouseState prevMouse)
 {
-    foreach (Door door in room.CurrentRoom.Doors)
+    foreach (Door door in CurrentRoom.Doors)
     {
         if(currentMouse.LeftButton == ButtonState.Pressed && prevMouse.LeftButton == ButtonState.Released)
         {
            Point mousePosition = new Point(currentMouse.X, currentMouse.Y);
                 if (door.Bounds.Contains(mousePosition))
-                 return room.TryTransition(player, door);
+                 return CurrentRoom.TryTransition(player, door);
         }
-        if (player.Bounds.Intersects(door.Bounds))
-        return room.TryTransition(player, door);
+        if (!player.Bounds.Intersects(door.Bounds))
+            continue;
+        return CurrentRoom.TryTransition(player, door);
     }
 
     return false;
