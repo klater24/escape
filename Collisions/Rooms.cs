@@ -58,19 +58,16 @@ public class Rooms
 {
     foreach (Door door in room.CurrentRoom.Doors)
     {
+        if(currentMouse.LeftButton == ButtonState.Pressed && prevMouse.LeftButton == ButtonState.Released)
+        {
+           Point mousePosition = new Point(currentMouse.X, currentMouse.Y);
+                if (door.Bounds.Contains(mousePosition))
+                 return room.TryTransition(player, door);
+        }
         if (!player.Bounds.Intersects(door.Bounds))
             continue;
         return room.TryTransition(player, door);
     }
-    if(currentMouse.LeftButton == ButtonState.Pressed && prevMouse.LeftButton == ButtonState.Released)
-        {
-           Point mousePosition = new Point(currentMouse.X, currentMouse.Y);
-            foreach (Door door in room.CurrentRoom.Doors)
-             {
-                if (door.Bounds.Contains(mousePosition)) continue;
-                 return room.TryTransition(player, door);
-    }
-        }
 
     return false;
 }
