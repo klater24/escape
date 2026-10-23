@@ -6,9 +6,6 @@ using escape.Projectiles;
 using escape.Levels;
 using escape.Enemies;
 using escape.Collisions;
-using escape.Items;
-using escape.Collisions;
-using Microsoft.Xna.Framework.Input;
 
 namespace escape;
 
@@ -29,12 +26,6 @@ public class Game1 : Game
     private ProjectileManager _projectiles = null!;
     private ProjectileFactory _projectileFactory = null!;
     private LevelManager _levelManager = null!;
-    private Room _currentRoom;
-    private MouseState _previousMouseState;
-
-
-
-    private EnemyManager _enemies = null!;
 
     public Game1()
     {
@@ -71,51 +62,6 @@ public class Game1 : Game
                                             Content, _itemAtlas, _player);
 
         RegisterResettable(_player);
-        
-
-        // Make ten blocks so the team can see how the factory chooses each block
-        var blockTypes = new[]
-        {
-            "grass", "dirt", "stone", "brick", "water",
-            "wood", "sand", "ice", "metal", "platform"
-        };
-
-        for (int i = 0; i < blockTypes.Length; i++)
-        {
-            var position = new Vector2(448, 238);
-            // Add a block to the block manager with the specified type and position (TEMPORARY)
-            _blockManager.Add(new Block(
-                _blockAtlas, 
-                blockTypes[i], 
-                position, 
-                2f,
-                isSolid: blockTypes[i] == "brick"));
-        }
-
-        var enemyPosition = new Vector2(450, 260);
-        var boss = new Boss(
-            SpriteFactory.CreateEnemySprite(Content, "SorcererAttack", enemyPosition),
-            enemyPosition);
-        boss.FireRequested += SpawnBossProjectile;
-        _enemies = new EnemyManager(new IEnemy[]
-        {
-            new EnemyA(SpriteFactory.CreateEnemySprite(Content, "Run", enemyPosition), enemyPosition),
-            new EnemyB(SpriteFactory.CreateEnemySprite(Content, "DemonFlying", enemyPosition), enemyPosition),
-            new EnemyC(SpriteFactory.CreateEnemySprite(Content, "ManaSeed", enemyPosition), enemyPosition),
-            boss
-        });
-        RegisterResettable(_enemies);
-
-        var itemPosition = new Vector2(700, 260);
-        _items = new ItemManager(new List<IItem>
-        {
-            new Book(ItemSprites.CreateBook(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Key(ItemSprites.CreateKey(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Watch(ItemSprites.CreateWatch(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Heart(ItemSprites.CreateHeart(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Potion(ItemSprites.CreatePotion(_itemAtlas, itemPosition, 2f), itemPosition)
-        });
-        RegisterResettable(_items);
 
         _projectileFactory = new ProjectileFactory(_projectileAtlas, _bossAtlas);
         _projectiles = new ProjectileManager(_projectileFactory);
@@ -139,25 +85,6 @@ public class Game1 : Game
             .Where(block => block.IsSolid)
             .Cast<ISolidCollider>()
             .ToList();
-        _player.Obstacles = _blockManager.CurrentBlock is { } block
-            ? new List<ISolidCollider> { block }
-            : new List<ISolidCollider>();
-
-
-        //probs need to fix this at some point 
-        Vector2 prevPlayerPos = _player.getPosit();
-        Vector2 currPlayerPos = _player.getPosit();
-        MouseState currentMouseState = Mouse.GetState();
-        if (prevPlayerPos != currPlayerPos)
-        {
-            Vector2 movement = currPlayerPos - prevPlayerPos;
-            //need a thing of obstacles
-            EnvironmentCollisionResolver.Move(_player, movement, null);
-           _currentRoom.CheckDoorTransition(_player, _currentRoom, currentMouseState, _previousMouseState);
-           _previousMouseState = currentMouseState; 
-        }
-
-
 
         _keyboardController.Update();
         _player.Update(gameTime);
