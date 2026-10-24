@@ -6,7 +6,7 @@ using escape.Collisions;
 
 namespace escape.Enemies;
 
-public class EnemyA : IEnemy, ICollidable
+public class EnemyA : IEnemy, IDamageable
 {
 
     private readonly ISprite _sprite;
@@ -35,22 +35,11 @@ public class EnemyA : IEnemy, ICollidable
 
     public Collision Category => Collision.Enemy;
 
-    private const int StartingHealth = 3;
-    private const float DamageFlashDuration = 0.4f;
-    private const float FlashInterval = 0.08f;
-    private float _damageFlashTimer;
-    public int Health { get; private set; } = StartingHealth;
-    public bool IsDefeated => Health == 0;
+    private readonly EnemyCombatState _combat = new(3);
+    public int Health => _combat.Health;
+    public bool IsDefeated => _combat.IsDefeated;
     public bool IsCollisionEnabled => !IsDefeated;
-
-    public void TakeDamage()
-    {
-        if (IsDefeated)
-            return;
-        Health--;
-        _damageFlashTimer = DamageFlashDuration;
-    }
-
+    public void TakeDamage() => _combat.TakeDamage();
     public EnemyA(ISprite sprite, Vector2 position)
     {
         _sprite = sprite;
@@ -67,7 +56,7 @@ public class EnemyA : IEnemy, ICollidable
         if (IsDefeated)
             return;
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        _damageFlashTimer = MathF.Max(0f, _damageFlashTimer - deltaTime);
+        _combat.Update(gameTime);
 
         Position += _direction * MovementSpeed * deltaTime;
 
@@ -119,15 +108,13 @@ public class EnemyA : IEnemy, ICollidable
     }
     public void Draw(SpriteBatch spriteBatch)
     {
-        if (IsDefeated || (_damageFlashTimer > 0f &&
-            (int)(_damageFlashTimer / FlashInterval) % 2 == 0))
+        if (!_combat.IsVisible)
             return;
         _sprite.Draw(spriteBatch);
     }
     public void Reset()
     {
-        Health = StartingHealth;
-        _damageFlashTimer = 0f;
+        _combat.Reset();
         Position = _initialPosition;
         _sprite.Reset();
         _sprite.Position = Position;

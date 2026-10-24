@@ -88,7 +88,7 @@ public class Game1 : Game
 
         _keyboardController.Update();
         _player.Update(gameTime);
-        foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<EnemyA>())
+        foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<IDamageable>())
             CombatCollisionHandler.Resolve(_player, enemy);
         Window.Title = $"Escape | HP: {_player.Health}/{Player.MaxHealth}{(_player.IsDefeated ? " - Defeated: press R" : "")} | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | F1-F3: change room | R: reset | Q: quit";
         base.Update(gameTime);

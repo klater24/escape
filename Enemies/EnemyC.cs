@@ -1,11 +1,12 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
+using escape.Collisions;
 using System;
 
 namespace escape.Enemies;
 
-public class EnemyC : IEnemy
+public class EnemyC : IEnemy, IDamageable
 {
 
     private readonly ISprite _sprite;
@@ -15,6 +16,18 @@ public class EnemyC : IEnemy
     private readonly Random _random = new();
     private bool _isMoving;
     public Vector2 Position { get; set; }
+    private const int HitboxOffsetX = 22;
+    private const int HitboxOffsetY = 16;
+    private const int HitboxWidth = 20;
+    private const int HitboxHeight = 28;
+    private readonly EnemyCombatState _combat = new(3);
+    public int Health => _combat.Health;
+    public bool IsDefeated => _combat.IsDefeated;
+    public bool IsCollisionEnabled => !IsDefeated;
+    public Collision Category => Collision.Enemy;
+    public Rectangle Bounds => new((int)Position.X + HitboxOffsetX,
+        (int)Position.Y + HitboxOffsetY, HitboxWidth, HitboxHeight);
+    public void TakeDamage() => _combat.TakeDamage();
 
     private const int ScreenWidth = 960;
     private const int ScreenHeight = 540;
@@ -37,6 +50,8 @@ public class EnemyC : IEnemy
 
     public void Update(GameTime gameTime)
     {
+        if (IsDefeated) return;
+        _combat.Update(gameTime);
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         if (_isMoving)
@@ -100,10 +115,12 @@ public class EnemyC : IEnemy
 
     public void Draw(SpriteBatch spriteBatch)
     {
+        if (!_combat.IsVisible) return;
         _sprite.Draw(spriteBatch);
     }
     public void Reset()
     {
+        _combat.Reset();
         Position = _initialPosition;
         _sprite.Reset();
         _sprite.Position = Position;
