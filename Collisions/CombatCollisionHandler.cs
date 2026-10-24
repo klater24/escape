@@ -9,7 +9,7 @@ public static class CombatCollisionHandler
         if (player.Sword.TryHit(enemy))
             enemy.TakeDamage();
 
-        if (AABBCollisionDetector.IsColliding(player, enemy))
+        if (!player.IsAttacking && AABBCollisionDetector.IsColliding(player, enemy))
             player.Damage();
     }
 }
