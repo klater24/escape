@@ -6,7 +6,7 @@ using escape.Collisions;
 
 namespace escape.Enemies;
 
-public class EnemyA : IEnemy, IDamageable
+public class EnemyA : IEnemy, IDamageable, IEnvironmentEnemy
 {
 
     private readonly ISprite _sprite;
@@ -15,6 +15,7 @@ public class EnemyA : IEnemy, IDamageable
     private float _directionTimer;
     private readonly Random _random = new();
     public Vector2 Position { get; set; }
+    public IReadOnlyList<ISolidCollider> Obstacles { get; set; } = Array.Empty<ISolidCollider>();
     private const int ScreenWidth = 960;
     private const int ScreenHeight = 540;
     private const int SpriteWidth = 96;
@@ -58,7 +59,7 @@ public class EnemyA : IEnemy, IDamageable
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         _combat.Update(gameTime);
 
-        Position += _direction * MovementSpeed * deltaTime;
+        _direction = EnemyMovement.Move(this, _direction, MovementSpeed * deltaTime);
 
         if (Position.X < 0)
         {

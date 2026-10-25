@@ -5,7 +5,7 @@ using escape.Collisions;
 
 namespace escape.Enemies;
 
-public class Boss : IEnemy, IDamageable
+public class Boss : IEnemy, IDamageable, IEnvironmentEnemy
 {
 
     private readonly ISprite _sprite;
@@ -14,6 +14,7 @@ public class Boss : IEnemy, IDamageable
     private readonly float _rightBoundary;
     private Vector2 _direction;
     public Vector2 Position { get; set; }
+    public IReadOnlyList<ISolidCollider> Obstacles { get; set; } = Array.Empty<ISolidCollider>();
     private const int HitboxOffsetX = 64;
     private const int HitboxOffsetY = 55;
     private const int HitboxWidth = 55;
@@ -59,7 +60,7 @@ public class Boss : IEnemy, IDamageable
         _combat.Update(gameTime);
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        Position += _direction * _speed * deltaTime;
+        _direction = EnemyMovement.Move(this, _direction, _speed * deltaTime);
 
         if (Position.X <= _leftBoundary)
         {
