@@ -5,6 +5,9 @@ using Microsoft.Xna.Framework.Graphics;
 using escape.Blocks;
 using Microsoft.Xna.Framework.Content;
 using escape.Interfaces;
+using System.Linq;
+using escape.Projectiles;
+using escape.Enemies;
 
 namespace escape.Levels;
 
@@ -16,21 +19,21 @@ public class LevelManager : IGameResettable
     private readonly Texture2D _itemAtlas;
     private readonly Player _player;
     private Vector2 _currentSpawn;
+    private readonly Texture2D _exteriorTexture;
+    private readonly ProjectileManager _projectiles;
 
     public Room CurrentRoom { get; private set; }
 
-    public LevelManager(
-        Texture2D blockAtlas,
-        string levelsDirectory,
-        ContentManager content,
-        Texture2D itemAtlas,
-        Player player)
+    public LevelManager(Texture2D blockAtlas, string levelsDirectory, ContentManager content,
+                            Texture2D itemAtlas, Player player, Texture2D exteriorTexture, ProjectileManager projectiles)
     {
         _blockAtlas = blockAtlas;
         _levelsDirectory = levelsDirectory;
         _content = content;
         _itemAtlas = itemAtlas;
         _player = player;
+        _exteriorTexture = exteriorTexture;
+        _projectiles = projectiles;
 
         LoadRoom("Room1");
     }
@@ -41,7 +44,13 @@ public class LevelManager : IGameResettable
         string filePath = Path.Combine(_levelsDirectory, $"{roomId}.json");
         RoomData data = RoomParser.Load(filePath);
 
-        CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas);
+        CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture);
+
+        foreach (Boss boss in CurrentRoom.Enemies.OfType<Boss>())
+        {
+            boss.FireRequested += position =>
+                _projectiles.SpawnBossProjectile(position, new Vector2(1, 0));
+        }
 
         _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
         _player.Position = _currentSpawn;
@@ -49,6 +58,7 @@ public class LevelManager : IGameResettable
         _player.Obstacles = CurrentRoom.Blocks
             .Where(block => block.IsSolid)
             .Cast<ISolidCollider>()
+            .Concat(CurrentRoom.ExteriorWalls)
             .ToList();
     }
 

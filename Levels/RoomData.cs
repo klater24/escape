@@ -9,13 +9,8 @@ public class RoomData
     public float SpawnX { get; set; } = 100;
     public float SpawnY { get; set; } = 100;
 
-    public List<GameObjectData> Blocks { get; set; } = new();
-
-    public List<GameObjectData> Enemies { get; set; } = new();
-
-    public List<GameObjectData> Items { get; set; } = new();
-
     public List<DoorData> Doors { get; set; } = new();
+    public List<string> TileMap { get; set; } = new();
 }
 
 public class GameObjectData
@@ -29,13 +24,8 @@ public class GameObjectData
 
 public class DoorData
 {
-    public float X { get; set; }
-
-    public float Y { get; set; }
-
+    public string Direction { get; set; } = "";
     public string DestinationRoom { get; set; } = "";
-
     public float SpawnX { get; set; }
-
     public float SpawnY { get; set; }
 }

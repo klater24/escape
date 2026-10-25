@@ -26,6 +26,7 @@ public class Game1 : Game
     private ProjectileManager _projectiles = null!;
     private ProjectileFactory _projectileFactory = null!;
     private LevelManager _levelManager = null!;
+    private Texture2D _exteriorTexture;
 
     public Game1()
     {
@@ -54,18 +55,20 @@ public class Game1 : Game
 
         // Load the PixelPack block tiles
         _blockAtlas = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
+        _exteriorTexture = Content.Load<Texture2D>("Textures/Blocks/Room-Exterior");
 
         _playerSheet = Content.Load<Texture2D>("Textures/Player/linkOrganized");
         _player = new Player(new Vector2(100, 100), _playerSheet, Content.Load<Texture2D>("Textures/Player/link"));
 
-        _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
-                                            Content, _itemAtlas, _player);
-
+        
         RegisterResettable(_player);
 
         _projectileFactory = new ProjectileFactory(_projectileAtlas, _bossAtlas);
         _projectiles = new ProjectileManager(_projectileFactory);
         RegisterResettable(_projectiles);
+
+        _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
+                                            Content, _itemAtlas, _player, _exteriorTexture, _projectiles);
         RegisterResettable(_levelManager);
 
         _keyboardController = new KeyboardController(this, _player, _projectiles, _levelManager);
@@ -84,6 +87,7 @@ public class Game1 : Game
         _player.Obstacles = _levelManager.CurrentRoom.Blocks
             .Where(block => block.IsSolid)
             .Cast<ISolidCollider>()
+            .Concat(_levelManager.CurrentRoom.ExteriorWalls)
             .ToList();
 
         _keyboardController.Update();
@@ -101,9 +105,9 @@ public class Game1 : Game
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-        _projectiles.Draw(_spriteBatch, gameTime);
-
         _levelManager.Draw(_spriteBatch);
+
+        _projectiles.Draw(_spriteBatch, gameTime);
 
         _player.Draw(_spriteBatch);
 
