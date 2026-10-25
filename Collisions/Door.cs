@@ -1,4 +1,3 @@
-using escape.Levels;
 using Microsoft.Xna.Framework;
 
 namespace escape.Interfaces;
@@ -6,15 +5,14 @@ namespace escape.Interfaces;
 public class Door
 {
     public Rectangle Bounds { get; }
+    public string NextRoom { get; }
+    public string NextDoor { get; }
 
-    public Room NextRoom { get; }
-
-    public Door NextDoor { get; }
-
-    public Door(Rectangle bounds, Door nextDoor, Room nextRoom)
+    public Door(Rectangle bounds, string nextDoor, string nextRoom)
     {
         Bounds = bounds;
-        NextRoom = nextRoom;
         NextDoor = nextDoor;
+        NextRoom = nextRoom;
     }
 }
+
