@@ -18,6 +18,7 @@ public class LevelManager : IGameResettable
     private Vector2 _currentSpawn;
 
     public Room CurrentRoom { get; private set; }
+    public event Action? RoomChanged;
 
     public LevelManager(
         Texture2D blockAtlas,
@@ -50,6 +51,7 @@ public class LevelManager : IGameResettable
 
         _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
         _player.Position = _currentSpawn;
+        RoomChanged?.Invoke();
     }
 
     public void ChangeRoom(string roomId, Vector2 spawnPosition)

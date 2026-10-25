@@ -16,6 +16,25 @@ public class ProjectileManager : IGameResettable
     }
 
     public void Add(IProjectile projectile) => _projectiles.Add(projectile);
+    public int Count => _projectiles.Count;
+
+    public void ResolveCombat(Player player, IEnumerable<IDamageable> enemies)
+    {
+        var targets = enemies.ToArray();
+        foreach (var projectile in _projectiles.OfType<ICombatProjectile>())
+        {
+            if (projectile.HitsPlayer)
+            {
+                if (projectile.TryHit(player)) player.Damage();
+            }
+            else
+            {
+                foreach (var enemy in targets)
+                    if (projectile.TryHit(enemy)) enemy.TakeDamage();
+            }
+        }
+        _projectiles.RemoveAll(projectile => !projectile.IsActive);
+    }
 
     public void SpawnArrow(Vector2 position, Vector2 direction) => Add(_factory.CreateArrow(position, direction));
     public void SpawnBomb(Vector2 position) => Add(_factory.CreateBomb(position));

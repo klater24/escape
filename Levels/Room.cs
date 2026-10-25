@@ -8,6 +8,7 @@ using escape.Enemies;
 using escape.Interfaces;
 using escape.Sprites;
 using escape.Items;
+using escape.Collisions;
 
 namespace escape.Levels;
 
@@ -58,6 +59,10 @@ public class Room
 
     private void CreateEnemies()
     {
+        var obstacles = _blocks.Select(block =>
+            block.BlockType.StartsWith("door_", StringComparison.OrdinalIgnoreCase)
+                ? (ISolidCollider)new EnemyDoorBarrier(block)
+                : block).ToArray();
         foreach (GameObjectData enemyData in _data.Enemies)
         {
             Vector2 position = new(enemyData.X, enemyData.Y);
@@ -72,10 +77,13 @@ public class Room
                 "Run" => new EnemyA(sprite, position),
                 "DemonFlying" => new EnemyB(sprite, position),
                 "ManaSeed" => new EnemyC(sprite, position),
+                "SorcererAttack" => new Boss(sprite, position),
                 _ => throw new ArgumentException(
                     $"Unknown enemy type: {enemyData.Type}")
             };
 
+            if (enemy is IEnvironmentEnemy movingEnemy)
+                movingEnemy.Obstacles = obstacles;
             _enemies.Add(enemy);
         }
     }

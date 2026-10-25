@@ -1,18 +1,34 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
+using escape.Collisions;
 
 namespace escape.Projectiles;
 
-public class BossProjectile : IProjectile
+public class BossProjectile : ICombatProjectile
 {
+    private const int HitboxWidth = 16;
+    private const int HitboxHeight = 32;
+    private readonly ProjectileHitTracker _hits = new();
+    public bool HitsPlayer => true;
+    public Collision Category => Collision.EnemyProjectile;
+    public bool IsCollisionEnabled => IsActive;
+    public Rectangle Bounds => new Rectangle((int)Position.X, (int)Position.Y, HitboxWidth, HitboxHeight);
+    public bool TryHit(ICollidable target)
+    {
+        if (!_hits.TryHit(this, target)) return false;
+        _consumed = true;
+        return true;
+    }
+
 
     private readonly ISprite _sprite;
     private readonly Vector2 _initialPosition;
     private readonly Vector2 _direction;
+    private bool _consumed;
     private float _ageSeconds;
     private const float LifetimeSeconds = 6f;
-    public bool IsActive => _ageSeconds < LifetimeSeconds;
+    public bool IsActive => !_consumed && _ageSeconds < LifetimeSeconds;
 
     public Vector2 Position { get; set;}
 
@@ -49,6 +65,8 @@ public class BossProjectile : IProjectile
     }
     public void Reset()
     {
+        _hits.Reset();
+        _consumed = false;
         Position = _initialPosition;
         _ageSeconds = 0f;
         _sprite.Reset();
