@@ -28,6 +28,7 @@ public class Arrow : ICombatProjectile
     private readonly Vector2 _initialPosition;
     private readonly Vector2 _direction;
     private bool _consumed;
+    public void HitWall() => _consumed = true;
     private float _ageSeconds;
     public bool IsActive => !_consumed && _ageSeconds < 3f;
     public Vector2 Position { get; set;}

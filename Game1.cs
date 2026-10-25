@@ -80,6 +80,7 @@ public class Game1 : Game
     {
         _levelManager.Update(gameTime);
 
+        _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>().ToArray();
         _projectiles.Update(gameTime);
 
         // Update the player's obstacles based on the current block in the block manager
@@ -129,6 +130,7 @@ public class Game1 : Game
             boss.FireRequested -= SpawnBossProjectile;
         _roomBosses.Clear();
         _projectiles.Reset();
+        _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>().ToArray();
         foreach (var boss in _levelManager.CurrentRoom.Enemies.OfType<Boss>())
         {
             boss.FireRequested += SpawnBossProjectile;

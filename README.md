@@ -73,4 +73,4 @@ For the sprint submission, merge the intended work into `main`/`master`, create 
 - 1 fires an arrow (one target), 2 places a bomb (damage only during explosion), and 3 throws a boomerang (one hit per enemy per throw). Each hit deals one damage. Player weapons do not hurt Link.
 - F2 includes the demon and Enemy C; F3 includes the boss and a demon. The boss fires toward Link every two seconds and stops when defeated.
 - Link has 3 health with a 5-second damage cooldown. Boss shots hurt Link, including during attacks. R restores health and enemies; changing rooms clears shots.
-- Test all weapons, flashing, defeat, cooldown, reset, and room switching. Enemies turn at solid walls and cannot leave through doorways; Link can still use doors. Projectile-wall collision is not implemented.
+- Test all weapons, flashing, defeat, cooldown, reset, and room switching. Enemies turn at solid walls and cannot leave through doorways; Link can still use doors. Arrows and boss shots stop at solid walls; boomerangs turn back. Walls block explosion damage.

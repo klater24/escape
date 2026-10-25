@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
+using escape.Collisions;
 
 namespace escape.Projectiles;
 
@@ -9,6 +10,8 @@ public class ProjectileManager : IGameResettable
 {
     private readonly List<IProjectile> _projectiles = new();
     private readonly ProjectileFactory _factory;
+    private const double MaximumStepSeconds = 1.0 / 120.0;
+    public IReadOnlyList<ISolidCollider> Obstacles { get; set; } = Array.Empty<ISolidCollider>();
 
     public ProjectileManager(ProjectileFactory factory)
     {
@@ -23,6 +26,13 @@ public class ProjectileManager : IGameResettable
         var targets = enemies.ToArray();
         foreach (var projectile in _projectiles.OfType<ICombatProjectile>())
         {
+            if (projectile is not Bomb { State: BombState.Exploding } &&
+                Obstacles.Any(wall => wall.IsSolid && wall.IsCollisionEnabled &&
+                projectile.Bounds.Intersects(wall.Bounds)))
+            {
+                projectile.HitWall();
+                continue;
+            }
             if (projectile.HitsPlayer)
             {
                 if (projectile.TryHit(player)) player.Damage();
@@ -30,7 +40,9 @@ public class ProjectileManager : IGameResettable
             else
             {
                 foreach (var enemy in targets)
-                    if (projectile.TryHit(enemy)) enemy.TakeDamage();
+                    if (!Obstacles.Any(wall => ProjectileWallCollision.BlocksPath(
+                            projectile.Bounds.Center.ToVector2(), enemy.Bounds.Center.ToVector2(), wall)) &&
+                        projectile.TryHit(enemy)) enemy.TakeDamage();
             }
         }
         _projectiles.RemoveAll(projectile => !projectile.IsActive);
@@ -44,7 +56,25 @@ public class ProjectileManager : IGameResettable
     public void Update(GameTime gameTime)
     {
         foreach (var projectile in _projectiles)
-            projectile.Update(gameTime);
+        {
+            double remaining = gameTime.ElapsedGameTime.TotalSeconds;
+            while (remaining > 0 && projectile.IsActive)
+            {
+                double step = Math.Min(remaining, MaximumStepSeconds);
+                Vector2 previous = projectile.Position;
+                projectile.Update(new GameTime(gameTime.TotalGameTime, TimeSpan.FromSeconds(step)));
+                if (projectile is ICombatProjectile combat &&
+                    projectile is not Bomb { State: BombState.Exploding } &&
+                    Obstacles.Any(wall => wall.IsSolid && wall.IsCollisionEnabled &&
+                        combat.Bounds.Intersects(wall.Bounds)))
+                {
+                    projectile.Position = previous;
+                    combat.HitWall();
+                    projectile.Update(new GameTime(gameTime.TotalGameTime, TimeSpan.Zero));
+                }
+                remaining -= step;
+            }
+        }
 
         _projectiles.RemoveAll(projectile => !projectile.IsActive);
     }

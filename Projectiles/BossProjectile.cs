@@ -26,6 +26,7 @@ public class BossProjectile : ICombatProjectile
     private readonly Vector2 _initialPosition;
     private readonly Vector2 _direction;
     private bool _consumed;
+    public void HitWall() => _consumed = true;
     private float _ageSeconds;
     private const float LifetimeSeconds = 6f;
     public bool IsActive => !_consumed && _ageSeconds < LifetimeSeconds;
