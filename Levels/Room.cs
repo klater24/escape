@@ -28,6 +28,8 @@ public class Room
     public IReadOnlyList<IEnemy> Enemies => _enemies;
     private readonly List<RoomWallCollider> _exteriorWalls = new();
     public IReadOnlyList<RoomWallCollider> ExteriorWalls => _exteriorWalls;
+    private readonly List<Door> _doors = new();
+    public IReadOnlyList<Door> Doors => _doors;
     private readonly List<Block> _floorTiles = new();
     
 
@@ -47,8 +49,10 @@ public class Room
         _exterior = new RoomExterior(exteriorTexture, Vector2.Zero, 3f);
 
         CreateExteriorWalls();
+        CreateDoors();
         CreateFloor();
         CreateTileMap();
+        
     }
 
 
@@ -311,6 +315,35 @@ private void CreateExterior()
     Vector2 rightPosition = new(640, 320);
     Vector2 bottomPosition = new(320, 640);
 }
+
+
+private void CreateDoors()
+{
+    const int doorGapStart = 336;
+    const int doorGapSize = 96;
+    const int sideGapStart = 216;
+    const int sideGapSize = 96;
+
+    foreach (DoorData doorData in _data.Doors)
+    {
+        Rectangle bounds = doorData.Direction.ToLowerInvariant() switch
+        {
+            "top" => new Rectangle(336, 48, 96, 48),
+            "bottom" => new Rectangle(336, 432, 96, 48),
+            "left" => new Rectangle(48, 216, 48, 96),
+            "right" => new Rectangle(672, 216, 48, 96),
+
+            _ => throw new ArgumentException(
+                $"Unknown door direction: {doorData.Direction}")
+        };
+
+        _doors.Add(new Door(
+            bounds,
+            doorData.DestinationDoor,
+            doorData.DestinationRoom));
+    }
+}
+
 private bool HasDoor(string direction)
 {
     foreach (DoorData door in _data.Doors)

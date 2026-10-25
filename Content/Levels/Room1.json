@@ -16,14 +16,16 @@
     {
       "Direction": "Top",
       "DestinationRoom": "Room2",
-      "SpawnX": 300,
-      "SpawnY": 350
+      "DestinationDoor": "Bottom",
+      "SpawnX": 360,
+      "SpawnY": 102
     },
     {
-      "Direction": "Left",
+      "Direction": "Right",
       "DestinationRoom": "Room3",
-      "SpawnX": 100,
-      "SpawnY": 200
+      "DestinationDoor": "Left",
+      "SpawnX": 600,
+      "SpawnY": 240
     }
   ]
 }

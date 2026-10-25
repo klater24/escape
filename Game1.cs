@@ -25,11 +25,6 @@ public class Game1 : Game
      private readonly List<ISprite> _sprites = new();
     private ProjectileManager _projectiles = null!;
     private ProjectileFactory _projectileFactory = null!;
-    //private Room _currentRoom;
-    //private MouseState _previousMouseState;
-
-
-
     private EnemyManager _enemies = null!;
     private LevelManager _levelManager = null!;
     private Texture2D _exteriorTexture;
@@ -98,6 +93,7 @@ public class Game1 : Game
 
         _keyboardController.Update();
         _player.Update(gameTime);
+        _levelManager.CheckDoorTransitions();
         foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<EnemyA>())
             CombatCollisionHandler.Resolve(_player, enemy);
         Window.Title = $"Escape | HP: {_player.Health}/{Player.MaxHealth}{(_player.IsDefeated ? " - Defeated: press R" : "")} | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | F1-F3: change room | R: reset | Q: quit";

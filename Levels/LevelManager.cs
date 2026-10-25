@@ -68,6 +68,83 @@ public class LevelManager : IGameResettable
         _currentSpawn = spawnPosition;
         _player.Position = _currentSpawn;
     }
+
+public Vector2 GetDoorSpawn(string roomId, string doorDirection)
+{
+    string filePath = Path.Combine(
+        _levelsDirectory,
+        $"{roomId}.json");
+
+    RoomData data = RoomParser.Load(filePath);
+
+    foreach (DoorData door in data.Doors)
+    {
+        if (door.Direction.Equals(
+            doorDirection,
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return new Vector2(door.SpawnX, door.SpawnY);
+        }
+    }
+
+    throw new InvalidOperationException(
+        $"Room '{roomId}' has no door in direction '{doorDirection}'.");
+}
+
+
+public bool TryTransition(Door door)
+{
+    try
+    {
+        Vector2 spawnPosition = GetDoorSpawn(
+            door.NextRoom,
+            door.NextDoor);
+
+        ChangeRoom(door.NextRoom, spawnPosition);
+        return true;
+    }
+    catch (InvalidOperationException)
+    {
+        // The destination room or matching door is invalid.
+        return false;
+    }
+}
+
+
+private bool _doorTransitioned;
+
+public void CheckDoorTransitions()
+{
+    // Prevent another transition until the player leaves the doorway.
+    if (_doorTransitioned)
+    {
+        foreach (Door door in CurrentRoom.Doors)
+        {
+            if (_player.Bounds.Intersects(door.Bounds))
+            {
+                return;
+            }
+        }
+
+        _doorTransitioned = false;
+    }
+
+    foreach (Door door in CurrentRoom.Doors)
+    {
+        if (!_player.Bounds.Intersects(door.Bounds))
+        {
+            continue;
+        }
+
+        if (TryTransition(door))
+        {
+            _doorTransitioned = true;
+        }
+
+        return;
+    }
+}
+
     public void Update(GameTime gameTime)
     {
         CurrentRoom.Update(gameTime);

@@ -15,8 +15,9 @@
         {
       "Direction": "Left",
       "DestinationRoom": "Room1",
-      "SpawnX": 300,
-      "SpawnY": 350
+      "DestinationDoor": "Right",
+      "SpawnX": 114,
+      "SpawnY": 240
     }
   ]
 }

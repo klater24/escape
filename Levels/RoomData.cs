@@ -26,6 +26,7 @@ public class DoorData
 {
     public string Direction { get; set; } = "";
     public string DestinationRoom { get; set; } = "";
+    public string DestinationDoor { get; set; } = "";
     public float SpawnX { get; set; }
     public float SpawnY { get; set; }
 }
