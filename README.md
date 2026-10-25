@@ -74,3 +74,92 @@ For the sprint submission, merge the intended work into `main`/`master`, create 
 - F2 includes the demon and Enemy C; F3 includes the boss and a demon. The boss fires toward Link every two seconds and stops when defeated.
 - Link has 3 health with a 5-second damage cooldown. Boss shots hurt Link, including during attacks. R restores health and enemies; changing rooms clears shots.
 - Test all weapons, flashing, defeat, cooldown, reset, and room switching. Enemies turn at solid walls and cannot leave through doorways; Link can still use doors. Projectile-wall collision is not implemented.
+- Z/N attacks Enemy A with the sword. It flashes when hit and is defeated after three hits.
+- Link has 3 health and loses one on enemy contact, with damage feedback and a 5-second cooldown. Health appears in the window title.
+- At zero health, Link cannot move, attack, or use items. R restores player/enemy health and clears combat timers.
+- Test attacks in all four directions, repeated contact, defeat, and reset. Combat applies only to Enemy A.
+
+## Level Files and Room Configuration
+
+### Overview
+
+Room layouts are defined in JSON files stored in `Content/Levels`. This allows developers to add or modify room layouts without changing the C# code responsible for constructing rooms.
+
+Each room file defines the room's name, default player spawn position, tile map, and door connections. The `RoomParser` reads the JSON file, and the level-loading system uses the resulting data to construct and manage the room.
+
+### JSON File Format
+
+Each room JSON file contains the following properties:
+
+| Property | Description |
+|---|---|
+| `Name` | The room's identifier. |
+| `SpawnX` | The default horizontal player spawn coordinate. |
+| `SpawnY` | The default vertical player spawn coordinate. |
+| `TileMap` | An array of strings representing rows of tiles in the room. |
+| `Doors` | An array describing the room's doorways and their destinations. |
+
+Each entry in `Doors` contains:
+
+| Property | Description |
+|---|---|
+| `Direction` | The direction of the doorway in the current room: `Top`, `Bottom`, `Left`, or `Right`. |
+| `DestinationRoom` | The identifier of the room the door leads to. |
+| `DestinationDoor` | The direction of the corresponding doorway in the destination room. |
+| `SpawnX` | The horizontal coordinate where the player appears when entering this room through this door. |
+| `SpawnY` | The vertical coordinate where the player appears when entering this room through this door. |
+
+The top-level spawn coordinates are used for the room's default spawn. Door-specific spawn coordinates determine where the player appears when entering through a particular doorway.
+
+### Tile Map Symbols
+
+The tile map uses symbols to determine which objects are created at each tile position.
+
+| Symbol | Object created |
+|---|---|
+| `0` | Empty tile; no object is created at that position. |
+| `B` | Brick block. |
+| `E` | Run enemy. |
+| `F` | Flying Demon enemy. |
+| `M` | Mana Seed enemy. |
+| `X` | Boss enemy. |
+| `K` | Key item. |
+| `D` | Book item. |
+| `W` | Watch item. |
+| `H` | Heart item. |
+| `P` | Potion item. |
+
+Each tile symbol represents a position in the room's tile grid. The room constructor translates the symbols into the corresponding game objects.
+
+### Door Connections and Room Transitions
+
+Doors connect rooms using room identifiers and doorway directions. For example, a door in `Room1` may lead to `Room3` through its `Left` doorway.
+
+When the player touches a door, the level manager loads the destination room and uses the destination doorway's spawn coordinates to position the player. Door connections should reference valid room files and matching doorway directions so that transitions work correctly.
+
+### Adding or Modifying Rooms
+
+To add a room:
+
+1. Create a new JSON file in `Content/Levels`.
+2. Set the room's name and default spawn coordinates.
+3. Define the tile map using the supported symbols.
+4. Add door definitions for the room's connections.
+5. Set each destination room, destination doorway, and door-specific spawn position.
+6. Verify that the referenced destination rooms and doorway directions exist.
+7. Run the game and test the room's transitions and spawn positions.
+
+When modifying a room, ensure that tile symbols are supported by the room constructor and that door spawn positions place the player safely inside the destination room.
+
+### Level Loading and Management
+
+The game uses three main components to load and manage rooms:
+
+- **`RoomParser`** reads a room's JSON file and converts it into a `RoomData` object.
+- **`Room`** uses the parsed data to create the room's floor, blocks, enemies, items, exterior walls, and door collision objects.
+- **`LevelManager`** loads rooms, tracks the active room, positions the player, and handles transitions between rooms.
+
+When a room is loaded, the level manager constructs the room and initializes the player's spawn position and collision obstacles. When the player touches a door, the manager identifies the destination room and doorway, loads the destination room, and positions the player at the corresponding spawn coordinates.
+
+The room-loading system separates level data from game logic. As a result, room layouts and connections can be modified through JSON files without requiring changes to the code that constructs and loads rooms.
+
