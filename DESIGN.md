@@ -211,3 +211,81 @@ One teammate creates the final GitHub release from main/master, verifies its sou
 CombatCollisionHandler uses the shared AABBCollisionDetector to resolve player/enemy and sword/enemy collisions for Enemy A in the current room. SwordHitbox implements ICollidable, follows Link's facing direction, and allows one hit per enemy per swing during the active attack window.
 
 Player manages health and a damage cooldown. EnemyA manages health, flashing, and defeat. Reset restores health and combat state; changing rooms cancels active sword attacks.
+
+## Level Handling and Loading
+
+### Overview
+
+The level-loading system is responsible for loading room layouts from JSON files. It constructs the objects within each room, and handles transitions between rooms. This separates level data from the code that creates and manages the game world, making it easier to add or modify rooms without changing the room-construction logic.
+
+### Room Data and Parsing
+
+`RoomParser` reads room definitions from JSON files and converts them into `RoomData` objects. `RoomData` stores information such as the room name, initial player spawn position, tile map, and door definitions. Each `DoorData` entry identifies the door's direction, destination room, destination door, and spawn coordinates.
+
+Keeping room layouts in external files allows the team to modify room arrangements and connections independently of the C# implementation. It also allows for scalability as more rooms can be added easily
+
+### Room Construction
+
+The `escape.Levels.Room` class constructs the game objects for a room. It creates the floor, blocks, enemies, items, exterior walls, and runtime door collision objects using the parsed room data. 
+
+Each json file requires a tilemap of 12x7. Each room has a default set of walls and floor, but this tile map allows level designers to easily place obstacles, enemies and items without knowing code.
+
+The room provides update, draw, and reset operations for the objects within it. It also uses door-direction information to determine where exterior walls should have openings.
+
+### Level Management and Transitions
+
+`LevelManager` is responsible for loading rooms and maintaining the currently active room through its `CurrentRoom` property. When a room is loaded, the manager constructs the room, initializes the player's spawn position, updates the player's collision obstacles, and connects boss projectile events to the projectile manager.
+
+When the player touches a door, the manager uses the door's destination room and destination-door information to locate the corresponding spawn position. It then loads the destination room and creates the player at that spawn. This keeps room transitions centralized rather than having the main game class directly construct or manage rooms.
+
+### Design Decisions and Component Interaction
+
+The design separates room parsing, room construction, and room management into distinct responsibilities. `RoomParser` handles reading external data, `RoomData` represents the parsed configuration, `Room` constructs the game-world objects, and `LevelManager` controls which room is active.
+
+The system reuses the existing `Door` collision representation to connect door collisions with room transitions. `Game1` invokes the level manager's transition check during the game update loop, while the level manager handles the actual room change.
+
+This design makes it possible to add rooms by creating new JSON files and defining their tile maps, spawn positions, and door connections, without requiring a separate room-management implementation for every room.
+
+
+### JSON Room File Design
+
+Each room is defined in an external JSON file stored in the `Content/Levels` directory. The JSON format separates room layout data from the code responsible for constructing and managing rooms.
+
+Each file contains the room's name, default player spawn coordinates, tile map, and door connections.
+
+- **Name:** Identifies the room.
+- **SpawnX and SpawnY:** Define the player's default spawn position when the room is loaded normally.
+- **TileMap:** Represents the room's layout as rows of tile symbols. The room constructor uses these symbols to create blocks, enemies, and items.
+- **Doors:** Defines the room's doorways and their connections to other rooms. Each door specifies its direction, destination room, destination door direction, and spawn coordinates.
+
+The `RoomParser` reads the JSON file and converts its contents into a `RoomData` object. The `Room` class then uses this data to construct the room's objects, while `LevelManager` uses the room and door information to manage loading and transitions.
+
+Door connections use room identifiers and door directions rather than direct references to other room objects. When a transition occurs, the level manager loads the destination room and finds the corresponding doorway's spawn coordinates. This allows rooms to define their connections through data instead of requiring hard-coded transitions.
+
+# JSON File Example
+
+```json
+{
+  "Name": "Room1",
+  "SpawnX": 250,
+  "SpawnY": 250,
+  "TileMap": [
+    "(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)",
+    "(0)(0)(0)(0)(0)(0)(0)(0)(K)(0)(0)(0)",
+    "(0)(0)(B)(0)(0)(0)(0)(0)(0)(B)(0)(0)",
+    "(0)(0)(0)(0)(0)(E)(0)(0)(0)(0)(0)(0)",
+    "(0)(0)(B)(0)(0)(0)(0)(0)(0)(B)(0)(0)",
+    "(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)",
+    "(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)"
+  ],
+  "Doors": [
+    {
+      "Direction": "Right",
+      "DestinationRoom": "Room3",
+      "DestinationDoor": "Left",
+      "SpawnX": 100,
+      "SpawnY": 200
+    }
+  ]
+}
+```
