@@ -25,7 +25,6 @@ public class Game1 : Game
      private readonly List<ISprite> _sprites = new();
     private ProjectileManager _projectiles = null!;
     private ProjectileFactory _projectileFactory = null!;
-    private EnemyManager _enemies = null!;
     private LevelManager _levelManager = null!;
     private Texture2D _exteriorTexture;
 
