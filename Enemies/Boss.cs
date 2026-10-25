@@ -18,7 +18,8 @@ public class Boss : IEnemy, IDamageable
     private const int HitboxOffsetY = 55;
     private const int HitboxWidth = 55;
     private const int HitboxHeight = 129;
-    private readonly EnemyCombatState _combat = new(6);
+    public const int MaxHealth = 6;
+    private readonly EnemyCombatState _combat = new(MaxHealth);
     public int Health => _combat.Health;
     public bool IsDefeated => _combat.IsDefeated;
     public bool IsCollisionEnabled => !IsDefeated;

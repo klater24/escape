@@ -69,7 +69,8 @@ For the sprint submission, merge the intended work into `main`/`master`, create 
 
 ## Sprint 3 - Combat (Samiya)
 
-- Z/N attacks Enemy A with the sword. It flashes when hit and is defeated after three hits.
-- Link has 3 health and loses one on enemy contact, with damage feedback and a 5-second cooldown. Health appears in the window title.
-- At zero health, Link cannot move, attack, or use items. R restores player/enemy health and clears combat timers.
-- Test attacks in all four directions, repeated contact, defeat, and reset. Combat applies only to Enemy A.
+- Z/N attacks enemies; regular enemies take three hits and the boss takes six. Link is protected from contact during sword attacks.
+- 1 fires an arrow (one target), 2 places a bomb (damage only during explosion), and 3 throws a boomerang (one hit per enemy per throw). Each hit deals one damage. Player weapons do not hurt Link.
+- F2 includes the demon and Enemy C; F3 includes the boss and a demon. The boss fires toward Link every two seconds and stops when defeated.
+- Link has 3 health with a 5-second damage cooldown. Boss shots hurt Link, including during attacks. R restores health and enemies; changing rooms clears shots.
+- Test all weapons, flashing, defeat, cooldown, reset, and room switching. Projectile-wall collision and enemy-wall blocking are not implemented in this combat update.

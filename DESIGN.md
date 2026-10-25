@@ -208,6 +208,6 @@ One teammate creates the final GitHub release from main/master, verifies its sou
 
 ## Sprint 3 - Combat (Samiya)
 
-CombatCollisionHandler uses the shared AABBCollisionDetector to resolve player/enemy and sword/enemy collisions for Enemy A in the current room. SwordHitbox implements ICollidable, follows Link's facing direction, and allows one hit per enemy per swing during the active attack window.
+CombatCollisionHandler uses the shared AABBCollisionDetector and IDamageable for all enemy types. EnemyCombatState shares health, flashing, defeat, and reset behavior. SwordHitbox follows Link's facing and tracks one hit per target per swing. Player manages health and its damage cooldown.
 
-Player manages health and a damage cooldown. EnemyA manages health, flashing, and defeat. Reset restores health and combat state; changing rooms cancels active sword attacks.
+ICombatProjectile exposes bounds, target faction, and hit registration. ProjectileHitTracker prevents repeat hits; arrows and boss shots disappear on contact, bombs enable damage only during explosions, and boomerangs retain their return behavior. ProjectileManager resolves damage against current-room enemies or Link. Room changes clear shots and reconnect boss firing events; defeated bosses stop firing. Room JSON places Enemy C and the boss. Projectile-wall and enemy-wall responses remain separate work.

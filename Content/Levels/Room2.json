@@ -28,7 +28,8 @@
       { "Type": "stone", "X": 320, "Y": 256 }
   ],
   "Enemies": [
-    { "Type": "DemonFlying", "X": 160, "Y": 64 }
+    { "Type": "DemonFlying", "X": 160, "Y": 64 },
+    { "Type": "ManaSeed", "X": 280, "Y": 120 }
   ],
   "Items": [
     { "Type": "Key", "X": 224, "Y": 64 }

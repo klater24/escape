@@ -28,7 +28,7 @@
       { "Type": "stone", "X": 320, "Y": 256 }
   ],
   "Enemies": [
-    { "Type": "Run", "X": 160, "Y": 64 },
+    { "Type": "SorcererAttack", "X": 100, "Y": 64 },
     { "Type": "DemonFlying", "X": 192, "Y": 64 }
   ],
   "Items": [

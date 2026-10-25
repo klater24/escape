@@ -72,6 +72,7 @@ public class Room
                 "Run" => new EnemyA(sprite, position),
                 "DemonFlying" => new EnemyB(sprite, position),
                 "ManaSeed" => new EnemyC(sprite, position),
+                "SorcererAttack" => new Boss(sprite, position),
                 _ => throw new ArgumentException(
                     $"Unknown enemy type: {enemyData.Type}")
             };
