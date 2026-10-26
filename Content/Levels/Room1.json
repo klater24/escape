@@ -1,31 +1,36 @@
 
 {
   "Name": "Room1",
-  "SpawnX": 250,
-  "SpawnY": 250,
-  "TileMap": [
-  "(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)",
-  "(0)(0)(0)(0)(0)(0)(0)(0)(K)(0)(0)(0)",
-  "(0)(0)(B)(0)(0)(0)(0)(0)(0)(B)(0)(0)",
-  "(0)(0)(0)(0)(0)(E)(0)(0)(0)(0)(0)(0)",
-  "(0)(0)(B)(0)(0)(0)(0)(0)(0)(B)(0)(0)",
-  "(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)",
-  "(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)"
-],
-  "Doors": [    
-    {
-      "Direction": "Top",
-      "DestinationRoom": "Room2",
-      "DestinationDoor": "Bottom",
-      "SpawnX": 360,
-      "SpawnY": 102
-    },
-    {
-      "Direction": "Right",
-      "DestinationRoom": "Room3",
-      "DestinationDoor": "Left",
-      "SpawnX": 600,
-      "SpawnY": 240
-    }
-  ]
+  "SpawnX": 150,
+  "SpawnY": 150,
+  "Blocks": [
+    { "Type": "stone", "X": 0, "Y": 0 },
+    { "Type": "stone", "X": 64, "Y": 0 },
+    { "Type": "stone", "X": 128, "Y": 0 },
+    { "Type": "stone", "X": 192, "Y": 0 },
+    { "Type": "stone", "X": 256, "Y": 0 },
+    { "Type": "stone", "X": 320, "Y": 0 },
+    { "Type": "stone", "X": 384, "Y": 0 },
+    { "Type": "stone", "X": 0, "Y": 64 },
+    { "Type": "stone", "X": 0, "Y": 128 },
+    { "Type": "stone", "X": 0, "Y": 192 },
+    { "Type": "stone", "X": 0, "Y": 256 },
+    { "Type": "stone", "X": 384, "Y": 64 },
+    { "Type": "stone", "X": 384, "Y": 128 },
+    { "Type": "stone", "X": 384, "Y": 192 },
+    { "Type": "stone", "X": 384, "Y": 256 },
+    { "Type": "stone", "X": 64, "Y": 256 },
+    { "Type": "stone", "X": 128, "Y": 256 },
+    { "Type": "door_up", "X": 192, "Y": 256 },
+    { "Type": "stone", "X": 256, "Y": 256 },
+    { "Type": "stone", "X": 320, "Y": 256 }
+    
+  ],
+  "Enemies": [
+    { "Type": "Run", "X": 160, "Y": 64 }
+  ],
+  "Items": [
+    { "Type": "Heart", "X": 224, "Y": 64 }
+  ],
+  "Doors": []
 }

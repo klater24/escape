@@ -41,7 +41,7 @@
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
+/processorParam:ColorKeyEnabled=False
 /processorParam:GenerateMipmaps=False
 /processorParam:PremultiplyAlpha=True
 /processorParam:ResizeToPowerOfTwo=False
@@ -192,18 +192,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/Blocks/PixelPack_Tiles/water_ice_4tiles_preview.png
-
-#begin Textures/Blocks/Room-Exterior.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=0,128,0,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Textures/Blocks/Room-Exterior.png
 
 #begin Textures/Enemies/DemonFlying.png
 /importer:TextureImporter
