@@ -14,7 +14,8 @@ public class Bomb : ICombatProjectile
     public bool HitsPlayer => false;
     public Collision Category => Collision.PlayerProjectile;
     public bool IsCollisionEnabled => State == BombState.Exploding;
-    public Rectangle Bounds => new Rectangle((int)Position.X, (int)Position.Y, ExplosionSize, ExplosionSize);
+    public Rectangle Bounds => new Rectangle((int)Position.X, (int)Position.Y,
+        State == BombState.Exploding ? ExplosionSize : ExplosionSize / 2, ExplosionSize);
     public bool TryHit(ICollidable target)
     {
         if (!_hits.TryHit(this, target)) return false;
@@ -29,6 +30,7 @@ public class Bomb : ICombatProjectile
     private const float FuseSeconds = 2f;
     private const float ExplosionSeconds = 1f;
     public BombState State { get; private set; } = BombState.Fuse;
+    public void HitWall() => State = BombState.Finished;
     public bool IsActive => State != BombState.Finished;
     public Vector2 Position { get; set;}
 
