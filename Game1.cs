@@ -7,9 +7,7 @@ using escape.Levels;
 using escape.Enemies;
 using escape.Collisions;
 using escape.Items;
-using Microsoft.Xna.Framework.Input;
 using escape.Sprites;
-using escape.Blocks;
 
 namespace escape;
 
@@ -19,7 +17,6 @@ public class Game1 : Game
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch = null!;
     private Texture2D _blockAtlas = null!;
-    private readonly BlockManager _blockManager = new();
     private readonly GameResetCoordinator _resetCoordinator = new();
     private IController _keyboardController = null!;
     private Player _player = null!;
@@ -32,8 +29,7 @@ public class Game1 : Game
     private ProjectileManager _projectiles = null!;
     private ProjectileFactory _projectileFactory = null!;
     private LevelManager _levelManager = null!;
-    private Rooms _currentRoom;
-    private MouseState _previousMouseState;
+    private Texture2D _exteriorTexture = null!;
 
 
 
@@ -72,25 +68,6 @@ public class Game1 : Game
         _player = new Player(new Vector2(100, 100), _playerSheet, Content.Load<Texture2D>("Textures/Player/link"));
 
         
-
-        // Make ten blocks so the team can see how the factory chooses each block
-        var blockTypes = new[]
-        {
-            "grass", "dirt", "stone", "brick", "water",
-            "wood", "sand", "ice", "metal", "platform"
-        };
-
-        for (int i = 0; i < blockTypes.Length; i++)
-        {
-            var position = new Vector2(448, 238);
-            // Add a block to the block manager with the specified type and position (TEMPORARY)
-            _blockManager.Add(new Block(
-                _blockAtlas, 
-                blockTypes[i], 
-                position, 
-                2f,
-                isSolid: blockTypes[i] == "brick"));
-        }
 
         var enemyPosition = new Vector2(450, 260);
         var boss = new Boss(
@@ -139,28 +116,6 @@ public class Game1 : Game
         _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>().ToArray();
         _projectiles.Update(gameTime);
 
-        // Update the player's obstacles based on the current block in the block manager
-        _player.Obstacles = _levelManager.CurrentRoom.Blocks
-            .Where(block => block.IsSolid)
-            .Cast<ISolidCollider>()
-            .Concat(_levelManager.CurrentRoom.ExteriorWalls)
-            .ToList();
-        _player.Obstacles = _blockManager.CurrentBlock is { } block
-            ? new List<ISolidCollider> { block }
-            : new List<ISolidCollider>();
-
-
-        //probs need to fix this at some point 
-        Vector2 prevPlayerPos = _player.getPosit();
-        Vector2 currPlayerPos = _player.getPosit();
-        MouseState currentMouseState = Mouse.GetState();
-        if (prevPlayerPos != currPlayerPos)
-        {
-            Vector2 movement = currPlayerPos - prevPlayerPos;
-            EnvironmentCollisionResolver.Move(_player, movement, _player.Obstacles);
-        }
-         _currentRoom.CheckDoorTransition(_player, currentMouseState, _previousMouseState);
-        _previousMouseState = currentMouseState; 
         _keyboardController.Update();
         _player.Update(gameTime);
         _levelManager.CheckDoorTransitions();
