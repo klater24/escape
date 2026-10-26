@@ -1,5 +1,7 @@
 
 using System.Collections.Generic;
+using escape.Collisions;
+using escape.Interfaces;
 
 namespace escape.Levels;
 
@@ -15,7 +17,7 @@ public class RoomData
 
     public List<GameObjectData> Items { get; set; } = new();
 
-    public List<DoorData> Doors { get; set; } = new();
+    public List<Door> Doors { get; set; } = new();
 }
 
 public class GameObjectData
@@ -25,17 +27,4 @@ public class GameObjectData
     public float X { get; set; }
 
     public float Y { get; set; }
-}
-
-public class DoorData
-{
-    public float X { get; set; }
-
-    public float Y { get; set; }
-
-    public string DestinationRoom { get; set; } = "";
-
-    public float SpawnX { get; set; }
-
-    public float SpawnY { get; set; }
 }
