@@ -1,0 +1,27 @@
+*   [33m4c87b91[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mplayer-input[m[33m, [m[1;31morigin/player-input[m[33m)[m Merge branch 'main' into player-input
+[31m|[m[32m\[m  
+[31m|[m *   [33mdcd68fd[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m Merge pull request #92 from klater24/revert-door-merge
+[31m|[m [33m|[m[34m\[m  
+[31m|[m [33m|[m * [33m52f694f[m[33m ([m[1;31morigin/revert-door-merge[m[33m)[m Revert "Merge branch 'door-collision-detection' into main"
+[31m|[m [33m|[m[33m/[m  
+[31m|[m *   [33m9943830[m Merge branch 'door-collision-detection' into main
+[31m|[m [35m|[m[36m\[m  
+[31m|[m * [36m\[m   [33m0ba3b0c[m Merge pull request #83 from klater24/feature/combat-collision
+[31m|[m [1;31m|[m[1;32m\[m [36m\[m  
+[31m|[m [1;31m|[m * [36m\[m   [33m204a8eb[m[33m ([m[1;31morigin/feature/combat-collision[m[33m)[m Merge branch 'main' into feature/combat-collision
+[31m|[m [1;31m|[m [1;33m|[m[1;31m\[m [36m\[m  
+[31m|[m [1;31m|[m [1;33m|[m[1;31m/[m [36m/[m  
+[31m|[m [1;31m|[m[1;31m/[m[1;33m|[m [36m|[m   
+* [1;31m|[m [1;33m|[m [36m|[m [33me92c353[m merged with nes
+* [1;31m|[m [1;33m|[m [36m|[m   [33m0703e1e[m Merge branch 'door-collision-detection' into player-input
+[1;35m|[m[1;36m\[m [1;31m\[m [1;33m\[m [36m\[m  
+[1;35m|[m * [1;31m|[m [1;33m|[m [36m|[m [33md920f68[m[33m ([m[1;32mdoor-collision-detection[m[33m)[m Merge branch 'main' into door-collision-detection
+[1;35m|[m [36m|[m[1;31m\[m[1;31m|[m [1;33m|[m [36m|[m 
+[1;35m|[m [36m|[m [1;31m|[m[36m_[m[1;33m|[m[36m/[m  
+[1;35m|[m [36m|[m[36m/[m[1;31m|[m [1;33m|[m   
+[1;35m|[m * [1;31m|[m [1;33m|[m [33m57cf194[m Update CheckDoorTransition method parameters and logic
+[1;35m|[m * [1;31m|[m [1;33m|[m [33m6f82e07[m Update Game1.cs
+[1;35m|[m * [1;31m|[m [1;33m|[m [33m776d99a[m Refactor CheckDoorTransition to include mouse input
+[1;35m|[m * [1;31m|[m [1;33m|[m [33mb2455aa[m formatting
+[1;35m|[m * [1;31m|[m [1;33m|[m [33mf5e7853[m room and door classes
+* [32m|[m [1;31m|[m [1;33m|[m [33m88dc45a[m saving proggress
