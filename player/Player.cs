@@ -55,7 +55,8 @@ public class Player : IGameResettable, IMoveCollider
     private const float SwordActiveStart = 0.12f;
     private const float SwordActiveEnd = 0.36f;
     public SwordHitbox Sword { get; }
-    public bool IsSwordActive => !IsDefeated && currentState == State.Attacking &&
+    public bool IsAttacking => !IsDefeated && currentState == State.Attacking;
+    public bool IsSwordActive => IsAttacking &&
         attackTimer >= SwordActiveStart && attackTimer < SwordActiveEnd;
 
         public Player(Vector2 intiPos, Texture2D spriteSheet, Texture2D attackSheet)

@@ -1,10 +1,11 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
+using escape.Collisions;
 
 namespace escape.Enemies;
 
-public class Boss : IEnemy
+public class Boss : IEnemy, IDamageable, IEnvironmentEnemy
 {
 
     private readonly ISprite _sprite;
@@ -13,6 +14,20 @@ public class Boss : IEnemy
     private readonly float _rightBoundary;
     private Vector2 _direction;
     public Vector2 Position { get; set; }
+    public IReadOnlyList<ISolidCollider> Obstacles { get; set; } = Array.Empty<ISolidCollider>();
+    private const int HitboxOffsetX = 64;
+    private const int HitboxOffsetY = 55;
+    private const int HitboxWidth = 55;
+    private const int HitboxHeight = 129;
+    public const int MaxHealth = 6;
+    private readonly EnemyCombatState _combat = new(MaxHealth);
+    public int Health => _combat.Health;
+    public bool IsDefeated => _combat.IsDefeated;
+    public bool IsCollisionEnabled => !IsDefeated;
+    public Collision Category => Collision.Enemy;
+    public Rectangle Bounds => new((int)Position.X + HitboxOffsetX,
+        (int)Position.Y + HitboxOffsetY, HitboxWidth, HitboxHeight);
+    public void TakeDamage() => _combat.TakeDamage();
     private float _speed;
     private float _fireTimer;
 
@@ -41,9 +56,11 @@ public class Boss : IEnemy
 
     public void Update(GameTime gameTime)
     {
+        if (IsDefeated) return;
+        _combat.Update(gameTime);
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        Position += _direction * _speed * deltaTime;
+        _direction = EnemyMovement.Move(this, _direction, _speed * deltaTime);
 
         if (Position.X <= _leftBoundary)
         {
@@ -73,10 +90,12 @@ public class Boss : IEnemy
 
     public void Draw(SpriteBatch spriteBatch)
     {
+        if (!_combat.IsVisible) return;
         _sprite.Draw(spriteBatch);
     }
     public void Reset()
     {
+        _combat.Reset();
         Position = _initialPosition;
         _sprite.Reset();
         _sprite.Position = Position;

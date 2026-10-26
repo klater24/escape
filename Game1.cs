@@ -124,6 +124,8 @@ public class Game1 : Game
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
                                             Content, _itemAtlas, _player, _exteriorTexture, _projectiles);
         RegisterResettable(_levelManager);
+        _levelManager.RoomChanged += ConnectRoomCombat;
+        ConnectRoomCombat();
 
         _keyboardController = new KeyboardController(this, _player, _projectiles, _levelManager);
         _keyboardController.Initialize();
@@ -135,7 +137,6 @@ public class Game1 : Game
         _levelManager.Update(gameTime);
 
         _projectiles.Update(gameTime);
-        _projectiles.RemoveOffscreenBossProjectiles(GraphicsDevice.Viewport.Width);
 
         // Update the player's obstacles based on the current block in the block manager
         _player.Obstacles = _levelManager.CurrentRoom.Blocks
@@ -164,7 +165,10 @@ public class Game1 : Game
         _levelManager.CheckDoorTransitions();
         foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<EnemyA>())
             CombatCollisionHandler.Resolve(_player, enemy);
-        Window.Title = $"Escape | HP: {_player.Health}/{Player.MaxHealth}{(_player.IsDefeated ? " - Defeated: press R" : "")} | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | F1-F3: change room | R: reset | Q: quit";
+        _projectiles.ResolveCombat(_player, _levelManager.CurrentRoom.Enemies.OfType<IDamageable>());
+        var boss = _levelManager.CurrentRoom.Enemies.OfType<Boss>().FirstOrDefault();
+        string bossStatus = boss is null ? "" : $" | Boss HP: {boss.Health}/{Boss.MaxHealth}";
+        Window.Title = $"Escape | HP: {_player.Health}/{Player.MaxHealth}{bossStatus}{(_player.IsDefeated ? " - Defeated: press R" : "")} | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | F1-F3: change room | R: reset | Q: quit";
         base.Update(gameTime);
     }
 
@@ -190,6 +194,27 @@ public class Game1 : Game
     public void Reset()
     {
         _resetCoordinator.Reset();
+    }
+
+    private void ConnectRoomCombat()
+    {
+        foreach (var boss in _roomBosses)
+            boss.FireRequested -= SpawnBossProjectile;
+        _roomBosses.Clear();
+        _projectiles.Reset();
+        foreach (var boss in _levelManager.CurrentRoom.Enemies.OfType<Boss>())
+        {
+            boss.FireRequested += SpawnBossProjectile;
+            _roomBosses.Add(boss);
+        }
+    }
+
+    private void SpawnBossProjectile(Vector2 position)
+    {
+        if (_player.IsDefeated) return;
+        Vector2 direction = _player.Bounds.Center.ToVector2() - (position + new Vector2(8, 16));
+        if (direction.LengthSquared() < 0.001f) direction = Vector2.UnitX;
+        _projectiles.SpawnBossProjectile(position, direction);
     }
 
     // Add a player or system so the game-wide reset can reach it

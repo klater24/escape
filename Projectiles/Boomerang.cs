@@ -1,11 +1,26 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
+using escape.Collisions;
 
 namespace escape.Projectiles;
 
-public class Boomerang : IProjectile
+public class Boomerang : ICombatProjectile
 {
+    private const int HitboxWidth = 16;
+    private const int HitboxHeight = 32;
+    private readonly ProjectileHitTracker _hits = new();
+    public bool HitsPlayer => false;
+    public Collision Category => Collision.PlayerProjectile;
+    public bool IsCollisionEnabled => IsActive;
+    public Rectangle Bounds => new Rectangle((int)Position.X, (int)Position.Y, HitboxWidth, HitboxHeight);
+    public bool TryHit(ICollidable target)
+    {
+        if (!_hits.TryHit(this, target)) return false;
+
+        return true;
+    }
+
     private readonly ISprite _sprite;
     private readonly Vector2 _initialPosition;
     private readonly Vector2 _direction;
@@ -50,10 +65,11 @@ public class Boomerang : IProjectile
     }
     public void Reset()
     {
+        _hits.Reset();
         Position = _initialPosition;
         _ageSeconds = 0f;
         _sprite.Reset();
         _sprite.Position = Position;
-         
+
     }
 }

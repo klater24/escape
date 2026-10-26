@@ -7,5 +7,7 @@ public enum Collision
     Enemy,
     Sword,
     Pickup,
-    Door
+    Door,
+    PlayerProjectile,
+    EnemyProjectile
 }

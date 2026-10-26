@@ -23,6 +23,7 @@ public class LevelManager : IGameResettable
     private readonly ProjectileManager _projectiles;
 
     public Room CurrentRoom { get; private set; }
+    public event Action? RoomChanged;
 
     public LevelManager(Texture2D blockAtlas, string levelsDirectory, ContentManager content,
                             Texture2D itemAtlas, Player player, Texture2D exteriorTexture, ProjectileManager projectiles)
@@ -60,6 +61,10 @@ public class LevelManager : IGameResettable
             .Cast<ISolidCollider>()
             .Concat(CurrentRoom.ExteriorWalls)
             .ToList();
+
+        _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
+        _player.Position = _currentSpawn;
+        RoomChanged?.Invoke();
     }
 
     public void ChangeRoom(string roomId, Vector2 spawnPosition)

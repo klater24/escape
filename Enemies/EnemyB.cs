@@ -1,11 +1,12 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
+using escape.Collisions;
 using System;
 
 namespace escape.Enemies;
 
-public class EnemyB : IEnemy
+public class EnemyB : IEnemy, IDamageable, IEnvironmentEnemy
 {
 
     private readonly ISprite _sprite;
@@ -15,6 +16,19 @@ public class EnemyB : IEnemy
     private float _speed;
     private readonly Random _random = new();
     public Vector2 Position { get; set; }
+    public IReadOnlyList<ISolidCollider> Obstacles { get; set; } = Array.Empty<ISolidCollider>();
+    private const int HitboxOffsetX = 12;
+    private const int HitboxOffsetY = 20;
+    private const int HitboxWidth = 46;
+    private const int HitboxHeight = 44;
+    private readonly EnemyCombatState _combat = new(3);
+    public int Health => _combat.Health;
+    public bool IsDefeated => _combat.IsDefeated;
+    public bool IsCollisionEnabled => !IsDefeated;
+    public Collision Category => Collision.Enemy;
+    public Rectangle Bounds => new((int)Position.X + HitboxOffsetX,
+        (int)Position.Y + HitboxOffsetY, HitboxWidth, HitboxHeight);
+    public void TakeDamage() => _combat.TakeDamage();
 
     private const int ScreenWidth = 960;
     private const int ScreenHeight = 540;
@@ -40,9 +54,11 @@ public class EnemyB : IEnemy
 
     public void Update(GameTime gameTime)
     {
+        if (IsDefeated) return;
+        _combat.Update(gameTime);
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        Position += _direction * _speed * deltaTime;
+        _direction = EnemyMovement.Move(this, _direction, _speed * deltaTime);
 
         if (Position.X < 0)
         {
@@ -101,10 +117,12 @@ public class EnemyB : IEnemy
 
     public void Draw(SpriteBatch spriteBatch)
     {
+        if (!_combat.IsVisible) return;
         _sprite.Draw(spriteBatch);
     }
     public void Reset()
     {
+        _combat.Reset();
         Position = _initialPosition;
         _sprite.Reset();
         _sprite.Position = Position;
