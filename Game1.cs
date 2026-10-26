@@ -30,7 +30,7 @@ public class Game1 : Game
     private ProjectileFactory _projectileFactory = null!;
     private LevelManager _levelManager = null!;
     private Texture2D _exteriorTexture = null!;
-
+private readonly List<Boss> _roomBosses = new();
 
 
     private EnemyManager _enemies = null!;
@@ -186,3 +186,4 @@ public class Game1 : Game
         _spriteBatch.Dispose();
         base.UnloadContent();
     }}
+
