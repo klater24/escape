@@ -69,6 +69,8 @@ private readonly List<Boss> _roomBosses = new();
 
         
 
+        RegisterResettable(_player);
+
         var enemyPosition = new Vector2(450, 260);
         var boss = new Boss(
             SpriteFactory.CreateEnemySprite(Content, "SorcererAttack", enemyPosition),
@@ -99,7 +101,7 @@ private readonly List<Boss> _roomBosses = new();
         RegisterResettable(_projectiles);
 
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
-                                            Content, _itemAtlas, _player, _exteriorTexture, _projectiles);
+                                            Content, _itemAtlas, _player, _exteriorTexture);
         RegisterResettable(_levelManager);
         _levelManager.RoomChanged += ConnectRoomCombat;
         ConnectRoomCombat();
@@ -113,13 +115,14 @@ private readonly List<Boss> _roomBosses = new();
     {
         _levelManager.Update(gameTime);
 
-        _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>().ToArray();
+        _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
+            .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
         _projectiles.Update(gameTime);
 
         _keyboardController.Update();
         _player.Update(gameTime);
         _levelManager.CheckDoorTransitions();
-        foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<EnemyA>())
+        foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<IDamageable>())
             CombatCollisionHandler.Resolve(_player, enemy);
         _projectiles.ResolveCombat(_player, _levelManager.CurrentRoom.Enemies.OfType<IDamageable>());
         var boss = _levelManager.CurrentRoom.Enemies.OfType<Boss>().FirstOrDefault();
@@ -158,7 +161,8 @@ private readonly List<Boss> _roomBosses = new();
             boss.FireRequested -= SpawnBossProjectile;
         _roomBosses.Clear();
         _projectiles.Reset();
-        _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>().ToArray();
+        _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
+            .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
         foreach (var boss in _levelManager.CurrentRoom.Enemies.OfType<Boss>())
         {
             boss.FireRequested += SpawnBossProjectile;
