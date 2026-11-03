@@ -52,6 +52,12 @@ public class Room
         CreateDoors();
         CreateFloor();
         CreateTileMap();
+        var enemyObstacles = _blocks.Cast<ISolidCollider>()
+            .Concat(_exteriorWalls)
+            .Concat(_doors.Select(door => (ISolidCollider)new RoomWallCollider(door.Bounds)))
+            .ToArray();
+        foreach (var enemy in _enemies.OfType<IEnvironmentEnemy>())
+            enemy.Obstacles = enemyObstacles;
         
     }
 
@@ -319,10 +325,6 @@ private void CreateExterior()
 
 private void CreateDoors()
 {
-    const int doorGapStart = 336;
-    const int doorGapSize = 96;
-    const int sideGapStart = 216;
-    const int sideGapSize = 96;
 
     foreach (DoorData doorData in _data.Doors)
     {
