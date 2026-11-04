@@ -6,6 +6,10 @@ See [DESIGN.md](DESIGN.md) for architecture, team responsibilities, reset behavi
 
 ## Build and run
 
+Sprint 4 room authors and map/camera contributors should use the
+[dungeon room data contract](docs/room-data-format.md) for JSON fields, tile
+symbols, coordinates, and door connection semantics.
+
 Use the .NET 9 SDK. The current content project targets Windows; other platforms have not been verified. Initial setup requires network access to restore NuGet packages and MonoGame tools.
 
 Extract the release ZIP or clone the repository. Open a terminal in the folder containing `escape.csproj` and run:
