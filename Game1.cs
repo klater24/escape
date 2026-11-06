@@ -30,7 +30,8 @@ public class Game1 : Game
     private ProjectileFactory _projectileFactory = null!;
     private LevelManager _levelManager = null!;
     private Texture2D _exteriorTexture = null!;
-private readonly List<Boss> _roomBosses = new();
+    private readonly List<Boss> _roomBosses = new();
+    public Inventory Inventory { get; private set; }
 
 
     private EnemyManager _enemies = null!;
@@ -48,6 +49,8 @@ private readonly List<Boss> _roomBosses = new();
 
     protected override void Initialize()
     {
+        Inventory = new Inventory();
+        Inventory.AddItem(ItemType.Key, 3);
         base.Initialize();
     }
 
@@ -101,7 +104,7 @@ private readonly List<Boss> _roomBosses = new();
         RegisterResettable(_projectiles);
 
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
-                                            Content, _itemAtlas, _player, _exteriorTexture);
+                                            Content, _itemAtlas, _player, _exteriorTexture, Inventory);
         RegisterResettable(_levelManager);
         _levelManager.RoomChanged += ConnectRoomCombat;
         ConnectRoomCombat();
