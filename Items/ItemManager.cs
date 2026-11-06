@@ -6,23 +6,30 @@ using escape.Interfaces;
 
 namespace escape.Items;
 
-// Only the selected item runs in the sprint demonstration.
+// Item Manager purpose is to manage the items in the game, allowing for cycling through them, updating their state, and drawing them on the screen
+// It implements the IGameResettable interface to allow for resetting the state of all managed items.
 public sealed class ItemManager : escape.Interfaces.IGameResettable
 {
-    private readonly List<IItem> _items;
+    private readonly IReadOnlyList<IItem> _items;
     public int SelectedIndex { get; private set; }
-    public IItem Current => _items[SelectedIndex];
-    public ItemManager(List<IItem> items)
+    public IItem? Current => _items.Count == 0 ? null : _items[SelectedIndex];
+    public ItemManager(IReadOnlyList<IItem> items)
     {
-        if (items.Count == 0) throw new ArgumentException("At least one item is required.", nameof(items));
         _items = items;
     }
 
-    public void Cycle(int direction) => SelectedIndex =
-        ((SelectedIndex + direction) % _items.Count + _items.Count) % _items.Count;
+    public void Cycle(int direction)
+    {
+        if (_items.Count == 0)
+        {
+            return;
+        }
 
-    public void Update(GameTime gameTime) => Current.Update(gameTime);
-    public void Draw(SpriteBatch spriteBatch) => Current.Draw(spriteBatch);
+        SelectedIndex = ((SelectedIndex + direction) % _items.Count + _items.Count) % _items.Count;
+    }
+
+    public void Update(GameTime gameTime) => Current?.Update(gameTime);
+    public void Draw(SpriteBatch spriteBatch) => Current?.Draw(spriteBatch);
 
     public void Reset()
     {

@@ -10,9 +10,9 @@ public class Boss : IEnemy, IDamageable, IEnvironmentEnemy
 
     private readonly ISprite _sprite;
     private readonly Vector2 _initialPosition;
-    private readonly float _leftBoundary;
-    private readonly float _rightBoundary;
     private Vector2 _direction;
+    private float _directionTimer;
+    private readonly Random _random = new();
     public Vector2 Position { get; set; }
     public IReadOnlyList<ISolidCollider> Obstacles { get; set; } = Array.Empty<ISolidCollider>();
     private const int HitboxOffsetX = 64;
@@ -34,7 +34,7 @@ public class Boss : IEnemy, IDamageable, IEnvironmentEnemy
     private const float FireInterval = 2f;
 
     private const float MovementSpeed = 75f;
-    private const float PatrolDistance = 150f;
+    private const float DirectionChangeInterval = 1.25f;
     private static readonly Vector2 ProjectileOffset = new(96f, 32f);
 
     // game1 handles the actual projectile
@@ -48,9 +48,8 @@ public class Boss : IEnemy, IDamageable, IEnvironmentEnemy
         _sprite.Position = position;
         _direction = new Vector2(1, 0);
         _speed = MovementSpeed;
+        _directionTimer = 0f;
         _fireTimer = 0f;
-        _leftBoundary = position.X - PatrolDistance;
-        _rightBoundary = position.X + PatrolDistance;
     }
 
 
@@ -60,19 +59,14 @@ public class Boss : IEnemy, IDamageable, IEnvironmentEnemy
         _combat.Update(gameTime);
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+        _directionTimer += deltaTime;
+        if (_directionTimer >= DirectionChangeInterval)
+        {
+            _directionTimer %= DirectionChangeInterval;
+            ChangeDirection();
+        }
+
         _direction = EnemyMovement.Move(this, _direction, _speed * deltaTime);
-
-        if (Position.X <= _leftBoundary)
-        {
-            Position = new Vector2(_leftBoundary, Position.Y);
-            _direction = new Vector2(1, 0);
-        }
-
-        if (Position.X >= _rightBoundary)
-        {
-            Position = new Vector2(_rightBoundary, Position.Y);
-            _direction = new Vector2(-1, 0);
-        }
 
         _sprite.Position = Position;
 
@@ -88,6 +82,17 @@ public class Boss : IEnemy, IDamageable, IEnvironmentEnemy
         }
     }
 
+    private void ChangeDirection()
+    {
+        _direction = _random.Next(4) switch
+        {
+            0 => Vector2.UnitX,
+            1 => -Vector2.UnitX,
+            2 => Vector2.UnitY,
+            _ => -Vector2.UnitY
+        };
+    }
+
     public void Draw(SpriteBatch spriteBatch)
     {
         if (!_combat.IsVisible) return;
@@ -101,6 +106,7 @@ public class Boss : IEnemy, IDamageable, IEnvironmentEnemy
         _sprite.Position = Position;
         _direction = new Vector2(1, 0);
         _speed = MovementSpeed;
+        _directionTimer = 0f;
         _fireTimer = 0f;
     }
 }
