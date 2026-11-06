@@ -1,4 +1,8 @@
 {
+  "Id": "Room2",
+  "MapX": 0,
+  "MapY": -1,
+  "RoomType": "TopDown",
   "Name": "Room2",
   "SpawnX": 150,
   "SpawnY": 250,
@@ -16,6 +20,8 @@
   "Doors": [
         {
       "Direction": "Bottom",
+      "Id": "Room2.Bottom",
+      "Type": "Open",
       "DestinationRoom": "Room1",
       "DestinationDoor": "Top",
       "SpawnX": 360,

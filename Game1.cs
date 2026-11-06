@@ -22,18 +22,13 @@ public class Game1 : Game
     private Player _player = null!;
     private Texture2D _playerSheet = null!;
     private Texture2D _itemAtlas = null!;
-     private ItemManager _items = null!;
     private Texture2D _projectileAtlas = null!;
     private Texture2D _bossAtlas = null!;
-     private readonly List<ISprite> _sprites = new();
     private ProjectileManager _projectiles = null!;
     private ProjectileFactory _projectileFactory = null!;
     private LevelManager _levelManager = null!;
     private Texture2D _exteriorTexture = null!;
 private readonly List<Boss> _roomBosses = new();
-
-
-    private EnemyManager _enemies = null!;
 
     public Game1()
     {
@@ -66,35 +61,8 @@ private readonly List<Boss> _roomBosses = new();
 
         _playerSheet = Content.Load<Texture2D>("Textures/Player/linkOrganized");
         _player = new Player(new Vector2(100, 100), _playerSheet, Content.Load<Texture2D>("Textures/Player/link"));
-
         
-
         RegisterResettable(_player);
-
-        var enemyPosition = new Vector2(450, 260);
-        var boss = new Boss(
-            SpriteFactory.CreateEnemySprite(Content, "SorcererAttack", enemyPosition),
-            enemyPosition);
-        //boss.FireRequested += SpawnBossProjectile;
-        _enemies = new EnemyManager(new IEnemy[]
-        {
-            new EnemyA(SpriteFactory.CreateEnemySprite(Content, "Run", enemyPosition), enemyPosition),
-            new EnemyB(SpriteFactory.CreateEnemySprite(Content, "DemonFlying", enemyPosition), enemyPosition),
-            new EnemyC(SpriteFactory.CreateEnemySprite(Content, "ManaSeed", enemyPosition), enemyPosition),
-            boss
-        });
-        RegisterResettable(_enemies);
-
-        var itemPosition = new Vector2(700, 260);
-        _items = new ItemManager(new List<IItem>
-        {
-            new Book(ItemSprites.CreateBook(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Key(ItemSprites.CreateKey(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Watch(ItemSprites.CreateWatch(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Heart(ItemSprites.CreateHeart(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Potion(ItemSprites.CreatePotion(_itemAtlas, itemPosition, 2f), itemPosition)
-        });
-        RegisterResettable(_items);
 
         _projectileFactory = new ProjectileFactory(_projectileAtlas, _bossAtlas);
         _projectiles = new ProjectileManager(_projectileFactory);
@@ -121,11 +89,17 @@ private readonly List<Boss> _roomBosses = new();
 
         _keyboardController.Update();
         _player.Update(gameTime);
+
+        // Level Manager logic to check if player is in a door and should transition to another room
         _levelManager.CheckDoorTransitions();
-        foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<IDamageable>())
-            CombatCollisionHandler.Resolve(_player, enemy);
-        _projectiles.ResolveCombat(_player, _levelManager.CurrentRoom.Enemies.OfType<IDamageable>());
-        var boss = _levelManager.CurrentRoom.Enemies.OfType<Boss>().FirstOrDefault();
+        if (_levelManager.CurrentRoom.CurrentEnemy is IDamageable currentEnemy)
+            CombatCollisionHandler.Resolve(_player, currentEnemy);
+        var currentTarget = _levelManager.CurrentRoom.CurrentEnemy as IDamageable;
+        _projectiles.ResolveCombat(
+            _player,
+            currentTarget is null ? Array.Empty<IDamageable>() : new[] { currentTarget });
+        var boss = _levelManager.CurrentRoom.CurrentEnemy as Boss;
+
         string bossStatus = boss is null ? "" : $" | Boss HP: {boss.Health}/{Boss.MaxHealth}";
         Window.Title = $"Escape | HP: {_player.Health}/{Player.MaxHealth}{bossStatus}{(_player.IsDefeated ? " - Defeated: press R" : "")} | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | F1-F3: change room | R: reset | Q: quit";
         base.Update(gameTime);
@@ -152,7 +126,14 @@ private readonly List<Boss> _roomBosses = new();
     // Reset every sprite to its starting state
     public void Reset()
     {
+        bool respawningAtDeathPosition = _player.IsDefeated;
+        Vector2 deathPosition = _player.Position;
         _resetCoordinator.Reset();
+
+        if (respawningAtDeathPosition)
+        {
+            _player.Position = deathPosition;
+        }
     }
 
     private void ConnectRoomCombat()

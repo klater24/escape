@@ -59,6 +59,11 @@ public class LevelManager : IGameResettable
 
     public void ChangeRoom(string roomId, Vector2 spawnPosition)
     {
+        if (_player.IsDefeated)
+        {
+            return;
+        }
+
         LoadRoom(roomId);
         _currentSpawn = spawnPosition;
         _player.Position = _currentSpawn;
@@ -89,6 +94,11 @@ public Vector2 GetDoorSpawn(string roomId, string doorDirection)
 
 public bool TryTransition(Door door)
 {
+    if (_player.IsDefeated)
+    {
+        return false;
+    }
+
     try
     {
         Vector2 spawnPosition = GetDoorSpawn(
@@ -110,6 +120,11 @@ private bool _doorTransitioned;
 
 public void CheckDoorTransitions()
 {
+    if (_player.IsDefeated)
+    {
+        return;
+    }
+
     // Prevent another transition until the player leaves the doorway.
     if (_doorTransitioned)
     {
@@ -144,6 +159,11 @@ public void CheckDoorTransitions()
     {
         CurrentRoom.Update(gameTime);
     }
+
+    public void SelectPreviousEnemy() => CurrentRoom.SelectPreviousEnemy();
+    public void SelectNextEnemy() => CurrentRoom.SelectNextEnemy();
+    public void SelectPreviousItem() => CurrentRoom.SelectPreviousItem();
+    public void SelectNextItem() => CurrentRoom.SelectNextItem();
 
     public void Draw(SpriteBatch spriteBatch)
     {

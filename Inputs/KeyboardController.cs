@@ -59,6 +59,11 @@ public class KeyboardController : IController
         pressedCommands[Keys.F1] = new ChangeRoomCommand(_levelManager, "Room1", new Vector2(100, 100));
         pressedCommands[Keys.F2] = new ChangeRoomCommand(_levelManager, "Room2", new Vector2(100, 100));
         pressedCommands[Keys.F3] = new ChangeRoomCommand(_levelManager, "Room3", new Vector2(100, 100));
+        
+        pressedCommands[Keys.O] = new CycleEnemyCommand(_levelManager, -1);
+        pressedCommands[Keys.P] = new CycleEnemyCommand(_levelManager, 1);
+        pressedCommands[Keys.U] = new CycleItemCommand(_levelManager, -1);
+        pressedCommands[Keys.I] = new CycleItemCommand(_levelManager, 1);
     }
     public void Update()
     {

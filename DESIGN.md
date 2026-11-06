@@ -18,13 +18,14 @@ This milestone demonstrates objects independently. Collision, collection effects
 
 ## Overall structure
 
-`Game1` loads assets, constructs objects, connects commands/events, and delegates update/draw work. Update advances behavior and timers; draw displays the resulting state.
+`Game1` loads shared assets, constructs the player and projectile systems, connects commands/events, and delegates room work to `LevelManager`. The active `Room` owns its blocks plus enemy and item selection managers. Update advances behavior and timers; draw displays the resulting state.
 
 ```text
 KeyboardController -> ICommand -> Player / manager / Game1
-Game1 -> Player, BlockManager, EnemyManager, ItemManager, ProjectileManager
+Game1 -> Player, LevelManager -> active Room -> blocks, EnemyManager, ItemManager
+Game1 -> ProjectileManager
 Gameplay object -> sprite -> SpriteBatch
-R -> ResetCommand -> Game1.Reset -> GameResetCoordinator -> registered systems
+R -> ResetCommand -> Game1.Reset -> GameResetCoordinator -> Player, LevelManager, ProjectileManager
 ```
 
 The block, enemy, and item managers update and draw only their selected object for the demonstration. The projectile manager updates and draws every active shot. Switching selection pauses an unselected enemy/item; cycling does not reset it.
@@ -123,7 +124,7 @@ All four implement `IEnemy`, including update, draw, position, and reset. They r
 | A — Knight | Random movement in four cardinal directions |
 | B — Flying Demon | Eight-direction random movement with varying speed |
 | C — Forester | Alternates walking and pausing, with directional layered animation |
-| Boss — Sorcerer | Horizontal patrol and a firing request every two seconds while selected |
+| Boss — Sorcerer | Random cardinal movement around the room and a firing request every two seconds while selected |
 
 EnemyManager handles O/P wraparound and resets all enemies, including hidden ones. Boss raises `FireRequested` with a spawn position. Game1 handles the event through `ProjectileManager.SpawnBossProjectile`, currently using a rightward direction. Switching away pauses the boss timer; already spawned shots continue. Boss reset clears the firing timer. Random enemies reset their behavior state but do not reseed their random generators for an identical replay.
 
@@ -166,7 +167,7 @@ Spawn methods use the factory and add the result to the active collection. Updat
 
 ## Reset integration
 
-GameResetCoordinator registers the block manager, player, enemy manager, item manager, and projectile manager. It calls each registered system once; managers reset their own objects.
+GameResetCoordinator registers the player, level manager, and projectile manager. The level manager resets the active room, whose block, enemy, and item managers restore their own objects and selection indexes. The projectile manager clears active shots.
 
 | System | Current result of R |
 | --- | --- |
