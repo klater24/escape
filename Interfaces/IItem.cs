@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace escape.Interfaces;
 // The shared rules for an item
-public interface IItem
+public interface IItem : ICollidable
 {
     //the items position on screen
     Vector2 Position { get; set;}

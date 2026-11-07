@@ -18,12 +18,13 @@ public class LevelManager : IGameResettable
     private readonly Player _player;
     private Vector2 _currentSpawn;
     private readonly Texture2D _exteriorTexture;
+    private readonly IInventory _inventory;
 
     public Room CurrentRoom { get; private set; }
     public event Action? RoomChanged;
 
     public LevelManager(Texture2D blockAtlas, string levelsDirectory, ContentManager content,
-                            Texture2D itemAtlas, Player player, Texture2D exteriorTexture)
+                            Texture2D itemAtlas, Player player, Texture2D exteriorTexture, IInventory inventory)
     {
         _blockAtlas = blockAtlas;
         _levelsDirectory = levelsDirectory;
@@ -31,6 +32,7 @@ public class LevelManager : IGameResettable
         _itemAtlas = itemAtlas;
         _player = player;
         _exteriorTexture = exteriorTexture;
+        _inventory = inventory;
 
         LoadRoom("Room1");
     }
@@ -41,7 +43,7 @@ public class LevelManager : IGameResettable
         string filePath = Path.Combine(_levelsDirectory, $"{roomId}.json");
         RoomData data = RoomParser.Load(filePath);
 
-        CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture);
+        CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture, _player, _inventory);
 
         _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
         _player.Position = _currentSpawn;
