@@ -31,7 +31,7 @@ public class Game1 : Game
     private LevelManager _levelManager = null!;
     private Texture2D _exteriorTexture = null!;
 private readonly List<Boss> _roomBosses = new();
-
+private Camera _camera; 
 
     private EnemyManager _enemies = null!;
 
@@ -41,7 +41,7 @@ private readonly List<Boss> _roomBosses = new();
         _graphics.PreferredBackBufferWidth = 960;
         _graphics.PreferredBackBufferHeight = 540;
         _graphics.ApplyChanges();
-
+        _camera = new Camera(_player.Position);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
@@ -114,7 +114,7 @@ private readonly List<Boss> _roomBosses = new();
     protected override void Update(GameTime gameTime)
     {
         _levelManager.Update(gameTime);
-
+        _camera.Update(gameTime);
         _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
             .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
         _projectiles.Update(gameTime);
