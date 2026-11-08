@@ -6,12 +6,13 @@ namespace escape.Items;
 
 public class Inventory : IInventory, IGameResettable
 {
-    public event Action<ItemType, int>? ItemAdded;
-    public event Action<ItemType, int>? ItemRemoved;
-    public event Action<ItemType>? ItemEquipped;
     private readonly Dictionary<ItemType, int> _items = new();
 
     private ItemType? _equippedItem;
+
+    public event Action<ItemType, int>? ItemAdded;
+    public event Action<ItemType, int>? ItemRemoved;
+    public event Action<ItemType>? ItemEquipped;
 
     public void AddItem(ItemType item, int quantity = 1)
     {
@@ -30,33 +31,32 @@ public class Inventory : IInventory, IGameResettable
     }
 
     public bool RemoveItem(ItemType item, int quantity = 1)
-{
-    if (quantity <= 0)
     {
-        throw new ArgumentOutOfRangeException(nameof(quantity));
-    }
-
-    if (GetQuantity(item) < quantity)
-    {
-        return false;
-    }
-
-    _items[item] -= quantity;
-
-    if (_items[item] == 0)
-    {
-        _items.Remove(item);
-
-        if (_equippedItem == item)
+        if (quantity <= 0)
         {
-            _equippedItem = null;
+            throw new ArgumentOutOfRangeException(nameof(quantity));
         }
+
+        if (GetQuantity(item) < quantity)
+        {
+            return false;
+        }
+
+        _items[item] -= quantity;
+
+        if (_items[item] == 0)
+        {
+            _items.Remove(item);
+
+            if (_equippedItem == item)
+            {
+                _equippedItem = null;
+            }
+        }
+
+        ItemRemoved?.Invoke(item, quantity);
+        return true;
     }
-
-    ItemRemoved?.Invoke(item, quantity);
-
-    return true;
-}
 
     public int GetQuantity(ItemType item)
     {
@@ -70,19 +70,17 @@ public class Inventory : IInventory, IGameResettable
         return GetQuantity(item) > 0;
     }
 
-  public bool EquipItem(ItemType item)
-{
-    if (!HasItem(item))
+    public bool EquipItem(ItemType item)
     {
-        return false;
+        if (!HasItem(item))
+        {
+            return false;
+        }
+
+        _equippedItem = item;
+        ItemEquipped?.Invoke(item);
+        return true;
     }
-
-    _equippedItem = item;
-
-    ItemEquipped?.Invoke(item);
-
-    return true;
-}
 
     public ItemType? GetEquippedItem()
     {
@@ -95,4 +93,3 @@ public class Inventory : IInventory, IGameResettable
         _equippedItem = null;
     }
 }
-
