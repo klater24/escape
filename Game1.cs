@@ -36,10 +36,8 @@ public class Game1 : Game
     private readonly List<Boss> _roomBosses = new();
     public Inventory Inventory { get; private set; }
     public int Rupees { get; private set; } = 0;
-    private SpriteFont _hudFont = null!;
-    private HUD _hud = null!;
-    private Texture2D _hudAtlas = null!;
-    private Audio _audio = null!;
+        private HUD _hud = null!;
+        private Audio _audio = null!;
 private Camera _camera = null!; 
 
     private EnemyManager _enemies = null!;
@@ -93,13 +91,12 @@ private Camera _camera = null!;
         _blockAtlas = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
         _exteriorTexture = Content.Load<Texture2D>("Textures/Blocks/Room-Exterior");
 
-        _playerSheet = Content.Load<Texture2D>("Textures/Player/linkOrganized");
+        _playerSheet = Content.Load<Texture2D>("Textures/Player/LinkOrganized");
         _player = new Player(new Vector2(100, 100), _playerSheet, Content.Load<Texture2D>("Textures/Player/link"));
 
-        _hudAtlas = Content.Load<Texture2D>("Textures/UI/NES - The Legend of Zelda - Miscellaneous - HUD & Pause Screen");
-        _hudFont = Content.Load<SpriteFont>("HUDFont");
-        _hud = new HUD(_player, Inventory, _hudFont, _itemAtlas, _hudAtlas);        
-        _camera = new Camera(_player.Position);
+        // HUD draws its own pixel graphics: the original HUD atlas and font are absent.
+        _hud = new HUD(_player, Inventory, GraphicsDevice);
+        _camera = new Camera(_player.Bounds.Center.ToVector2(), 1f);
 
         RegisterResettable(_player);
 
@@ -133,8 +130,7 @@ private Camera _camera = null!;
         RegisterResettable(_projectiles);
 
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
-                                            Content, _itemAtlas, _player, _exteriorTexture, Inventory, AddRupees);
-        _camera = new Camera(_player.Bounds.Center.ToVector2(), 1f);
+                                            Content, _itemAtlas, _player, _exteriorTexture);
         RegisterResettable(_levelManager);
         _levelManager.RoomChanged += ConnectRoomCombat;
         ConnectRoomCombat();
@@ -146,19 +142,19 @@ private Camera _camera = null!;
     // Update every sprite once per frame
     protected override void Update(GameTime gameTime)
     {
+        _keyboardController.Update();
+        _player.Update(gameTime);
         _levelManager.Update(gameTime);
         _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
             .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
         _projectiles.Update(gameTime);
-        if (_camera._isTransition)
+        _levelManager.CheckDoorTransitions();
+        if (_camera.IsTransitioning)
         {
              _camera.Update(gameTime);
         }else{
              _camera.Follow(_player.Bounds.Center.ToVector2(),gameTime);
         }
-        _keyboardController.Update();
-        _player.Update(gameTime);
-        _levelManager.CheckDoorTransitions();
         foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<IDamageable>())
             CombatCollisionHandler.Resolve(_player, enemy);
         _projectiles.ResolveCombat(_player, _levelManager.CurrentRoom.Enemies.OfType<IDamageable>());
@@ -204,6 +200,9 @@ protected override void Draw(GameTime gameTime)
             boss.FireRequested -= SpawnBossProjectile;
         _roomBosses.Clear();
         _projectiles.Reset();
+        // Recenter smoothly whenever the room changes.
+        if (_camera != null)
+            _camera.Transition(_player.Bounds.Center.ToVector2(), 1f, 0.35f);
         _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
             .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
         foreach (var boss in _levelManager.CurrentRoom.Enemies.OfType<Boss>())
@@ -231,6 +230,8 @@ protected override void Draw(GameTime gameTime)
     protected override void UnloadContent()
     {
         // Content owns and disposes the textures loaded through Content.Load.
+        _audio?.StopMusic();
+        _hud?.Dispose();
         _spriteBatch.Dispose();
         base.UnloadContent();
     }}
