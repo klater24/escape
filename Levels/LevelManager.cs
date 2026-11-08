@@ -160,11 +160,6 @@ public void CheckDoorTransitions()
         CurrentRoom.Update(gameTime);
     }
 
-    public void SelectPreviousEnemy() => CurrentRoom.SelectPreviousEnemy();
-    public void SelectNextEnemy() => CurrentRoom.SelectNextEnemy();
-    public void SelectPreviousItem() => CurrentRoom.SelectPreviousItem();
-    public void SelectNextItem() => CurrentRoom.SelectNextItem();
-
     public void Draw(SpriteBatch spriteBatch)
     {
         CurrentRoom.Draw(spriteBatch);

@@ -37,8 +37,6 @@ Click the game window to give it keyboard focus. Close the running game before r
 | 1 | Fire an arrow from the player's position and facing direction |
 | 2 | Place a bomb at the player's position |
 | 3 | Throw a boomerang in the player's facing direction |
-| O / P | Previous / next enemy |
-| U / I | Previous / next pickup |
 | T / Y | Previous / next block |
 | R | Reset the scene and clear active projectiles |
 | Q | Quit |
@@ -48,12 +46,12 @@ Movement keys repeat while held. Other actions occur once per press. Use the num
 ## What to demonstrate
 
 - **Player:** starts at (100, 100), moves, faces left/right/up/down, and displays idle, walking, attack, and damaged states. Attack lasts 0.48 seconds; damage normally lasts 0.96 seconds.
-- **Enemies:** O/P cycles among Knight (random cardinal movement), Flying Demon (eight-direction movement with varying speed), Forester (alternating walking and pausing), and Sorcerer (random cardinal movement). Only the selected enemy updates and draws. Selecting another pauses the previous enemy.
-- **Boss:** the selected Sorcerer requests a rightward projectile every two seconds. Existing shots continue after switching enemies until removed or reset.
-- **Pickups:** Book, Key, Watch, Heart, and Potion cycle at the middle-right of the screen. They bob six pixels around their starting positions on a two-second cycle. Heart and Potion also change image frames.
+- **Enemies:** All enemies placed in the active room are shown, move, and animate together. The Knight moves in random cardinal directions, the Flying Demon moves in eight directions with varying speed, the Forester alternates between walking and pausing, and the Sorcerer moves in random cardinal directions.
+- **Boss:** The Sorcerer requests a rightward projectile every two seconds while in the active room. Its projectiles continue after leaving the room until they expire or are reset.
+- **Pickups:** All pickups placed in the active room are shown and updated together. Book, Key, Watch, Heart, and Potion bob six pixels around their starting positions on a two-second cycle. Heart and Potion also change image frames.
 - **Blocks:** grass, dirt, stone, brick, water, wood, sand, ice, metal, and platform. Only the selected block is shown; blocks remain stationary. All three selectors wrap at either end.
 - **Projectiles:** the scene starts empty. Create shots with 1–3; boss shots are created by the selected boss. Arrow moves for two seconds and expires after three. Bomb has a two-second fuse and a one-second explosion display. Boomerang travels outward for three seconds and returns to its launch point over three seconds. Boss shots expire after six seconds or when they leave the right edge.
-- **Reset:** R restores block/item/enemy selections and their initial state, restores the player's position/facing/state, and clears every active projectile. If the player was defeated, R revives them at their death position. It does not create demo shots.
+- **Reset:** R restores room objects to their initial state, restores the player's position/facing/state, and clears every active projectile. If the player was defeated, R revives them at their death position. It does not create demo shots.
 - **Defeated player:** F1-F3 and door transitions do not leave the player’s death room. Press R to reset the scene and revive the player.
 
 The sprint does not require pickup collection, inventory effects, projectile collisions, or enemies reacting to the player/environment. These are not implemented.

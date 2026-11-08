@@ -92,13 +92,14 @@ private readonly List<Boss> _roomBosses = new();
 
         // Level Manager logic to check if player is in a door and should transition to another room
         _levelManager.CheckDoorTransitions();
-        if (_levelManager.CurrentRoom.CurrentEnemy is IDamageable currentEnemy)
-            CombatCollisionHandler.Resolve(_player, currentEnemy);
-        var currentTarget = _levelManager.CurrentRoom.CurrentEnemy as IDamageable;
-        _projectiles.ResolveCombat(
-            _player,
-            currentTarget is null ? Array.Empty<IDamageable>() : new[] { currentTarget });
-        var boss = _levelManager.CurrentRoom.CurrentEnemy as Boss;
+        var currentRoomEnemies = _levelManager.CurrentRoom.Enemies;
+        foreach (var enemy in currentRoomEnemies.OfType<IDamageable>())
+        {
+            CombatCollisionHandler.Resolve(_player, enemy);
+        }
+
+        _projectiles.ResolveCombat(_player, currentRoomEnemies.OfType<IDamageable>());
+        var boss = currentRoomEnemies.OfType<Boss>().FirstOrDefault();
 
         string bossStatus = boss is null ? "" : $" | Boss HP: {boss.Health}/{Boss.MaxHealth}";
         Window.Title = $"Escape | HP: {_player.Health}/{Player.MaxHealth}{bossStatus}{(_player.IsDefeated ? " - Defeated: press R" : "")} | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | F1-F3: change room | R: reset | Q: quit";

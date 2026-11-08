@@ -5,35 +5,34 @@ using System.Collections.Generic;
 
 namespace escape.Enemies;
 
-// Enemy Manager purpose is to manage the enemies in the game, allowing for cycling through them, updating their state, and drawing them on the screen
-// It implements the IGameResettable interface to allow for resetting the state of all managed enemies.
+// Updates, draws, and resets all enemies in a room
 public sealed class EnemyManager : escape.Interfaces.IGameResettable
 {
     private readonly IReadOnlyList<IEnemy> _enemies;
-    public int SelectedIndex { get; private set; }
-    public IEnemy? Current => _enemies.Count == 0 ? null : _enemies[SelectedIndex]; 
 
     public EnemyManager(IReadOnlyList<IEnemy> enemies)
     {
         _enemies = enemies;
     }
 
-    public void Cycle(int direction)
+    public void Update(GameTime gameTime)
     {
-        if (_enemies.Count == 0)
+        foreach (var enemy in _enemies)
         {
-            return;
+            enemy.Update(gameTime);
         }
-
-        SelectedIndex = ((SelectedIndex + direction) % _enemies.Count + _enemies.Count) % _enemies.Count;
     }
 
-    public void Update(GameTime gameTime) => Current?.Update(gameTime);
-    public void Draw(SpriteBatch spriteBatch) => Current?.Draw(spriteBatch);
+    public void Draw(SpriteBatch spriteBatch)
+    {
+        foreach (var enemy in _enemies)
+        {
+            enemy.Draw(spriteBatch);
+        }
+    }
 
     public void Reset()
     {
         foreach (var enemy in _enemies) enemy.Reset();
-        SelectedIndex = 0;
     }
 }

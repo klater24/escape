@@ -28,7 +28,6 @@ public class Room
     public IReadOnlyList<IItem> Items => _items;
     public IReadOnlyList<Block> Blocks => _blocks;
     public IReadOnlyList<IEnemy> Enemies => _enemies;
-    public IEnemy? CurrentEnemy => _enemyManager.Current;
     private readonly List<RoomWallCollider> _exteriorWalls = new();
     public IReadOnlyList<RoomWallCollider> ExteriorWalls => _exteriorWalls;
     private readonly List<Door> _doors = new();
@@ -373,11 +372,6 @@ private bool HasDoor(string direction)
         _enemyManager.Update(gameTime);
         _itemManager.Update(gameTime);
     }
-
-    public void SelectPreviousEnemy() => _enemyManager.Cycle(-1);
-    public void SelectNextEnemy() => _enemyManager.Cycle(1);
-    public void SelectPreviousItem() => _itemManager.Cycle(-1);
-    public void SelectNextItem() => _itemManager.Cycle(1);
 
     public void Draw(SpriteBatch spriteBatch)
     {
