@@ -10,6 +10,7 @@ using escape.Sprites;
 using escape.Items;
 using escape.Collisions;
 
+
 namespace escape.Levels;
 
 public class Room
@@ -33,6 +34,8 @@ public class Room
     private readonly List<Door> _doors = new();
     public IReadOnlyList<Door> Doors => _doors;
     private readonly List<Block> _floorTiles = new();
+    private readonly IInventory _inventory;
+    private readonly Player _player;
     
 
     public Room(
@@ -40,13 +43,17 @@ public class Room
         Texture2D blockAtlas,
         ContentManager content,
         Texture2D itemAtlas,
-        Texture2D exteriorTexture)
+        Texture2D exteriorTexture,
+        Player player,
+        IInventory inventory)
     {
         Name = data.Name;
         _data = data;
         _blockAtlas = blockAtlas;
         _content = content;
         _itemAtlas = itemAtlas;
+        _player = player;
+        _inventory = inventory;
 
         _exterior = new RoomExterior(exteriorTexture, Vector2.Zero, 3f);
 
@@ -65,7 +72,40 @@ public class Room
         
     }
 
+    private void CheckItemCollisions()
+    {
+        foreach (IItem item in _items.ToList())
+        {
+            if (!AABBCollisionDetector.IsColliding(_player, item))
+            {
+                continue;
+            }
 
+            switch (item)
+            {
+                case Key:
+                    _inventory.AddItem(ItemType.Key);
+                    break;
+
+                case Book:
+                    _inventory.AddItem(ItemType.Book);
+                    break;
+
+                case Watch:
+                    _inventory.AddItem(ItemType.Watch);
+                    break;
+
+                case Potion:
+                    _inventory.AddItem(ItemType.Potion);
+                    break;
+
+                default:
+                    continue;
+            }
+
+            _items.Remove(item);
+        }
+    }
     private void CreateBlock(string type, Vector2 position, float scale)
     {
         bool isSolid = type is "stone" or "brick" or "metal";
@@ -371,6 +411,8 @@ private bool HasDoor(string direction)
 
         _enemyManager.Update(gameTime);
         _itemManager.Update(gameTime);
+
+        CheckItemCollisions();
     }
 
     public void Draw(SpriteBatch spriteBatch)
