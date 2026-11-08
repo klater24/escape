@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Media;
-
+namespace escape.Sounds;
 public class Audio
 {
     private readonly Dictionary<string, SoundEffect> _soundEffects = new();
@@ -12,10 +12,8 @@ public class Audio
 
     public void LoadContent(ContentManager content)
     {
-        _soundEffects["PlaceHolder"] =
-            content.Load<SoundEffect>("SoundEffects/button.mp3");
-        _music["MainTheme"] =
-            content.Load<Song>("SoundEffects/bg.mp3");
+        _soundEffects["main"] = content.Load<SoundEffect>("SoundEffects/effect.wav");
+        _music["MainTheme"] =  content.Load<Song>("SoundEffects/bg.mp3");
     }
        public void PlaySound(string name)
     {
@@ -26,16 +24,13 @@ public class Audio
     }
        public void PlayMusic(string name)
     {
-        if (!_music.TryGetValue(name, out Song? song))
+       if (!_music.TryGetValue(name, out Song? song))
             return;
-        if (_currentMusic == name && MediaPlayer.State == MediaState.Playing)
-        {
+
+        if (_currentMusic == name &&MediaPlayer.State == MediaState.Playing)
             return;
-        }
-        if (MediaPlayer.State != MediaState.Stopped)
-        {
-            MediaPlayer.Stop();
-        }
+
+        MediaPlayer.Stop();
 
         MediaPlayer.IsRepeating = true;
         MediaPlayer.Play(song);
