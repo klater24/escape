@@ -9,6 +9,8 @@ using escape.Collisions;
 using escape.Items;
 using escape.Sprites;
 using escape.UI;
+using escape.View;
+using escape.Sounds;
 
 namespace escape;
 
@@ -37,6 +39,8 @@ public class Game1 : Game
     private SpriteFont _hudFont = null!;
     private HUD _hud = null!;
     private Texture2D _hudAtlas = null!;
+    private Audio _audio = null!;
+private Camera _camera = null!; 
 
     private EnemyManager _enemies = null!;
 
@@ -51,7 +55,6 @@ public class Game1 : Game
         _graphics.PreferredBackBufferWidth = 768;
         _graphics.PreferredBackBufferHeight = 696;
         _graphics.ApplyChanges();
-
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
@@ -66,7 +69,21 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-
+        _audio = new Audio();
+        _audio.LoadContent(Content);
+        _audio.PlayMusic("MainTheme");
+        Inventory.ItemAdded += (item, quantity) =>
+        {
+             _audio.PlaySound("ItemPickup");
+        };
+        Inventory.ItemRemoved += (item, quantity) =>
+        {
+            _audio.PlaySound("main");
+        };
+        Inventory.ItemEquipped += item =>
+        {
+            _audio.PlaySound("main");
+        };
         _itemAtlas = Content.Load<Texture2D>("zeldaitems");
         _projectileAtlas = Content.Load<Texture2D>("zelda");
         _bossAtlas = Content.Load<Texture2D>("boses");
@@ -82,6 +99,7 @@ public class Game1 : Game
         _hudAtlas = Content.Load<Texture2D>("Textures/UI/NES - The Legend of Zelda - Miscellaneous - HUD & Pause Screen");
         _hudFont = Content.Load<SpriteFont>("HUDFont");
         _hud = new HUD(_player, Inventory, _hudFont, _itemAtlas, _hudAtlas);        
+        _camera = new Camera(_player.Position);
 
         RegisterResettable(_player);
 
@@ -116,11 +134,12 @@ public class Game1 : Game
 
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
                                             Content, _itemAtlas, _player, _exteriorTexture, Inventory, AddRupees);
+        _camera = new Camera(_player.Bounds.Center.ToVector2(), 1f);
         RegisterResettable(_levelManager);
         _levelManager.RoomChanged += ConnectRoomCombat;
         ConnectRoomCombat();
 
-        _keyboardController = new KeyboardController(this, _player, _projectiles, _levelManager);
+        _keyboardController = new KeyboardController(this, _player, _projectiles, _levelManager, _audio);
         _keyboardController.Initialize();
     }
 
@@ -128,11 +147,15 @@ public class Game1 : Game
     protected override void Update(GameTime gameTime)
     {
         _levelManager.Update(gameTime);
-
         _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
             .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
         _projectiles.Update(gameTime);
-
+        if (_camera._isTransition)
+        {
+             _camera.Update(gameTime);
+        }else{
+             _camera.Follow(_player.Bounds.Center.ToVector2(),gameTime);
+        }
         _keyboardController.Update();
         _player.Update(gameTime);
         _levelManager.CheckDoorTransitions();
@@ -146,28 +169,25 @@ public class Game1 : Game
     }
 
     // Draw everything in the scene
-    protected override void Draw(GameTime gameTime)
-    {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+protected override void Draw(GameTime gameTime)
+{
+    GraphicsDevice.Clear(Color.CornflowerBlue);
+    _spriteBatch.Begin(samplerState: SamplerState.PointClamp,transformMatrix: _camera.GetViewMatrix(GraphicsDevice.Viewport));
 
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: Matrix.CreateTranslation(0, 168, 0));
+    _levelManager.Draw(_spriteBatch);
+    _projectiles.Draw(_spriteBatch, gameTime);
+    _player.Draw(_spriteBatch);
 
-        _levelManager.Draw(_spriteBatch);
+    _spriteBatch.End();
 
-        _projectiles.Draw(_spriteBatch, gameTime);
+    _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-        _player.Draw(_spriteBatch);
+    _hud.Draw(_spriteBatch, Rupees);
 
-        _spriteBatch.End();
+    _spriteBatch.End();
 
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-
-        _hud.Draw(_spriteBatch, Rupees);
-
-        _spriteBatch.End();
-
-        base.Draw(gameTime);
-    }
+    base.Draw(gameTime);
+}
 
     // Reset every sprite to its starting state
     public void Reset()
@@ -175,6 +195,7 @@ public class Game1 : Game
         Rupees = 0;
         Inventory.Reset();
         _resetCoordinator.Reset();
+        _camera.Transition(_player.Bounds.Center.ToVector2(),1f,0.3f);
     }
 
     private void ConnectRoomCombat()
@@ -213,4 +234,3 @@ public class Game1 : Game
         _spriteBatch.Dispose();
         base.UnloadContent();
     }}
-
