@@ -172,6 +172,8 @@ public class Game1 : Game
     // Reset every sprite to its starting state
     public void Reset()
     {
+        Rupees = 0;
+        Inventory.Reset();
         _resetCoordinator.Reset();
     }
 
@@ -202,7 +204,7 @@ public class Game1 : Game
     public void RegisterResettable(IGameResettable system)
     {
         _resetCoordinator.Register(system);
-        Rupees = 0;
+        
     }
 
     protected override void UnloadContent()
