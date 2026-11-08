@@ -1,8 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
-using escape.Collisions;
-using Microsoft.Xna.Framework;
 
 namespace escape.Items;
 
@@ -16,11 +14,6 @@ public class Book : IItem
 
     public Vector2 Position { get; set; }
 
-    public Rectangle Bounds => new Rectangle( (int)Position.X, (int)Position.Y, 14, 30);
-
-    public Collision Category => Collision.Pickup;
-
-    public bool IsCollisionEnabled { get; private set; } = true;
     public Book(ISprite sprite, Vector2 position)
     {
         _sprite = sprite;
@@ -50,6 +43,5 @@ public class Book : IItem
         Position = _initialPosition;
         _sprite.Reset();
         _sprite.Position = Position;
-        IsCollisionEnabled = true;
     }
 }
