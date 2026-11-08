@@ -11,6 +11,7 @@ namespace escape.Levels;
 
 public class LevelManager : IGameResettable
 {
+    public const string StartingRoom = "Room1";
     private readonly Texture2D _blockAtlas;
     private readonly string _levelsDirectory;
     private readonly ContentManager _content;
@@ -22,6 +23,7 @@ public class LevelManager : IGameResettable
 
     public Room CurrentRoom { get; private set; }
     public event Action? RoomChanged;
+    public event Action<string>? RoomChanging;
 
     public LevelManager(Texture2D blockAtlas, string levelsDirectory, ContentManager content,
                             Texture2D itemAtlas, Player player, Texture2D exteriorTexture, IInventory inventory)
@@ -34,7 +36,7 @@ public class LevelManager : IGameResettable
         _exteriorTexture = exteriorTexture;
         _inventory = inventory;
 
-        LoadRoom("Room1");
+        LoadRoom(StartingRoom);
     }
 
     [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(CurrentRoom))]
@@ -61,6 +63,8 @@ public class LevelManager : IGameResettable
 
     public void ChangeRoom(string roomId, Vector2 spawnPosition)
     {
+        if (_player.IsDefeated) return;
+        RoomChanging?.Invoke(roomId);
         LoadRoom(roomId);
         _currentSpawn = spawnPosition;
         _player.Position = _currentSpawn;
@@ -112,6 +116,7 @@ private bool _doorTransitioned;
 
 public void CheckDoorTransitions()
 {
+    if (_player.IsDefeated) return;
     // Prevent another transition until the player leaves the doorway.
     if (_doorTransitioned)
     {
@@ -154,7 +159,7 @@ public void CheckDoorTransitions()
 
     public void Reset()
     {
-        CurrentRoom.Reset();
-        _player.Position = _currentSpawn;
+        _doorTransitioned = false;
+        LoadRoom(StartingRoom);
     }
 }

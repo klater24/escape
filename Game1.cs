@@ -8,6 +8,7 @@ using escape.Enemies;
 using escape.Collisions;
 using escape.Items;
 using escape.Sprites;
+using escape.GameStates;
 
 namespace escape;
 
@@ -31,7 +32,12 @@ public class Game1 : Game
     private LevelManager _levelManager = null!;
     private Texture2D _exteriorTexture = null!;
     private readonly List<Boss> _roomBosses = new();
-    public Inventory Inventory { get; private set; }
+    public Inventory Inventory { get; private set; } = null!;
+    public GameStateManager States { get; } = new();
+    public IGameTransition Transitions { get; set; } = new ImmediateGameTransition();
+    public IInventoryScreen InventoryScreen { get; set; } = null!;
+    private StateScreen _stateScreen = null!;
+    private const int StartingKeys = 3;
 
 
     private EnemyManager _enemies = null!;
@@ -50,7 +56,8 @@ public class Game1 : Game
     protected override void Initialize()
     {
         Inventory = new Inventory();
-        Inventory.AddItem(ItemType.Key, 3);
+        Inventory.AddItem(ItemType.Key, StartingKeys);
+        RegisterResettable(Inventory);
         base.Initialize();
     }
 
@@ -58,6 +65,9 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+        var stateFont = Content.Load<SpriteFont>("Fonts/StateFont");
+        _stateScreen = new StateScreen(GraphicsDevice, stateFont);
+        InventoryScreen = new BasicInventoryScreen(Inventory, stateFont);
 
         _itemAtlas = Content.Load<Texture2D>("zeldaitems");
         _projectileAtlas = Content.Load<Texture2D>("zelda");
@@ -107,6 +117,7 @@ public class Game1 : Game
                                             Content, _itemAtlas, _player, _exteriorTexture, Inventory);
         RegisterResettable(_levelManager);
         _levelManager.RoomChanged += ConnectRoomCombat;
+        _levelManager.RoomChanging += BeginRoomTransition;
         ConnectRoomCombat();
 
         _keyboardController = new KeyboardController(this, _player, _projectiles, _levelManager);
@@ -116,21 +127,39 @@ public class Game1 : Game
     // Update every sprite once per frame
     protected override void Update(GameTime gameTime)
     {
-        _levelManager.Update(gameTime);
-
-        _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
-            .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
-        _projectiles.Update(gameTime);
-
+        EvaluateOutcome();
+        var stateBeforeInput = States.Current;
         _keyboardController.Update();
-        _player.Update(gameTime);
-        _levelManager.CheckDoorTransitions();
-        foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<IDamageable>())
-            CombatCollisionHandler.Resolve(_player, enemy);
-        _projectiles.ResolveCombat(_player, _levelManager.CurrentRoom.Enemies.OfType<IDamageable>());
+        EvaluateOutcome();
+        if (States.Current == GameState.Transition)
+        {
+            Transitions.Update(gameTime);
+            if (!Transitions.IsTransitioning) States.CompleteTransition();
+        }
+        else if (States.Current == GameState.Inventory && stateBeforeInput == GameState.Inventory)
+        {
+            InventoryScreen.Update(gameTime);
+        }
+        else if (States.CanUpdateGameplay && stateBeforeInput == GameState.Gameplay)
+        {
+            _player.Update(gameTime);
+            _levelManager.Update(gameTime);
+            EvaluateOutcome();
+            if (States.CanUpdateGameplay)
+            {
+                _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
+                    .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
+                _projectiles.Update(gameTime);
+                foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<IDamageable>())
+                    CombatCollisionHandler.Resolve(_player, enemy);
+                _projectiles.ResolveCombat(_player, _levelManager.CurrentRoom.Enemies.OfType<IDamageable>());
+                EvaluateOutcome();
+                if (States.CanUpdateGameplay) _levelManager.CheckDoorTransitions();
+            }
+        }
         var boss = _levelManager.CurrentRoom.Enemies.OfType<Boss>().FirstOrDefault();
         string bossStatus = boss is null ? "" : $" | Boss HP: {boss.Health}/{Boss.MaxHealth}";
-        Window.Title = $"Escape | HP: {_player.Health}/{Player.MaxHealth}{bossStatus}{(_player.IsDefeated ? " - Defeated: press R" : "")} | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | F1-F3: change room | R: reset | Q: quit";
+        Window.Title = $"Escape | {States.Current} | HP: {_player.Health}/{Player.MaxHealth}{bossStatus} | P: pause | Enter: inventory | Z/N: attack | 1-3: items | F1-F3: rooms | R: restart | Q: quit";
         base.Update(gameTime);
     }
 
@@ -141,11 +170,18 @@ public class Game1 : Game
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-        _levelManager.Draw(_spriteBatch);
-
-        _projectiles.Draw(_spriteBatch, gameTime);
-
-        _player.Draw(_spriteBatch);
+        if (States.Current == GameState.Inventory)
+        {
+            GraphicsDevice.Clear(Color.Black);
+            InventoryScreen.Draw(_spriteBatch, GraphicsDevice.Viewport.Bounds);
+        }
+        else
+        {
+            _levelManager.Draw(_spriteBatch);
+            _projectiles.Draw(_spriteBatch, gameTime);
+            _player.Draw(_spriteBatch);
+            _stateScreen.Draw(_spriteBatch, GraphicsDevice.Viewport.Bounds, States.Current);
+        }
 
         _spriteBatch.End();
 
@@ -155,7 +191,27 @@ public class Game1 : Game
     // Reset every sprite to its starting state
     public void Reset()
     {
+        Transitions.Cancel();
         _resetCoordinator.Reset();
+        Inventory.AddItem(ItemType.Key, StartingKeys);
+        InventoryScreen.Reset();
+        States.Reset();
+    }
+
+    public void ToggleInventory()
+    {
+        var from = States.Current;
+        if (!States.BeginInventoryTransition()) return;
+        InventoryScreen.Reset();
+        Transitions.Begin(from, States.TransitionTarget);
+    }
+
+    private void EvaluateOutcome() => States.EvaluateOutcome(_player.IsDefeated, Inventory.HasItem(ItemType.Triforce));
+
+    private void BeginRoomTransition(string roomId)
+    {
+        if (States.BeginRoomTransition())
+            Transitions.Begin(GameState.Gameplay, GameState.Gameplay, roomId);
     }
 
     private void ConnectRoomCombat()
@@ -191,6 +247,7 @@ public class Game1 : Game
     {
         // Content owns and disposes the textures loaded through Content.Load.
         _spriteBatch.Dispose();
+        _stateScreen.Dispose();
         base.UnloadContent();
     }}
 
