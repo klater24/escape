@@ -54,26 +54,4 @@ public static ISprite CreatePotion(Texture2D atlas, Vector2 position, float scal
         };
         return new AnimatedSprite(atlas, itemBookFrames, position, 1f, scale);
     }
-
-    public static ISprite CreateHeartContainer(
-        Texture2D atlas, Vector2 position, float scale)
-    {
-        var frames = new[]
-        {
-            new Rectangle(25, 0, 13, 15)
-        };
-
-        return new AnimatedSprite(atlas, frames, position, .5f, scale);
-    }
-
-    public static ISprite CreateRupee(
-        Texture2D atlas, Vector2 position, float scale)
-    {
-        var frames = new[]
-        {
-            new Rectangle(72, 0, 8, 16)
-        };
-
-        return new AnimatedSprite(atlas, frames, position, .5f, scale);
-    }
 }
