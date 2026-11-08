@@ -18,14 +18,12 @@ public class LevelManager : IGameResettable
     private readonly Player _player;
     private Vector2 _currentSpawn;
     private readonly Texture2D _exteriorTexture;
-    private readonly IInventory _inventory;
 
     public Room CurrentRoom { get; private set; }
     public event Action? RoomChanged;
-    private readonly Action<int> _addRupees;
 
     public LevelManager(Texture2D blockAtlas, string levelsDirectory, ContentManager content,
-                            Texture2D itemAtlas, Player player, Texture2D exteriorTexture, IInventory inventory, Action<int> addRupees)
+                            Texture2D itemAtlas, Player player, Texture2D exteriorTexture)
     {
         _blockAtlas = blockAtlas;
         _levelsDirectory = levelsDirectory;
@@ -33,8 +31,6 @@ public class LevelManager : IGameResettable
         _itemAtlas = itemAtlas;
         _player = player;
         _exteriorTexture = exteriorTexture;
-        _inventory = inventory;
-        _addRupees = addRupees;
 
         LoadRoom("Room1");
     }
@@ -45,7 +41,7 @@ public class LevelManager : IGameResettable
         string filePath = Path.Combine(_levelsDirectory, $"{roomId}.json");
         RoomData data = RoomParser.Load(filePath);
 
-        CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture, _player, _inventory, _addRupees);
+        CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture);
 
         _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
         _player.Position = _currentSpawn;
@@ -56,9 +52,6 @@ public class LevelManager : IGameResettable
             .Concat(CurrentRoom.ExteriorWalls)
             .ToList();
 
-        _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
-        _player.Position = _currentSpawn;
-        RoomChanged?.Invoke();
     }
 
     public void ChangeRoom(string roomId, Vector2 spawnPosition)
@@ -66,6 +59,7 @@ public class LevelManager : IGameResettable
         LoadRoom(roomId);
         _currentSpawn = spawnPosition;
         _player.Position = _currentSpawn;
+        RoomChanged?.Invoke();
     }
 
 public Vector2 GetDoorSpawn(string roomId, string doorDirection)
