@@ -30,6 +30,7 @@ public class Game1 : Game
     private ProjectileFactory _projectileFactory = null!;
     private LevelManager _levelManager = null!;
     private Texture2D _exteriorTexture = null!;
+    private Audio _audio;
 private readonly List<Boss> _roomBosses = new();
 private Camera _camera; 
 
@@ -42,6 +43,7 @@ private Camera _camera;
         _graphics.PreferredBackBufferHeight = 540;
         _graphics.ApplyChanges();
         _camera = new Camera(_player.Position);
+        _audio = new Audio();
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
@@ -55,7 +57,8 @@ private Camera _camera;
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-
+        _audio.LoadContent(Content);
+        _audio.PlayMusic("MainTheme");
         _itemAtlas = Content.Load<Texture2D>("zeldaitems");
         _projectileAtlas = Content.Load<Texture2D>("zelda");
         _bossAtlas = Content.Load<Texture2D>("boses");
