@@ -469,3 +469,8 @@
 /processorParam:TextureFormat=Color
 /build:zeldaitems.png
 
+
+#begin Fonts/StateFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/build:Fonts/StateFont.spritefont
