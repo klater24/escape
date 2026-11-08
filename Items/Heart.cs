@@ -1,8 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
-using escape.Collisions;
-using Microsoft.Xna.Framework;
 
 namespace escape.Items;
 
@@ -13,11 +11,6 @@ public class Heart : IItem
     private const float BobHeight = 6f;
     private const float BobPeriodSeconds = 2f;
     private float _bobTime;
-    public Rectangle Bounds => new Rectangle( (int)Position.X, (int)Position.Y, 14, 30);
-
-    public Collision Category => Collision.Pickup;
-
-    public bool IsCollisionEnabled { get; private set; } = true;
 
     public Vector2 Position { get; set; }
 
@@ -49,6 +42,5 @@ public class Heart : IItem
         Position = _initialPosition;
         _sprite.Reset();
         _sprite.Position = Position;
-        IsCollisionEnabled = true;
     }
 }
