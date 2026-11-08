@@ -8,6 +8,8 @@ using escape.Enemies;
 using escape.Collisions;
 using escape.Items;
 using escape.Sprites;
+using escape.View;
+using escape.Sounds;
 
 namespace escape;
 
@@ -30,9 +32,9 @@ public class Game1 : Game
     private ProjectileFactory _projectileFactory = null!;
     private LevelManager _levelManager = null!;
     private Texture2D _exteriorTexture = null!;
-    private Audio _audio;
+    private Audio _audio = null!;
 private readonly List<Boss> _roomBosses = new();
-private Camera _camera; 
+private Camera _camera = null!; 
 
     private EnemyManager _enemies = null!;
 
@@ -42,8 +44,6 @@ private Camera _camera;
         _graphics.PreferredBackBufferWidth = 960;
         _graphics.PreferredBackBufferHeight = 540;
         _graphics.ApplyChanges();
-        _camera = new Camera(_player.Position);
-        _audio = new Audio();
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
@@ -57,6 +57,7 @@ private Camera _camera;
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+        _audio = new Audio();
         _audio.LoadContent(Content);
         _audio.PlayMusic("MainTheme");
         _itemAtlas = Content.Load<Texture2D>("zeldaitems");
@@ -69,8 +70,7 @@ private Camera _camera;
 
         _playerSheet = Content.Load<Texture2D>("Textures/Player/linkOrganized");
         _player = new Player(new Vector2(100, 100), _playerSheet, Content.Load<Texture2D>("Textures/Player/link"));
-
-        
+        _camera = new Camera(_player.Position);
 
         RegisterResettable(_player);
 
@@ -105,11 +105,12 @@ private Camera _camera;
 
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
                                             Content, _itemAtlas, _player, _exteriorTexture);
+        _camera = new Camera(_player.Bounds.Center.ToVector2(), 1f);
         RegisterResettable(_levelManager);
         _levelManager.RoomChanged += ConnectRoomCombat;
         ConnectRoomCombat();
 
-        _keyboardController = new KeyboardController(this, _player, _projectiles, _levelManager);
+        _keyboardController = new KeyboardController(this, _player, _projectiles, _levelManager, _audio);
         _keyboardController.Initialize();
     }
 
@@ -117,11 +118,15 @@ private Camera _camera;
     protected override void Update(GameTime gameTime)
     {
         _levelManager.Update(gameTime);
-        _camera.Update(gameTime);
         _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
             .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
         _projectiles.Update(gameTime);
-
+        if (_camera._isTransition)
+        {
+             _camera.Update(gameTime);
+        }else{
+             _camera.Follow(_player.Bounds.Center.ToVector2(),gameTime);
+        }
         _keyboardController.Update();
         _player.Update(gameTime);
         _levelManager.CheckDoorTransitions();
@@ -139,7 +144,7 @@ private Camera _camera;
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+       _spriteBatch.Begin(samplerState: SamplerState.PointClamp,transformMatrix: _camera.GetViewMatrix(GraphicsDevice.Viewport));
 
         _levelManager.Draw(_spriteBatch);
 
@@ -156,6 +161,7 @@ private Camera _camera;
     public void Reset()
     {
         _resetCoordinator.Reset();
+        _camera.Transition(_player.Bounds.Center.ToVector2(),1f,0.3f);
     }
 
     private void ConnectRoomCombat()
