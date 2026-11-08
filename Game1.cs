@@ -8,6 +8,7 @@ using escape.Enemies;
 using escape.Collisions;
 using escape.Items;
 using escape.Sprites;
+using escape.UI;
 using escape.View;
 using escape.Sounds;
 
@@ -32,17 +33,27 @@ public class Game1 : Game
     private ProjectileFactory _projectileFactory = null!;
     private LevelManager _levelManager = null!;
     private Texture2D _exteriorTexture = null!;
+    private readonly List<Boss> _roomBosses = new();
+    public Inventory Inventory { get; private set; }
+    public int Rupees { get; private set; } = 0;
+    private SpriteFont _hudFont = null!;
+    private HUD _hud = null!;
+    private Texture2D _hudAtlas = null!;
     private Audio _audio = null!;
-private readonly List<Boss> _roomBosses = new();
 private Camera _camera = null!; 
 
     private EnemyManager _enemies = null!;
 
+    public void AddRupees(int amount = 1)
+    {
+        if (amount > 0)
+            Rupees += amount;
+    }
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
-        _graphics.PreferredBackBufferWidth = 960;
-        _graphics.PreferredBackBufferHeight = 540;
+        _graphics.PreferredBackBufferWidth = 768;
+        _graphics.PreferredBackBufferHeight = 696;
         _graphics.ApplyChanges();
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
@@ -50,6 +61,7 @@ private Camera _camera = null!;
 
     protected override void Initialize()
     {
+        Inventory = new Inventory();
         base.Initialize();
     }
 
@@ -63,6 +75,7 @@ private Camera _camera = null!;
         _itemAtlas = Content.Load<Texture2D>("zeldaitems");
         _projectileAtlas = Content.Load<Texture2D>("zelda");
         _bossAtlas = Content.Load<Texture2D>("boses");
+        
 
         // Load the PixelPack block tiles
         _blockAtlas = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
@@ -70,6 +83,10 @@ private Camera _camera = null!;
 
         _playerSheet = Content.Load<Texture2D>("Textures/Player/linkOrganized");
         _player = new Player(new Vector2(100, 100), _playerSheet, Content.Load<Texture2D>("Textures/Player/link"));
+
+        _hudAtlas = Content.Load<Texture2D>("Textures/UI/NES - The Legend of Zelda - Miscellaneous - HUD & Pause Screen");
+        _hudFont = Content.Load<SpriteFont>("HUDFont");
+        _hud = new HUD(_player, Inventory, _hudFont, _itemAtlas, _hudAtlas);        
         _camera = new Camera(_player.Position);
 
         RegisterResettable(_player);
@@ -104,6 +121,7 @@ private Camera _camera = null!;
         RegisterResettable(_projectiles);
 
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
+                                            Content, _itemAtlas, _player, _exteriorTexture, Inventory, AddRupees);
                                             Content, _itemAtlas, _player, _exteriorTexture);
         _camera = new Camera(_player.Bounds.Center.ToVector2(), 1f);
         RegisterResettable(_levelManager);
@@ -135,7 +153,7 @@ private Camera _camera = null!;
         _projectiles.ResolveCombat(_player, _levelManager.CurrentRoom.Enemies.OfType<IDamageable>());
         var boss = _levelManager.CurrentRoom.Enemies.OfType<Boss>().FirstOrDefault();
         string bossStatus = boss is null ? "" : $" | Boss HP: {boss.Health}/{Boss.MaxHealth}";
-        Window.Title = $"Escape | HP: {_player.Health}/{Player.MaxHealth}{bossStatus}{(_player.IsDefeated ? " - Defeated: press R" : "")} | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | F1-F3: change room | R: reset | Q: quit";
+        Window.Title = $"Escape | HP: {_player.Health}/{_player.MaxHealth}{bossStatus}{(_player.IsDefeated ? " - Defeated: press R" : "")} | WASD/Arrows: move | Z/N: attack | E: damage | 1: arrow | 2: bomb | 3: boomerang | F1-F3: change room | R: reset | Q: quit";
         base.Update(gameTime);
     }
 
@@ -144,6 +162,7 @@ private Camera _camera = null!;
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: Matrix.CreateTranslation(0, 168, 0));
        _spriteBatch.Begin(samplerState: SamplerState.PointClamp,transformMatrix: _camera.GetViewMatrix(GraphicsDevice.Viewport));
 
         _levelManager.Draw(_spriteBatch);
@@ -154,12 +173,20 @@ private Camera _camera = null!;
 
         _spriteBatch.End();
 
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+
+        _hud.Draw(_spriteBatch, Rupees);
+
+        _spriteBatch.End();
+
         base.Draw(gameTime);
     }
 
     // Reset every sprite to its starting state
     public void Reset()
     {
+        Rupees = 0;
+        Inventory.Reset();
         _resetCoordinator.Reset();
         _camera.Transition(_player.Bounds.Center.ToVector2(),1f,0.3f);
     }
@@ -191,6 +218,7 @@ private Camera _camera = null!;
     public void RegisterResettable(IGameResettable system)
     {
         _resetCoordinator.Register(system);
+        
     }
 
     protected override void UnloadContent()
