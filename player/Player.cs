@@ -3,6 +3,7 @@ using escape.Collisions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Sprites;
+using escape.Sounds;
 public enum Direction
 {
     Up,
@@ -20,6 +21,7 @@ public enum State
 
 public class Player : IGameResettable, IMoveCollider
 {
+    public bool CanStartAttack => !IsDefeated && currentState != State.Attacking && currentState != State.Damaged;
     public Rectangle Bounds => new Rectangle((int)position.X, (int)position.Y, 48, 48);
     public Collision Category => Collision.Player;
     public const int MaxHealth = 3;
