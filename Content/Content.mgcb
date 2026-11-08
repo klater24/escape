@@ -25,6 +25,13 @@
 /processorParam:TextureFormat=Color
 /build:boses.png
 
+#begin HUDFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:HUDFont.spritefont
+
 #begin Textures/Blocks/doors.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -36,18 +43,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/Blocks/doors.png
-
-#begin Textures/Blocks/PixelPack_Block_Atlas.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Textures/Blocks/PixelPack_Block_Atlas.png
 
 #begin Textures/Blocks/PixelPack_Block_Atlas.png
 /importer:TextureImporter
@@ -444,6 +439,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/Player/LinkOrganized.png
+
+#begin Textures/UI/NES - The Legend of Zelda - Miscellaneous - HUD & Pause Screen.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/UI/NES - The Legend of Zelda - Miscellaneous - HUD & Pause Screen.png
 
 #begin zelda.png
 /importer:TextureImporter
