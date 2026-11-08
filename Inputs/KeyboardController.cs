@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using escape.Interfaces;
 using escape.Projectiles;
 using escape.Levels;
+using escape.Sounds;
 
 namespace escape.Inputs;
 
@@ -16,14 +17,16 @@ public class KeyboardController : IController
     private Dictionary<Keys, ICommand> heldCommands;
     private ProjectileManager _projectiles;
     private readonly LevelManager _levelManager;
+    private Audio _audio;
 
 
-    public KeyboardController(Game1 game, Player player, ProjectileManager projectiles, LevelManager levelManager)
+    public KeyboardController(Game1 game, Player player, ProjectileManager projectiles, LevelManager levelManager, Audio audio)
     {
         _game = game;
         _player = player;
         _projectiles = projectiles;
         _levelManager = levelManager;
+        _audio = audio;
 
         previousState = new KeyboardState();
         currentState = Keyboard.GetState();
@@ -44,8 +47,8 @@ public class KeyboardController : IController
         heldCommands[Keys.D] = new MoveRightCommand(_player);
         heldCommands[Keys.Right] = new MoveRightCommand(_player);
 
-        pressedCommands[Keys.Z] = new AttackCommand(_player);
-        pressedCommands[Keys.N] = new AttackCommand(_player);
+        pressedCommands[Keys.Z] = new AttackCommand(_player, _audio);
+        pressedCommands[Keys.N] = new AttackCommand(_player, _audio);
 
         pressedCommands[Keys.Q] = new QuitCommand(_game);
         pressedCommands[Keys.R] = new ResetCommand(_game.Reset);
