@@ -54,7 +54,6 @@ public class LevelManager : IGameResettable
 
         _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
         _player.Position = _currentSpawn;
-        RoomChanged?.Invoke();
     }
 
     public void ChangeRoom(string roomId, Vector2 spawnPosition)
@@ -62,6 +61,7 @@ public class LevelManager : IGameResettable
         LoadRoom(roomId);
         _currentSpawn = spawnPosition;
         _player.Position = _currentSpawn;
+        RoomChanged?.Invoke();
     }
 
 public Vector2 GetDoorSpawn(string roomId, string doorDirection)
