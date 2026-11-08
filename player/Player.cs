@@ -3,6 +3,7 @@ using escape.Collisions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Sprites;
+using System;
 using escape.Sounds;
 public enum Direction
 {
@@ -24,8 +25,8 @@ public class Player : IGameResettable, IMoveCollider
     public bool CanStartAttack => !IsDefeated && currentState != State.Attacking && currentState != State.Damaged;
     public Rectangle Bounds => new Rectangle((int)position.X, (int)position.Y, 48, 48);
     public Collision Category => Collision.Player;
-    public const int MaxHealth = 3;
-    public int Health { get; private set; } = MaxHealth;
+    public int MaxHealth { get; private set; } = 3;
+    public float Health { get; private set; } = 3f;
     public bool IsDefeated => Health == 0;
     public bool IsCollisionEnabled => !IsDefeated;
     public Vector2 Position
@@ -181,13 +182,29 @@ public class Player : IGameResettable, IMoveCollider
     {
         if (IsDefeated || damageCooldownTimer > 0f)
             return;
-        Health--;
+        Health = Math.Max(Health - 0.5f, 0f);
         CancelAttack();
         damageCooldownTimer = DamageCooldown;
         currentState = State.Damaged;
         damageTimer = 0f;
         damaged.Reset();
-        damaged.Position = position;
+        damaged.Position = position;        
+    }
+    public void RestoreHealth(float amount = 0.5f)
+    {
+        if (IsDefeated || amount <= 0)
+            return;
+
+        Health = Math.Min(Health + amount, MaxHealth);
+    }
+
+    public void IncreaseMaxHealth(int amount = 1)
+    {
+        if (amount <= 0)
+            return;
+
+        MaxHealth += amount;
+        Health += amount;
     }
     public void StopMoving()
     {
