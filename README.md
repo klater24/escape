@@ -172,3 +172,9 @@ The room-loading system separates level data from game logic. As a result, room 
 P pauses/resumes; Enter opens/closes inventory. Up/Down selects equipment and Space equips an owned item in the basic inventory screen. Death shows Game Over; collecting the Triforce near the top of Room 2 shows Victory. R starts a fresh run in Room 1, and Q quits. Gameplay freezes in menus, end screens, and transitions. Final inventory UI and animated camera transitions are separate integrations.
 
 See [game-state behavior and integration contracts](docs/game-states.md).
+
+### Inventory integration (Samiya)
+
+X uses the item equipped with Space in inventory. Consumable items reduce their quantity; a potion heals only when needed. Reopening inventory highlights the equipped item. The basic inventory screen still awaits Person 2's final screen. Keys 1-3 remain projectile demo shortcuts.
+
+Bow/Arrow is one equipment option requiring both items. X spends one rupee per shot and keeps both items; zero rupees prevents firing. Keys 1-3 are still projectile demo shortcuts.

@@ -47,7 +47,7 @@ public class Inventory : IInventory, IGameResettable
     {
         _items.Remove(item);
 
-        if (_equippedItem == item)
+        if (_equippedItem == item || (_equippedItem == ItemType.Bow && item == ItemType.Arrow))
         {
             _equippedItem = null;
         }
@@ -72,6 +72,8 @@ public class Inventory : IInventory, IGameResettable
 
   public bool EquipItem(ItemType item)
 {
+    if (item == ItemType.Arrow) item = ItemType.Bow;
+    if (item == ItemType.Bow && !HasItem(ItemType.Arrow)) return false;
     if (!HasItem(item))
     {
         return false;

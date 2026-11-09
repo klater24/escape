@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using escape.Interfaces;
 using escape.Projectiles;
 using escape.Levels;
+using escape.Items;
 
 namespace escape.Inputs;
 
@@ -48,6 +49,8 @@ public class KeyboardController : IController
         pressedCommands[Keys.N] = new AttackCommand(_player);
 
         pressedCommands[Keys.E] = new DamageSelfCommand(_player);
+        pressedCommands[Keys.X] = new UseEquippedItemCommand(new EquippedItemUse(
+            _player, _game.Inventory, _projectiles, () => _game.States.CanUpdateGameplay, _game.TrySpendRupees));
         
         pressedCommands[Keys.D1] = new UseItemCommand(1, _player, _projectiles);
         pressedCommands[Keys.D2] = new UseItemCommand(2, _player, _projectiles);
@@ -58,10 +61,12 @@ public class KeyboardController : IController
         pressedCommands[Keys.F3] = new ChangeRoomCommand(_levelManager, "Room3", new Vector2(100, 100));
         
     }
-    public void Update()
+    public void Update() => Update(Keyboard.GetState());
+
+    public void Update(KeyboardState keyboardState)
     {
         previousState = currentState;
-        currentState = Keyboard.GetState();
+        currentState = keyboardState;
         if (Pressed(Keys.Q)) { _game.Exit(); return; }
         if (Pressed(Keys.R)) { _game.Reset(); return; }
         if (Pressed(Keys.P)) { _game.States.TogglePause(); return; }
