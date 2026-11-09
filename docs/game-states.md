@@ -26,10 +26,10 @@ An external integration harness exercises the real game update loop, pickup coll
 
 ## Inventory-to-gameplay connection
 
-X uses the equipped item through the shared IInventory data. Bombs and arrows consume one unit; a bow uses an arrow; boomerangs remain owned. A potion restores full health and consumes one potion only when health is missing. Unsupported/unowned items do nothing. Use is blocked outside gameplay and after death. The existing 1-3 projectile demo shortcuts remain separate from equipped-item use.
+X uses the equipped item through the shared IInventory data. Bombs consume one unit; Bow/Arrow requires owning both items and spends one rupee per shot without consuming either item; boomerangs remain owned. A potion restores full health and consumes one potion only when health is missing. Unsupported/unowned items do nothing. Use is blocked outside gameplay and after death. The existing 1-3 projectile demo shortcuts remain separate from equipped-item use.
 
 Reopening inventory highlights the equipped item. Trying to equip an unowned item displays feedback and preserves the previous equipment. Current room data provides a potion in Room 2 for testing: collect it, open inventory, select Potion, press Space, return with Enter, take damage, then press X.
 
 Current main contains inventory data and a HUD, but no separate final inventory screen. The basic screen therefore remains until Person 2 supplies an IInventoryScreen implementation. Room placements for other equipment and the final inventory layout/map remain separate work.
 
-Validation: 50 automated integration assertions pass, including real potion pickup, keyboard input blocking, equipment use/quantities, reopening selection, death, victory, and reset. Camera/audio code was not changed.
+Validation: 57 automated integration assertions pass, including real potion pickup, keyboard input blocking, equipment use/quantities, reopening selection, death, victory, and reset. Camera/audio code was not changed.

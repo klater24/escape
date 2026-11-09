@@ -49,6 +49,13 @@ public class Game1 : Game
         if (amount > 0)
             Rupees += amount;
     }
+
+    public bool TrySpendRupees(int amount)
+    {
+        if (amount <= 0 || Rupees < amount) return false;
+        Rupees -= amount;
+        return true;
+    }
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);

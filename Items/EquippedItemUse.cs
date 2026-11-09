@@ -10,13 +10,16 @@ public sealed class EquippedItemUse
     private readonly IInventory _inventory;
     private readonly ProjectileManager _projectiles;
     private readonly Func<bool> _canUse;
+    private readonly Func<int, bool> _trySpendRupees;
+    private const int ArrowRupeeCost = 1;
 
-    public EquippedItemUse(Player player, IInventory inventory, ProjectileManager projectiles, Func<bool> canUse)
+    public EquippedItemUse(Player player, IInventory inventory, ProjectileManager projectiles, Func<bool> canUse, Func<int, bool> trySpendRupees)
     {
         _player = player;
         _inventory = inventory;
         _projectiles = projectiles;
         _canUse = canUse;
+        _trySpendRupees = trySpendRupees;
     }
 
     public bool TryUse()
@@ -39,9 +42,8 @@ public sealed class EquippedItemUse
                 if (!_inventory.RemoveItem(ItemType.Bomb)) return false;
                 _projectiles.SpawnBomb(position);
                 return true;
-            case ItemType.Arrow:
             case ItemType.Bow:
-                if (!_inventory.RemoveItem(ItemType.Arrow)) return false;
+                if (!_inventory.HasItem(ItemType.Arrow) || !_trySpendRupees(ArrowRupeeCost)) return false;
                 _projectiles.SpawnArrow(position, direction);
                 return true;
             case ItemType.Boomerang:

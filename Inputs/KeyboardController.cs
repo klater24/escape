@@ -50,7 +50,7 @@ public class KeyboardController : IController
 
         pressedCommands[Keys.E] = new DamageSelfCommand(_player);
         pressedCommands[Keys.X] = new UseEquippedItemCommand(new EquippedItemUse(
-            _player, _game.Inventory, _projectiles, () => _game.States.CanUpdateGameplay));
+            _player, _game.Inventory, _projectiles, () => _game.States.CanUpdateGameplay, _game.TrySpendRupees));
         
         pressedCommands[Keys.D1] = new UseItemCommand(1, _player, _projectiles);
         pressedCommands[Keys.D2] = new UseItemCommand(2, _player, _projectiles);
