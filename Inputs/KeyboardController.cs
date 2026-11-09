@@ -56,6 +56,7 @@ public class KeyboardController : IController
         pressedCommands[Keys.F1] = new ChangeRoomCommand(_levelManager, "Room1", new Vector2(100, 100));
         pressedCommands[Keys.F2] = new ChangeRoomCommand(_levelManager, "Room2", new Vector2(100, 100));
         pressedCommands[Keys.F3] = new ChangeRoomCommand(_levelManager, "Room3", new Vector2(100, 100));
+        
     }
     public void Update()
     {

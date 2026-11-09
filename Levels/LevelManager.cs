@@ -97,6 +97,11 @@ public Vector2 GetDoorSpawn(string roomId, string doorDirection)
 
 public bool TryTransition(Door door)
 {
+    if (_player.IsDefeated)
+    {
+        return false;
+    }
+
     try
     {
         Vector2 spawnPosition = GetDoorSpawn(

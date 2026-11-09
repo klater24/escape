@@ -22,8 +22,10 @@ public class Room
     private readonly ContentManager _content;
     private readonly List<Block> _blocks = new();
     private readonly List<IEnemy> _enemies = new();
+    private readonly EnemyManager _enemyManager;
     private readonly Texture2D _itemAtlas;
     private readonly List<IItem> _items = new();
+    private readonly ItemManager _itemManager;
     public IReadOnlyList<IItem> Items => _items;
     public IReadOnlyList<Block> Blocks => _blocks;
     public IReadOnlyList<IEnemy> Enemies => _enemies;
@@ -62,6 +64,8 @@ public class Room
         CreateDoors();
         CreateFloor();
         CreateTileMap();
+        _enemyManager = new EnemyManager(_enemies);
+        _itemManager = new ItemManager(_items);
         var enemyObstacles = _blocks.Cast<ISolidCollider>()
             .Concat(_exteriorWalls)
             .Concat(_doors.Select(door => (ISolidCollider)new RoomWallCollider(door.Bounds)))
@@ -447,11 +451,8 @@ private bool HasDoor(string direction)
         foreach (Block block in _blocks)
             block.Update(gameTime);
 
-        foreach (IEnemy enemy in _enemies)
-            enemy.Update(gameTime);
-
-        foreach (IItem item in _items)
-            item.Update(gameTime);
+        _enemyManager.Update(gameTime);
+        _itemManager.Update(gameTime);
 
         CheckItemCollisions();
     }
@@ -476,11 +477,8 @@ private bool HasDoor(string direction)
         foreach (Block block in _blocks)
             block.Draw(spriteBatch);
 
-        foreach (IEnemy enemy in _enemies)
-            enemy.Draw(spriteBatch);
-
-        foreach (IItem item in _items)
-            item.Draw(spriteBatch);
+        _enemyManager.Draw(spriteBatch);
+        _itemManager.Draw(spriteBatch);
     }
 
     public void Reset()
@@ -488,7 +486,7 @@ private bool HasDoor(string direction)
         foreach (Block block in _blocks)
             block.Reset();
 
-        foreach (IEnemy enemy in _enemies)
-            enemy.Reset();
+        _enemyManager.Reset();
+        _itemManager.Reset();
     }
 }

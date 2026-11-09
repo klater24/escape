@@ -24,10 +24,8 @@ public class Game1 : Game
     private Player _player = null!;
     private Texture2D _playerSheet = null!;
     private Texture2D _itemAtlas = null!;
-     private ItemManager _items = null!;
     private Texture2D _projectileAtlas = null!;
     private Texture2D _bossAtlas = null!;
-     private readonly List<ISprite> _sprites = new();
     private ProjectileManager _projectiles = null!;
     private ProjectileFactory _projectileFactory = null!;
     private LevelManager _levelManager = null!;
@@ -44,7 +42,7 @@ public class Game1 : Game
     private HUD _hud = null!;
     private Texture2D _hudAtlas = null!;
 
-    private EnemyManager _enemies = null!;
+
 
     public void AddRupees(int amount = 1)
     {
@@ -94,31 +92,6 @@ public class Game1 : Game
         _hud = new HUD(_player, Inventory, _hudFont, _itemAtlas, _hudAtlas);        
 
         RegisterResettable(_player);
-
-        var enemyPosition = new Vector2(450, 260);
-        var boss = new Boss(
-            SpriteFactory.CreateEnemySprite(Content, "SorcererAttack", enemyPosition),
-            enemyPosition);
-        //boss.FireRequested += SpawnBossProjectile;
-        _enemies = new EnemyManager(new IEnemy[]
-        {
-            new EnemyA(SpriteFactory.CreateEnemySprite(Content, "Run", enemyPosition), enemyPosition),
-            new EnemyB(SpriteFactory.CreateEnemySprite(Content, "DemonFlying", enemyPosition), enemyPosition),
-            new EnemyC(SpriteFactory.CreateEnemySprite(Content, "ManaSeed", enemyPosition), enemyPosition),
-            boss
-        });
-        RegisterResettable(_enemies);
-
-        var itemPosition = new Vector2(700, 260);
-        _items = new ItemManager(new List<IItem>
-        {
-            new Book(ItemSprites.CreateBook(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Key(ItemSprites.CreateKey(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Watch(ItemSprites.CreateWatch(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Heart(ItemSprites.CreateHeart(_itemAtlas, itemPosition, 2f), itemPosition),
-            new Potion(ItemSprites.CreatePotion(_itemAtlas, itemPosition, 2f), itemPosition)
-        });
-        RegisterResettable(_items);
 
         _projectileFactory = new ProjectileFactory(_projectileAtlas, _bossAtlas);
         _projectiles = new ProjectileManager(_projectileFactory);

@@ -18,16 +18,17 @@ This milestone demonstrates objects independently. Collision, collection effects
 
 ## Overall structure
 
-`Game1` loads assets, constructs objects, connects commands/events, and delegates update/draw work. Update advances behavior and timers; draw displays the resulting state.
+`Game1` loads shared assets, constructs the player and projectile systems, connects commands/events, and delegates room work to `LevelManager`. The active `Room` owns its blocks plus enemy and item selection managers. Update advances behavior and timers; draw displays the resulting state.
 
 ```text
 KeyboardController -> ICommand -> Player / manager / Game1
-Game1 -> Player, BlockManager, EnemyManager, ItemManager, ProjectileManager
+Game1 -> Player, LevelManager -> active Room -> blocks, EnemyManager, ItemManager
+Game1 -> ProjectileManager
 Gameplay object -> sprite -> SpriteBatch
-R -> ResetCommand -> Game1.Reset -> GameResetCoordinator -> registered systems
+R -> ResetCommand -> Game1.Reset -> GameResetCoordinator -> Player, LevelManager, ProjectileManager
 ```
 
-The block, enemy, and item managers update and draw only their selected object for the demonstration. The projectile manager updates and draws every active shot. Switching selection pauses an unselected enemy/item; cycling does not reset it.
+Room managers update and draw every block, enemy, and item placed in the active room. The projectile manager updates and draws every active shot. Enemies and items continue updating together; there is no selection cycling.
 
 ## Shared rendering and assets
 
@@ -64,7 +65,7 @@ Known transition gaps: Attack can interrupt Damaged; Damage can interrupt Attack
 
 `KeyboardController.Initialize()` builds held-key and pressed-key command dictionaries. `Game1` constructs the controller and invokes initialization; it does not register each binding itself. Movement commands execute while held. Other commands execute on a transition from released to pressed.
 
-Bindings are listed in README: WASD/arrows, Z/N attack, E damage, 1 arrow, 2 bomb, 3 boomerang, O/P enemies, U/I pickups, T/Y blocks, R reset, Q quit. There are no bindings for 4–5.
+Bindings are listed in README: WASD/arrows, Z/N attack, E damage, 1 arrow, 2 bomb, 3 boomerang, T/Y blocks, R reset, and Q quit. There are no enemy or item cycling bindings, and there are no bindings for 4–5.
 
 `UseItemCommand` reads the player's current position and facing, then calls a spawn method on ProjectileManager. It does not require the player to construct textures or sprites. Projectiles currently spawn at the player's top-left position; there is no separate item-use state or animation.
 
@@ -123,15 +124,15 @@ All four implement `IEnemy`, including update, draw, position, and reset. They r
 | A — Knight | Random movement in four cardinal directions |
 | B — Flying Demon | Eight-direction random movement with varying speed |
 | C — Forester | Alternates walking and pausing, with directional layered animation |
-| Boss — Sorcerer | Horizontal patrol and a firing request every two seconds while selected |
+| Boss — Sorcerer | Random cardinal movement around the room and a firing request every two seconds while selected |
 
-EnemyManager handles O/P wraparound and resets all enemies, including hidden ones. Boss raises `FireRequested` with a spawn position. Game1 handles the event through `ProjectileManager.SpawnBossProjectile`, currently using a rightward direction. Switching away pauses the boss timer; already spawned shots continue. Boss reset clears the firing timer. Random enemies reset their behavior state but do not reseed their random generators for an identical replay.
+EnemyManager updates, draws, and resets every enemy placed in the active room. Combat checks every damageable enemy in that room. Boss raises `FireRequested` with a spawn position. Game1 handles the event through `ProjectileManager.SpawnBossProjectile`, currently using a rightward direction. The boss firing timer continues while its room is active; already spawned shots continue after room changes. Boss reset clears the firing timer. Random enemies reset their behavior state but do not reseed their random generators for an identical replay.
 
 ## Items
 
-Book, Key, Watch, Heart, and Potion implement `IItem` and each contain a sprite. ItemManager displays the selected item and handles U/I wraparound. All five bob six pixels around their initial position on a two-second cycle using elapsed time. Heart and Potion additionally animate between image frames; the other three use single-frame sprites.
+Book, Key, Watch, Heart, and Potion implement `IItem` and each contain a sprite. ItemManager updates and draws every item placed in the active room. All five bob six pixels around their initial position on a two-second cycle using elapsed time. Heart and Potion additionally animate between image frames; the other three use single-frame sprites.
 
-Each item's Reset restores its position, bobbing timer, and sprite animation. ItemManager resets all five and selects Book. Items do not yet interact with the player. Their shared movement code is duplicated and could be extracted later without changing this sprint's behavior.
+Each item's Reset restores its position, bobbing timer, and sprite animation. ItemManager resets all items in the active room. Items do not yet interact with the player. Their shared movement code is duplicated and could be extracted later without changing this sprint's behavior.
 
 ## Projectiles
 
@@ -166,7 +167,7 @@ Spawn methods use the factory and add the result to the active collection. Updat
 
 ## Reset integration
 
-GameResetCoordinator registers the block manager, player, enemy manager, item manager, and projectile manager. It calls each registered system once; managers reset their own objects.
+GameResetCoordinator registers the player, level manager, and projectile manager. The level manager resets the active room, whose block, enemy, and item managers restore their own objects and selection indexes. The projectile manager clears active shots.
 
 | System | Current result of R |
 | --- | --- |
@@ -191,9 +192,9 @@ The development build was verified with zero errors/warnings during the document
 | Attack | Z/N starts and completes a directional attack; repeat and interrupt to check frame restart | Pending; restart limitation known |
 | Damage | E shows feedback and normally returns to idle after 0.96 seconds; test Z/N and item use during damage | Pending; interruption limitation known |
 | Blocks | Cycle all ten, wrap both directions, hold T/Y without repeated cycling; no movement | Pending |
-| Enemies | Cycle all four, observe distinct movement/animation and paused hidden enemies | Pending |
+| Enemies | Confirm all placed enemies move and animate together, and combat affects each damageable enemy | Pending |
 | Boss | While selected, fires every two seconds; independent shots expire; reset clears timer/shots | Pending |
-| Items | Cycle five pickups; bob around spawn point; reset selection and animation | Pending |
+| Items | Confirm all placed pickups appear and update together; reset restores their positions and animations | Pending |
 | Player shots | After waiting ten seconds, press 1–3 in each facing direction; each starts a fresh lifecycle | Pending; arrow orientation limitation known |
 | Multiple shots | Shots have independent positions and timers, and expire without affecting each other | Pending |
 | Bomb/boomerang | Fuse/explosion timing works; boomerang returns to launch point | Pending |
