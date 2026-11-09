@@ -169,7 +169,7 @@ The room-loading system separates level data from game logic. As a result, room 
 
 ## Sprint 4 - Game States (Samiya)
 
-P pauses/resumes; Enter opens/closes inventory. Up/Down selects equipment and Space equips an owned item in the basic inventory screen. Death shows Game Over; collecting the Triforce near the top of Room 2 shows Victory. R starts a fresh run in Room 1, and Q quits. Gameplay freezes in menus, end screens, and transitions. Final inventory UI and animated camera transitions are separate integrations.
+P pauses/resumes; Enter opens/closes inventory. Up/Down selects equipment and Space equips an owned item in the basic inventory screen. Death shows Game Over; collecting the Triforce near the top of Room 2 shows Victory. R starts a fresh run in Room 1, and Q quits. Gameplay freezes in menus, end screens, and transitions. Final inventory UI remains a separate integration.
 
 See [game-state behavior and integration contracts](docs/game-states.md).
 
@@ -178,3 +178,7 @@ See [game-state behavior and integration contracts](docs/game-states.md).
 X uses the item equipped with Space in inventory. Consumable items reduce their quantity; a potion heals only when needed. Reopening inventory highlights the equipped item. The basic inventory screen still awaits Person 2's final screen. Keys 1-3 remain projectile demo shortcuts.
 
 Bow/Arrow is one equipment option requiring both items. X spends one rupee per shot and keeps both items; zero rupees prevents firing. Keys 1-3 are still projectile demo shortcuts.
+
+### Camera and audio integration
+
+Rooms slide according to their map coordinates; Enter slides inventory in/out. Gameplay freezes during the 0.35-second animations, and R cancels them. M toggles background music without muting sound effects. Attack, damage, and inventory changes currently reuse the supplied generic effect; distinct original-game effects remain unfinished.
