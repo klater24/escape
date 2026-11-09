@@ -36,6 +36,7 @@ public class Room
     private readonly List<Block> _floorTiles = new();
     private readonly IInventory _inventory;
     private readonly Player _player;
+    private readonly Action<int> _addRupees;
     
 
     public Room(
@@ -45,7 +46,8 @@ public class Room
         Texture2D itemAtlas,
         Texture2D exteriorTexture,
         Player player,
-        IInventory inventory)
+        IInventory inventory,
+        Action<int> addRupees)
     {
         Name = data.Name;
         _data = data;
@@ -54,6 +56,7 @@ public class Room
         _itemAtlas = itemAtlas;
         _player = player;
         _inventory = inventory;
+        _addRupees = addRupees;
 
         _exterior = new RoomExterior(exteriorTexture, Vector2.Zero, 3f);
 
@@ -99,6 +102,18 @@ public class Room
                     _inventory.AddItem(ItemType.Potion);
                     break;
 
+                case Heart:
+                    _player.RestoreHealth();
+                    break;
+
+                case HeartContainer:
+                    _player.IncreaseMaxHealth();
+                    break;
+                
+                case Rupee:
+                    _addRupees(1);
+                    break;
+
                 default:
                     continue;
             }
@@ -141,6 +156,14 @@ private void CreateTileItem(string type, Vector2 position)
 
         "Potion" => new Potion(
             ItemSprites.CreatePotion(_itemAtlas, position, 2f),
+            position),
+
+        "HeartContainer" => new HeartContainer(
+            ItemSprites.CreateHeartContainer(_itemAtlas, position, 2f),
+            position),
+
+        "Rupee" => new Rupee(
+            ItemSprites.CreateRupee(_itemAtlas, position, 2f),
             position),
 
         _ => throw new ArgumentException(
@@ -347,6 +370,14 @@ private void CreateTileMap()
 
                 case "P":
                     CreateTileItem("Potion", position);
+                    break;
+
+                case "C":
+                    CreateTileItem("HeartContainer", position);
+                    break;
+
+                case "R":
+                    CreateTileItem("Rupee", position);
                     break;
 
                 default:
