@@ -7,7 +7,7 @@
 - Enter opens/closes inventory. Gameplay stays frozen while inventory or a transition is active.
 - Zero health opens Game Over. Movement, attacks, items, and room shortcuts stay disabled until restart.
 - Collecting a Triforce opens Victory and freezes gameplay. Room JSON uses tile `T`; Room 2 contains one near the top for integration testing.
-- R cancels transitions and starts a fresh run in Room 1: full health, initial enemies/pickups, no projectiles, no collected/equipped items, and the existing three starting keys. Q quits in every state.
+- R cancels transitions and starts a fresh run in Room 1: full health, initial enemies/pickups, no projectiles, no collected/equipped items, and zero starting keys. Q quits in every state.
 - Game over takes priority if death and victory are detected together.
 
 ## Integration contracts

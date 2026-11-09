@@ -9,6 +9,7 @@ using escape.Collisions;
 using escape.Items;
 using escape.Sprites;
 using escape.GameStates;
+using escape.UI;
 
 namespace escape;
 
@@ -37,16 +38,24 @@ public class Game1 : Game
     public IGameTransition Transitions { get; set; } = new ImmediateGameTransition();
     public IInventoryScreen InventoryScreen { get; set; } = null!;
     private StateScreen _stateScreen = null!;
-    private const int StartingKeys = 3;
 
+    public int Rupees { get; private set; } = 0;
+    private SpriteFont _hudFont = null!;
+    private HUD _hud = null!;
+    private Texture2D _hudAtlas = null!;
 
     private EnemyManager _enemies = null!;
 
+    public void AddRupees(int amount = 1)
+    {
+        if (amount > 0)
+            Rupees += amount;
+    }
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
-        _graphics.PreferredBackBufferWidth = 960;
-        _graphics.PreferredBackBufferHeight = 540;
+        _graphics.PreferredBackBufferWidth = 768;
+        _graphics.PreferredBackBufferHeight = 696;
         _graphics.ApplyChanges();
 
         Content.RootDirectory = "Content";
@@ -56,7 +65,6 @@ public class Game1 : Game
     protected override void Initialize()
     {
         Inventory = new Inventory();
-        Inventory.AddItem(ItemType.Key, StartingKeys);
         RegisterResettable(Inventory);
         base.Initialize();
     }
@@ -72,6 +80,7 @@ public class Game1 : Game
         _itemAtlas = Content.Load<Texture2D>("zeldaitems");
         _projectileAtlas = Content.Load<Texture2D>("zelda");
         _bossAtlas = Content.Load<Texture2D>("boses");
+        
 
         // Load the PixelPack block tiles
         _blockAtlas = Content.Load<Texture2D>("Textures/Blocks/PixelPack_Block_Atlas");
@@ -80,7 +89,9 @@ public class Game1 : Game
         _playerSheet = Content.Load<Texture2D>("Textures/Player/linkOrganized");
         _player = new Player(new Vector2(100, 100), _playerSheet, Content.Load<Texture2D>("Textures/Player/link"));
 
-        
+        _hudAtlas = Content.Load<Texture2D>("Textures/UI/NES - The Legend of Zelda - Miscellaneous - HUD & Pause Screen");
+        _hudFont = Content.Load<SpriteFont>("HUDFont");
+        _hud = new HUD(_player, Inventory, _hudFont, _itemAtlas, _hudAtlas);        
 
         RegisterResettable(_player);
 
@@ -114,7 +125,7 @@ public class Game1 : Game
         RegisterResettable(_projectiles);
 
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
-                                            Content, _itemAtlas, _player, _exteriorTexture, Inventory);
+                                            Content, _itemAtlas, _player, _exteriorTexture, Inventory, AddRupees);
         RegisterResettable(_levelManager);
         _levelManager.RoomChanged += ConnectRoomCombat;
         _levelManager.RoomChanging += BeginRoomTransition;
@@ -159,7 +170,7 @@ public class Game1 : Game
         }
         var boss = _levelManager.CurrentRoom.Enemies.OfType<Boss>().FirstOrDefault();
         string bossStatus = boss is null ? "" : $" | Boss HP: {boss.Health}/{Boss.MaxHealth}";
-        Window.Title = $"Escape | {States.Current} | HP: {_player.Health}/{Player.MaxHealth}{bossStatus} | P: pause | Enter: inventory | Z/N: attack | 1-3: items | F1-F3: rooms | R: restart | Q: quit";
+        Window.Title = $"Escape | {States.Current} | HP: {_player.Health}/{_player.MaxHealth}{bossStatus} | P: pause | Enter: inventory | Z/N: attack | 1-3: items | F1-F3: rooms | R: restart | Q: quit";
         base.Update(gameTime);
     }
 
@@ -168,21 +179,28 @@ public class Game1 : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-
-        if (States.Current == GameState.Inventory)
+        if (States.Current != GameState.Inventory)
         {
-            GraphicsDevice.Clear(Color.Black);
-            InventoryScreen.Draw(_spriteBatch, GraphicsDevice.Viewport.Bounds);
-        }
-        else
-        {
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp,
+                transformMatrix: Matrix.CreateTranslation(0, 168, 0));
             _levelManager.Draw(_spriteBatch);
             _projectiles.Draw(_spriteBatch, gameTime);
             _player.Draw(_spriteBatch);
-            _stateScreen.Draw(_spriteBatch, GraphicsDevice.Viewport.Bounds, States.Current);
+            _spriteBatch.End();
+        }
+        else
+        {
+            GraphicsDevice.Clear(Color.Black);
         }
 
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        if (States.Current == GameState.Inventory)
+            InventoryScreen.Draw(_spriteBatch, GraphicsDevice.Viewport.Bounds);
+        else
+        {
+            _hud.Draw(_spriteBatch, Rupees);
+            _stateScreen.Draw(_spriteBatch, GraphicsDevice.Viewport.Bounds, States.Current);
+        }
         _spriteBatch.End();
 
         base.Draw(gameTime);
@@ -192,8 +210,8 @@ public class Game1 : Game
     public void Reset()
     {
         Transitions.Cancel();
+        Rupees = 0;
         _resetCoordinator.Reset();
-        Inventory.AddItem(ItemType.Key, StartingKeys);
         InventoryScreen.Reset();
         States.Reset();
     }
@@ -241,6 +259,7 @@ public class Game1 : Game
     public void RegisterResettable(IGameResettable system)
     {
         _resetCoordinator.Register(system);
+        
     }
 
     protected override void UnloadContent()

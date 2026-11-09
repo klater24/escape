@@ -24,9 +24,10 @@ public class LevelManager : IGameResettable
     public Room CurrentRoom { get; private set; }
     public event Action? RoomChanged;
     public event Action<string>? RoomChanging;
+    private readonly Action<int> _addRupees;
 
     public LevelManager(Texture2D blockAtlas, string levelsDirectory, ContentManager content,
-                            Texture2D itemAtlas, Player player, Texture2D exteriorTexture, IInventory inventory)
+                            Texture2D itemAtlas, Player player, Texture2D exteriorTexture, IInventory inventory, Action<int> addRupees)
     {
         _blockAtlas = blockAtlas;
         _levelsDirectory = levelsDirectory;
@@ -35,6 +36,7 @@ public class LevelManager : IGameResettable
         _player = player;
         _exteriorTexture = exteriorTexture;
         _inventory = inventory;
+        _addRupees = addRupees;
 
         LoadRoom(StartingRoom);
     }
@@ -45,7 +47,7 @@ public class LevelManager : IGameResettable
         string filePath = Path.Combine(_levelsDirectory, $"{roomId}.json");
         RoomData data = RoomParser.Load(filePath);
 
-        CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture, _player, _inventory);
+        CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture, _player, _inventory, _addRupees);
 
         _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
         _player.Position = _currentSpawn;
