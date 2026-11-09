@@ -68,6 +68,7 @@ public class KeyboardController : IController
         previousState = currentState;
         currentState = keyboardState;
         if (Pressed(Keys.Q)) { _game.Exit(); return; }
+        if (Pressed(Keys.M)) { _game.ToggleMusicMute(); return; }
         if (Pressed(Keys.R)) { _game.Reset(); return; }
         if (Pressed(Keys.P)) { _game.States.TogglePause(); return; }
         if (Pressed(Keys.Enter)) { _game.ToggleInventory(); return; }

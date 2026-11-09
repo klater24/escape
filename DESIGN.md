@@ -297,3 +297,5 @@ Door connections use room identifiers and door directions rather than direct ref
 GameStateManager centralizes gameplay, pause, inventory, transition, game-over, and victory states. Game1 gates updates/collisions; KeyboardController gates gameplay commands. IInventoryScreen and IGameTransition separate state ownership from inventory rendering and camera animation. Restart resets inventory/player and reloads Room 1. See [integration contracts](docs/game-states.md).
 
 EquippedItemUse connects the shared IInventory selection to player/projectile actions and checks gameplay state before using or consuming an item. BasicInventoryScreen highlights current equipment when reopened; the IInventoryScreen replacement point remains available for the final inventory UI.
+
+ScreenTransition implements IGameTransition using Camera interpolation. Game1 slides outgoing/incoming render targets, keeping the HUD stationary during room transitions. LevelManager derives slide direction from room map coordinates. Audio loads the supplied music/effect assets; M changes only MediaPlayer mute state.

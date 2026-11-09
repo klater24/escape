@@ -10,6 +10,8 @@ using escape.Items;
 using escape.Sprites;
 using escape.GameStates;
 using escape.UI;
+using escape.View;
+using escape.Sounds;
 
 namespace escape;
 
@@ -41,6 +43,11 @@ public class Game1 : Game
     private SpriteFont _hudFont = null!;
     private HUD _hud = null!;
     private Texture2D _hudAtlas = null!;
+    private Audio _audio = null!;
+    private RenderTarget2D _outgoingScene = null!;
+    private RenderTarget2D _incomingScene = null!;
+    private const int HudHeight = 168;
+    private readonly RasterizerState _transitionRasterizer = new() { ScissorTestEnable = true };
 
 
 
@@ -56,6 +63,8 @@ public class Game1 : Game
         Rupees -= amount;
         return true;
     }
+
+    public void ToggleMusicMute() => _audio.ToggleMusicMute();
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -78,6 +87,13 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+        _outgoingScene = new RenderTarget2D(GraphicsDevice, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+        _incomingScene = new RenderTarget2D(GraphicsDevice, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+        _audio = new Audio();
+        _audio.LoadContent(Content);
+        _audio.PlayMusic("MainTheme");
+        Inventory.ItemAdded += OnItemAdded;
+        Inventory.ItemRemoved += OnItemRemoved;
         var stateFont = Content.Load<SpriteFont>("Fonts/StateFont");
         _stateScreen = new StateScreen(GraphicsDevice, stateFont);
         InventoryScreen = new BasicInventoryScreen(Inventory, stateFont);
@@ -107,6 +123,8 @@ public class Game1 : Game
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
                                             Content, _itemAtlas, _player, _exteriorTexture, Inventory, AddRupees);
         RegisterResettable(_levelManager);
+        Transitions = new ScreenTransition(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
+            HudHeight, _levelManager.GetTransitionDirection);
         _levelManager.RoomChanged += ConnectRoomCombat;
         _levelManager.RoomChanging += BeginRoomTransition;
         ConnectRoomCombat();
@@ -120,7 +138,10 @@ public class Game1 : Game
     {
         EvaluateOutcome();
         var stateBeforeInput = States.Current;
+        bool wasAttacking = _player.IsAttacking;
+        float previousHealth = _player.Health;
         _keyboardController.Update();
+        if (!wasAttacking && _player.IsAttacking) _audio.PlaySound("main");
         EvaluateOutcome();
         if (States.Current == GameState.Transition)
         {
@@ -149,20 +170,32 @@ public class Game1 : Game
             }
         }
         var boss = _levelManager.CurrentRoom.Enemies.OfType<Boss>().FirstOrDefault();
+        if (_player.Health < previousHealth) _audio.PlaySound("main");
         string bossStatus = boss is null ? "" : $" | Boss HP: {boss.Health}/{Boss.MaxHealth}";
-        Window.Title = $"Escape | {States.Current} | HP: {_player.Health}/{_player.MaxHealth}{bossStatus} | P: pause | Enter: inventory | X: equipped item | Z/N: attack | 1-3: demo shots | F1-F3: rooms | R: restart | Q: quit";
+        Window.Title = $"Escape | {States.Current} | HP: {_player.Health}/{_player.MaxHealth}{bossStatus} | M: music {(_audio.IsMusicMuted ? "off" : "on")} | P: pause | Enter: inventory | X: equipped item | R: restart | Q: quit";
         base.Update(gameTime);
     }
 
     // Draw everything in the scene
     protected override void Draw(GameTime gameTime)
     {
+        if (States.Current == GameState.Transition && Transitions is ScreenTransition transition)
+        {
+            CaptureScene(_incomingScene, transition.To, gameTime);
+            DrawTransition(transition);
+        }
+        else DrawScene(States.Current, gameTime);
+        base.Draw(gameTime);
+    }
+
+    private void DrawScene(GameState state, GameTime gameTime)
+    {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        if (States.Current != GameState.Inventory)
+        if (state != GameState.Inventory)
         {
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp,
-                transformMatrix: Matrix.CreateTranslation(0, 168, 0));
+                transformMatrix: Matrix.CreateTranslation(0, HudHeight, 0));
             _levelManager.Draw(_spriteBatch);
             _projectiles.Draw(_spriteBatch, gameTime);
             _player.Draw(_spriteBatch);
@@ -174,16 +207,43 @@ public class Game1 : Game
         }
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-        if (States.Current == GameState.Inventory)
+        if (state == GameState.Inventory)
             InventoryScreen.Draw(_spriteBatch, GraphicsDevice.Viewport.Bounds);
         else
         {
             _hud.Draw(_spriteBatch, Rupees);
-            _stateScreen.Draw(_spriteBatch, GraphicsDevice.Viewport.Bounds, States.Current);
+            _stateScreen.Draw(_spriteBatch, GraphicsDevice.Viewport.Bounds, state);
         }
         _spriteBatch.End();
 
-        base.Draw(gameTime);
+    }
+
+    private void CaptureScene(RenderTarget2D target, GameState state, GameTime gameTime)
+    {
+        GraphicsDevice.SetRenderTarget(target);
+        DrawScene(state, gameTime);
+        GraphicsDevice.SetRenderTarget(null);
+    }
+
+    private void DrawTransition(ScreenTransition transition)
+    {
+        GraphicsDevice.Clear(Color.Black);
+        var bounds = GraphicsDevice.Viewport.Bounds;
+        var source = transition.IsRoomTransition
+            ? new Rectangle(0, HudHeight, bounds.Width, bounds.Height - HudHeight) : bounds;
+        var previousScissor = GraphicsDevice.ScissorRectangle;
+        GraphicsDevice.ScissorRectangle = source;
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp, rasterizerState: _transitionRasterizer);
+        _spriteBatch.Draw(_outgoingScene, source.Location.ToVector2() + transition.OutgoingOffset, source, Color.White);
+        _spriteBatch.Draw(_incomingScene, source.Location.ToVector2() + transition.IncomingOffset, source, Color.White);
+        _spriteBatch.End();
+        GraphicsDevice.ScissorRectangle = previousScissor;
+        if (transition.IsRoomTransition)
+        {
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+            _hud.Draw(_spriteBatch, Rupees);
+            _spriteBatch.End();
+        }
     }
 
     // Reset every sprite to its starting state
@@ -200,6 +260,7 @@ public class Game1 : Game
     {
         var from = States.Current;
         if (!States.BeginInventoryTransition()) return;
+        CaptureScene(_outgoingScene, from, new GameTime());
         InventoryScreen.Reset();
         Transitions.Begin(from, States.TransitionTarget);
     }
@@ -209,8 +270,14 @@ public class Game1 : Game
     private void BeginRoomTransition(string roomId)
     {
         if (States.BeginRoomTransition())
+        {
+            CaptureScene(_outgoingScene, GameState.Gameplay, new GameTime());
             Transitions.Begin(GameState.Gameplay, GameState.Gameplay, roomId);
+        }
     }
+
+    private void OnItemAdded(ItemType item, int quantity) => _audio.PlaySound("ItemPickup");
+    private void OnItemRemoved(ItemType item, int quantity) => _audio.PlaySound("main");
 
     private void ConnectRoomCombat()
     {
@@ -247,6 +314,12 @@ public class Game1 : Game
         // Content owns and disposes the textures loaded through Content.Load.
         _spriteBatch.Dispose();
         _stateScreen.Dispose();
+        Inventory.ItemAdded -= OnItemAdded;
+        Inventory.ItemRemoved -= OnItemRemoved;
+        _audio.StopMusic();
+        _outgoingScene.Dispose();
+        _incomingScene.Dispose();
+        _transitionRasterizer.Dispose();
         base.UnloadContent();
     }}
 

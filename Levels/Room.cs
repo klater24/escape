@@ -16,6 +16,7 @@ namespace escape.Levels;
 public class Room
 {
     public string Name { get; }
+    public Point MapPosition { get; }
     private readonly RoomExterior _exterior;
     private readonly RoomData _data;
     private readonly Texture2D _blockAtlas;
@@ -50,6 +51,7 @@ public class Room
         Action<int> addRupees)
     {
         Name = data.Name;
+        MapPosition = new Point(data.MapX, data.MapY);
         _data = data;
         _blockAtlas = blockAtlas;
         _content = content;

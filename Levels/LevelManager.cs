@@ -72,6 +72,14 @@ public class LevelManager : IGameResettable
         _player.Position = _currentSpawn;
     }
 
+    public Vector2 GetTransitionDirection(string roomId)
+    {
+        var data = RoomParser.Load(Path.Combine(_levelsDirectory, $"{roomId}.json"));
+        int dx = data.MapX - CurrentRoom.MapPosition.X;
+        int dy = data.MapY - CurrentRoom.MapPosition.Y;
+        return dx != 0 ? new Vector2(Math.Sign(dx), 0) : new Vector2(0, Math.Sign(dy));
+    }
+
 public Vector2 GetDoorSpawn(string roomId, string doorDirection)
 {
     string filePath = Path.Combine(

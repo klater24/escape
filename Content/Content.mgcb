@@ -528,3 +528,9 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/UI/NES - The Legend of Zelda - Miscellaneous - HUD & Pause Screen.png
+
+#begin SoundEffects/bg.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:SoundEffects/bg.mp3
