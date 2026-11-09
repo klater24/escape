@@ -507,3 +507,24 @@
 /processorParam:Version=3.8.6.1
 /build:zeldaitems.png
 
+
+#begin Fonts/StateFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/build:Fonts/StateFont.spritefont
+
+#begin HUDFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/build:HUDFont.spritefont
+
+#begin Textures/UI/NES - The Legend of Zelda - Miscellaneous - HUD & Pause Screen.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/UI/NES - The Legend of Zelda - Miscellaneous - HUD & Pause Screen.png

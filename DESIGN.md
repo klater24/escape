@@ -290,3 +290,7 @@ Door connections use room identifiers and door directions rather than direct ref
   ]
 }
 ```
+
+## Sprint 4 - Game States (Samiya)
+
+GameStateManager centralizes gameplay, pause, inventory, transition, game-over, and victory states. Game1 gates updates/collisions; KeyboardController gates gameplay commands. IInventoryScreen and IGameTransition separate state ownership from inventory rendering and camera animation. Restart resets inventory/player and reloads Room 1. See [integration contracts](docs/game-states.md).

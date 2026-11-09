@@ -82,6 +82,10 @@ public class Room
 
             switch (item)
             {
+                case Triforce:
+                    _inventory.AddItem(ItemType.Triforce);
+                    break;
+
                 case Key:
                     _inventory.AddItem(ItemType.Key);
                     break;
@@ -134,6 +138,9 @@ private void CreateTileItem(string type, Vector2 position)
 {
     IItem item = type switch
     {
+        "Triforce" => new Triforce(
+            new AnimatedSprite(_itemAtlas, new[] { new Rectangle(272, 0, 16, 16), new Rectangle(272, 16, 16, 16) }, position, 0.25f, 2f),
+            position),
         "Book" => new Book(
             ItemSprites.CreateBook(_itemAtlas, position, 2f),
             position),
@@ -348,6 +355,10 @@ private void CreateTileMap()
                     break;
 
                 //items
+                case "T":
+                    CreateTileItem("Triforce", position);
+                    break;
+
                 case "K":
                     CreateTileItem("Key", position);
                     break;
