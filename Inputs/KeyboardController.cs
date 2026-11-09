@@ -47,9 +47,6 @@ public class KeyboardController : IController
         pressedCommands[Keys.Z] = new AttackCommand(_player);
         pressedCommands[Keys.N] = new AttackCommand(_player);
 
-        pressedCommands[Keys.Q] = new QuitCommand(_game);
-        pressedCommands[Keys.R] = new ResetCommand(_game.Reset);
-
         pressedCommands[Keys.E] = new DamageSelfCommand(_player);
         
         pressedCommands[Keys.D1] = new UseItemCommand(1, _player, _projectiles);
@@ -65,6 +62,11 @@ public class KeyboardController : IController
     {
         previousState = currentState;
         currentState = Keyboard.GetState();
+        if (Pressed(Keys.Q)) { _game.Exit(); return; }
+        if (Pressed(Keys.R)) { _game.Reset(); return; }
+        if (Pressed(Keys.P)) { _game.States.TogglePause(); return; }
+        if (Pressed(Keys.Enter)) { _game.ToggleInventory(); return; }
+        if (!_game.States.CanUpdateGameplay || _player.IsDefeated) return;
         bool moving = false;
 
         foreach (var key in heldCommands.Keys)
@@ -81,6 +83,7 @@ public class KeyboardController : IController
         }
         foreach (var key in pressedCommands.Keys)
         {
+            if (_player.IsDefeated || !_game.States.CanUpdateGameplay) break;
             if (currentState.IsKeyDown(key) &&
                 previousState.IsKeyUp(key))
             {
@@ -88,4 +91,6 @@ public class KeyboardController : IController
             }
         }
     }
+
+    private bool Pressed(Keys key) => currentState.IsKeyDown(key) && previousState.IsKeyUp(key);
 }

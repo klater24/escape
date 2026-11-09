@@ -166,3 +166,9 @@ When a room is loaded, the level manager constructs the room and initializes the
 
 The room-loading system separates level data from game logic. As a result, room layouts and connections can be modified through JSON files without requiring changes to the code that constructs and loads rooms.
 
+
+## Sprint 4 - Game States (Samiya)
+
+P pauses/resumes; Enter opens/closes inventory. Up/Down selects equipment and Space equips an owned item in the basic inventory screen. Death shows Game Over; collecting the Triforce near the top of Room 2 shows Victory. R starts a fresh run in Room 1, and Q quits. Gameplay freezes in menus, end screens, and transitions. Final inventory UI and animated camera transitions are separate integrations.
+
+See [game-state behavior and integration contracts](docs/game-states.md).

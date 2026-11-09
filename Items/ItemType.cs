@@ -11,5 +11,6 @@ public enum ItemType
     Watch,
     Potion,
     Map,
-    Compass
+    Compass,
+    Triforce
 }

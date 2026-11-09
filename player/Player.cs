@@ -23,8 +23,9 @@ public class Player : IGameResettable, IMoveCollider
 {
     public Rectangle Bounds => new Rectangle((int)position.X, (int)position.Y, 48, 48);
     public Collision Category => Collision.Player;
-    public int MaxHealth { get; private set; } = 3;
-    public float Health { get; private set; } = 3f;
+    public const int StartingHealth = 3;
+    public int MaxHealth { get; private set; } = StartingHealth;
+    public float Health { get; private set; } = StartingHealth;
     public bool IsDefeated => Health == 0;
     public bool IsCollisionEnabled => !IsDefeated;
     public Vector2 Position
@@ -213,6 +214,7 @@ public class Player : IGameResettable, IMoveCollider
     }
     public void Reset()
     {
+        MaxHealth = StartingHealth;
         Health = MaxHealth;
         position = initialPosition;
         facingDirection = Direction.Down;
