@@ -143,7 +143,7 @@ public class Game1 : Game
         }
         var boss = _levelManager.CurrentRoom.Enemies.OfType<Boss>().FirstOrDefault();
         string bossStatus = boss is null ? "" : $" | Boss HP: {boss.Health}/{Boss.MaxHealth}";
-        Window.Title = $"Escape | {States.Current} | HP: {_player.Health}/{_player.MaxHealth}{bossStatus} | P: pause | Enter: inventory | Z/N: attack | 1-3: items | F1-F3: rooms | R: restart | Q: quit";
+        Window.Title = $"Escape | {States.Current} | HP: {_player.Health}/{_player.MaxHealth}{bossStatus} | P: pause | Enter: inventory | X: equipped item | Z/N: attack | 1-3: demo shots | F1-F3: rooms | R: restart | Q: quit";
         base.Update(gameTime);
     }
 

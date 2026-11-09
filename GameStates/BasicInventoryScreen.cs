@@ -12,6 +12,8 @@ public sealed class BasicInventoryScreen : IInventoryScreen
     private readonly SpriteFont _font;
     private KeyboardState _previous;
     private int _selected;
+    private string _selectionStatus = "";
+    public ItemType SelectedItem => Equipment[_selected];
     private static readonly ItemType[] Equipment = { ItemType.Bomb, ItemType.Arrow, ItemType.Boomerang, ItemType.Bow, ItemType.Potion };
 
     public BasicInventoryScreen(IInventory inventory, SpriteFont font)
@@ -20,12 +22,14 @@ public sealed class BasicInventoryScreen : IInventoryScreen
         _font = font;
     }
 
-    public void Update(GameTime gameTime)
+    public void Update(GameTime gameTime) => Update(Keyboard.GetState());
+
+    public void Update(KeyboardState keys)
     {
-        var keys = Keyboard.GetState();
-        if (Pressed(keys, Keys.Down)) _selected = (_selected + 1) % Equipment.Length;
-        if (Pressed(keys, Keys.Up)) _selected = (_selected + Equipment.Length - 1) % Equipment.Length;
-        if (Pressed(keys, Keys.Space)) _inventory.EquipItem(Equipment[_selected]);
+        if (Pressed(keys, Keys.Down)) { _selected = (_selected + 1) % Equipment.Length; _selectionStatus = ""; }
+        if (Pressed(keys, Keys.Up)) { _selected = (_selected + Equipment.Length - 1) % Equipment.Length; _selectionStatus = ""; }
+        if (Pressed(keys, Keys.Space))
+            _selectionStatus = _inventory.EquipItem(SelectedItem) ? $"Equipped {SelectedItem}. Press X during gameplay to use." : "You have not collected this item.";
         _previous = keys;
     }
 
@@ -45,11 +49,13 @@ public sealed class BasicInventoryScreen : IInventoryScreen
         }
         batch.DrawString(_font, $"Keys: {_inventory.GetQuantity(ItemType.Key)}   Map: {_inventory.HasItem(ItemType.Map)}   Compass: {_inventory.HasItem(ItemType.Compass)}",
             origin + new Vector2(0, 320), Color.White);
+        batch.DrawString(_font, _selectionStatus, origin + new Vector2(0, 370), Color.Gold);
     }
 
     public void Reset()
     {
-        _selected = 0;
+        _selected = _inventory.GetEquippedItem() is ItemType item ? Math.Max(0, Array.IndexOf(Equipment, item)) : 0;
+        _selectionStatus = "";
         _previous = Keyboard.GetState();
     }
 }
