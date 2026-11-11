@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Blocks;
+using escape.Collisions;
 using Microsoft.Xna.Framework.Content;
 using escape.Interfaces;
 using System.Linq;
@@ -20,11 +22,24 @@ public class LevelManager : IGameResettable
     private Vector2 _currentSpawn;
     private readonly Texture2D _exteriorTexture;
     private readonly IInventory _inventory;
+    private readonly HashSet<string> _collectedItems = new(StringComparer.OrdinalIgnoreCase);
 
     public Room CurrentRoom { get; private set; }
     public event Action? RoomChanged;
     public event Action<string>? RoomChanging;
     private readonly Action<int> _addRupees;
+
+    private void RefreshPlayerObstacles()
+    {
+        _player.Obstacles = CurrentRoom.Blocks
+            .Where(block => block.IsSolid)
+            .Cast<ISolidCollider>()
+            .Concat(CurrentRoom.ExteriorWalls)
+            .Concat(CurrentRoom.Doors
+                .Where(door => door.IsLocked && !door.CanTraverse(_inventory))
+                .Select(door => (ISolidCollider)new RoomWallCollider(door.Bounds)))
+            .ToList();
+    }
 
     public LevelManager(Texture2D blockAtlas, string levelsDirectory, ContentManager content,
                             Texture2D itemAtlas, Player player, Texture2D exteriorTexture, IInventory inventory, Action<int> addRupees)
@@ -47,16 +62,12 @@ public class LevelManager : IGameResettable
         string filePath = Path.Combine(_levelsDirectory, $"{roomId}.json");
         RoomData data = RoomParser.Load(filePath);
 
-        CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture, _player, _inventory, _addRupees);
+        CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture, _player, _inventory, _addRupees, roomId, _collectedItems);
 
         _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
         _player.Position = _currentSpawn;
         _player.CancelAttack();
-        _player.Obstacles = CurrentRoom.Blocks
-            .Where(block => block.IsSolid)
-            .Cast<ISolidCollider>()
-            .Concat(CurrentRoom.ExteriorWalls)
-            .ToList();
+        RefreshPlayerObstacles();
 
         _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
         _player.Position = _currentSpawn;
@@ -72,6 +83,28 @@ public class LevelManager : IGameResettable
         _player.Position = _currentSpawn;
     }
 
+    public Vector2 GetDoorSpawn(string roomId, string doorDirection)
+    {
+        string filePath = Path.Combine(
+            _levelsDirectory,
+            $"{roomId}.json");
+
+        RoomData data = RoomParser.Load(filePath);
+
+        foreach (DoorData door in data.Doors)
+        {
+            if (door.Direction.Equals(
+                doorDirection,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                return new Vector2(door.SpawnX, door.SpawnY);
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Room '{roomId}' has no door in direction '{doorDirection}'.");
+    }
+
     public Vector2 GetTransitionDirection(string roomId)
     {
         var data = RoomParser.Load(Path.Combine(_levelsDirectory, $"{roomId}.json"));
@@ -80,51 +113,33 @@ public class LevelManager : IGameResettable
         return dx != 0 ? new Vector2(Math.Sign(dx), 0) : new Vector2(0, Math.Sign(dy));
     }
 
-public Vector2 GetDoorSpawn(string roomId, string doorDirection)
-{
-    string filePath = Path.Combine(
-        _levelsDirectory,
-        $"{roomId}.json");
-
-    RoomData data = RoomParser.Load(filePath);
-
-    foreach (DoorData door in data.Doors)
+    public bool TryTransition(Door door)
     {
-        if (door.Direction.Equals(
-            doorDirection,
-            StringComparison.OrdinalIgnoreCase))
+        if (_player.IsDefeated)
         {
-            return new Vector2(door.SpawnX, door.SpawnY);
+            return false;
+        }
+
+        if (!door.CanTraverse(_inventory)) return false;
+
+        try
+        {
+            Vector2 spawnPosition = GetDoorSpawn(
+                door.NextRoom,
+                door.NextDoor);
+
+            // Validate the destination before spending a key.
+            if (!door.TryUnlock(_inventory)) return false;
+
+            ChangeRoom(door.NextRoom, spawnPosition);
+            return true;
+        }
+        catch (InvalidOperationException)
+        {
+            // The destination room or matching door is invalid.
+            return false;
         }
     }
-
-    throw new InvalidOperationException(
-        $"Room '{roomId}' has no door in direction '{doorDirection}'.");
-}
-
-
-public bool TryTransition(Door door)
-{
-    if (_player.IsDefeated)
-    {
-        return false;
-    }
-
-    try
-    {
-        Vector2 spawnPosition = GetDoorSpawn(
-            door.NextRoom,
-            door.NextDoor);
-
-        ChangeRoom(door.NextRoom, spawnPosition);
-        return true;
-    }
-    catch (InvalidOperationException)
-    {
-        // The destination room or matching door is invalid.
-        return false;
-    }
-}
 
 
 private bool _doorTransitioned;
@@ -165,6 +180,8 @@ public void CheckDoorTransitions()
     public void Update(GameTime gameTime)
     {
         CurrentRoom.Update(gameTime);
+        // Pickups can change whether a locked doorway blocks the player.
+        RefreshPlayerObstacles();
     }
 
     public void Draw(SpriteBatch spriteBatch)
@@ -175,6 +192,7 @@ public void CheckDoorTransitions()
     public void Reset()
     {
         _doorTransitioned = false;
+        _collectedItems.Clear();
         LoadRoom(StartingRoom);
     }
 }
