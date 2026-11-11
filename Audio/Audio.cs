@@ -18,8 +18,12 @@ public sealed class Audio
     public void LoadContent(ContentManager content)
     {
         var effect = content.Load<SoundEffect>("SoundEffects/effect");
+        var effect1 = content.Load<SoundEffect>("SoundEffects/damage");
+        var effect2 = content.Load<SoundEffect>("SoundEffects/attack");
         _soundEffects["main"] = effect;
         _soundEffects["ItemPickup"] = effect;
+        _soundEffects["damage"]=effect1; 
+        _soundEffects["attack"]= effect2; 
         _music["MainTheme"] = content.Load<Song>("SoundEffects/bg");
     }
 

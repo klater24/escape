@@ -141,7 +141,7 @@ public class Game1 : Game
         bool wasAttacking = _player.IsAttacking;
         float previousHealth = _player.Health;
         _keyboardController.Update();
-        if (!wasAttacking && _player.IsAttacking) _audio.PlaySound("main");
+        if (!wasAttacking && _player.IsAttacking) _audio.PlaySound("attack");
         EvaluateOutcome();
         if (States.Current == GameState.Transition)
         {
@@ -170,7 +170,7 @@ public class Game1 : Game
             }
         }
         var boss = _levelManager.CurrentRoom.Enemies.OfType<Boss>().FirstOrDefault();
-        if (_player.Health < previousHealth) _audio.PlaySound("main");
+        if (_player.Health < previousHealth) _audio.PlaySound("damage");
         string bossStatus = boss is null ? "" : $" | Boss HP: {boss.Health}/{Boss.MaxHealth}";
         Window.Title = $"Escape | {States.Current} | HP: {_player.Health}/{_player.MaxHealth}{bossStatus} | M: music {(_audio.IsMusicMuted ? "off" : "on")} | P: pause | Enter: inventory | X: equipped item | R: restart | Q: quit";
         base.Update(gameTime);
