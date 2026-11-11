@@ -453,7 +453,8 @@ private void CreateDoors()
             doorData.DestinationDoor,
             doorData.DestinationRoom,
             doorData.Id,
-            doorData.Type));
+            doorData.Type,
+            doorData.Direction));
     }
 }
 
@@ -471,6 +472,13 @@ private bool HasDoor(string direction)
     return false;
 }
 
+private bool HasVisibleDoor(string direction) => _doors.Any(door =>
+    door.Direction.Equals(direction, StringComparison.OrdinalIgnoreCase) && !door.IsBombable);
+
+public IEnumerable<ISolidCollider> BombableWalls => _doors
+    .Where(door => door.IsBombable)
+    .Select(door => (ISolidCollider)new RoomWallCollider(door.Bounds));
+
     public void Update(GameTime gameTime)
     {
         foreach (Block block in _blocks)
@@ -486,10 +494,10 @@ private bool HasDoor(string direction)
     {
         _exterior.Draw(spriteBatch);
 
-        bool hasUpDoor = HasDoor("Top");
-        bool hasLeftDoor = HasDoor("Left");
-        bool hasRightDoor = HasDoor("Right");
-        bool hasDownDoor = HasDoor("Bottom");
+        bool hasUpDoor = HasVisibleDoor("Top");
+        bool hasLeftDoor = HasVisibleDoor("Left");
+        bool hasRightDoor = HasVisibleDoor("Right");
+        bool hasDownDoor = HasVisibleDoor("Bottom");
 
         _exterior.DrawOpening(spriteBatch, _blockAtlas, hasUpDoor, "up");
         _exterior.DrawOpening(spriteBatch, _blockAtlas, hasLeftDoor, "left");

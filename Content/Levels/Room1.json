@@ -29,7 +29,7 @@
     {
       "Direction": "Right",
       "Id": "Room1.Right",
-      "Type": "Open",
+      "Type": "Bombable",
       "DestinationRoom": "Room3",
       "DestinationDoor": "Left",
       "SpawnX": 600,

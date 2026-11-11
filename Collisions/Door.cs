@@ -17,20 +17,24 @@ public class Door
     public string NextRoom { get; }
     public string NextDoor { get; }
     public string Id { get; }
+    public string Direction { get; }
     public DoorType Type { get; private set; }
     public bool IsLocked => Type == DoorType.Locked;
+    public bool IsBombable => Type == DoorType.Bombable;
 
-    public Door(Rectangle bounds, string nextDoor, string nextRoom, string id = "", string type = "Open")
+    public Door(Rectangle bounds, string nextDoor, string nextRoom, string id = "", string type = "Open", string direction = "")
     {
         Bounds = bounds;
         NextDoor = nextDoor;
         NextRoom = nextRoom;
         Id = id;
+        Direction = direction;
         Type = ParseType(type);
     }
 
     public bool CanTraverse(IInventory inventory)
     {
+        if (IsBombable) return false;
         if (Type != DoorType.Locked)
             return true;
 
@@ -39,6 +43,7 @@ public class Door
 
     public bool TryUnlock(IInventory inventory)
     {
+        if (IsBombable) return false;
         if (Type != DoorType.Locked)
             return true;
 
@@ -48,6 +53,15 @@ public class Door
         Type = DoorType.Open;
         return true;
     }
+
+    public bool TryBomb(Rectangle blastBounds)
+    {
+        if (!IsBombable || !Bounds.Intersects(blastBounds)) return false;
+        RestoreOpening();
+        return true;
+    }
+
+    public void RestoreOpening() => Type = DoorType.Open;
 
     public static DoorType ParseType(string type)
     {

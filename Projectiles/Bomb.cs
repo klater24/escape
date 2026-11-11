@@ -9,13 +9,18 @@ public enum BombState { Fuse, Exploding, Finished }
 
 public class Bomb : ICombatProjectile
 {
-    private const int ExplosionSize = 32;
+    public const int ExplosionSize = 96;
+    private const int BombWidth = 16;
+    private const int BombHeight = 32;
     private readonly ProjectileHitTracker _hits = new();
     public bool HitsPlayer => false;
     public Collision Category => Collision.PlayerProjectile;
     public bool IsCollisionEnabled => State == BombState.Exploding;
-    public Rectangle Bounds => new Rectangle((int)Position.X, (int)Position.Y,
-        State == BombState.Exploding ? ExplosionSize : ExplosionSize / 2, ExplosionSize);
+    private Vector2 ExplosionPosition => Position + new Vector2(
+        (BombWidth - ExplosionSize) / 2f, (BombHeight - ExplosionSize) / 2f);
+    public Rectangle Bounds => State == BombState.Exploding
+        ? new Rectangle((int)ExplosionPosition.X, (int)ExplosionPosition.Y, ExplosionSize, ExplosionSize)
+        : new Rectangle((int)Position.X, (int)Position.Y, BombWidth, BombHeight);
     public bool TryHit(ICollidable target)
     {
         if (!_hits.TryHit(this, target)) return false;
@@ -54,7 +59,7 @@ public class Bomb : ICombatProjectile
         State = _ageSeconds >= FuseSeconds + ExplosionSeconds ? BombState.Finished
             : _ageSeconds >= FuseSeconds ? BombState.Exploding : BombState.Fuse;
         _sprite.Position = Position;
-        _explosionSprite.Position = Position;
+        _explosionSprite.Position = ExplosionPosition;
 
         if (State == BombState.Fuse) 
             _sprite.Update(gameTime);

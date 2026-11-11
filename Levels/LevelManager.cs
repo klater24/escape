@@ -23,6 +23,27 @@ public class LevelManager : IGameResettable
     private readonly Texture2D _exteriorTexture;
     private readonly IInventory _inventory;
     private readonly HashSet<string> _collectedItems = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _bombedPassages = new(StringComparer.OrdinalIgnoreCase);
+
+    private static string PassageKey(string roomId, Door door)
+    {
+        string source = $"{roomId}:{door.Direction}";
+        string destination = $"{door.NextRoom}:{door.NextDoor}";
+        return StringComparer.OrdinalIgnoreCase.Compare(source, destination) < 0
+            ? $"{source}|{destination}" : $"{destination}|{source}";
+    }
+
+    public void BombWalls(Rectangle blastBounds)
+    {
+        bool changed = false;
+        foreach (Door door in CurrentRoom.Doors)
+        {
+            if (!door.TryBomb(blastBounds)) continue;
+            _bombedPassages.Add(PassageKey(CurrentRoom.RoomId, door));
+            changed = true;
+        }
+        if (changed) RefreshPlayerObstacles();
+    }
 
     public Room CurrentRoom { get; private set; }
     public event Action? RoomChanged;
@@ -36,7 +57,7 @@ public class LevelManager : IGameResettable
             .Cast<ISolidCollider>()
             .Concat(CurrentRoom.ExteriorWalls)
             .Concat(CurrentRoom.Doors
-                .Where(door => door.IsLocked && !door.CanTraverse(_inventory))
+                .Where(door => !door.CanTraverse(_inventory))
                 .Select(door => (ISolidCollider)new RoomWallCollider(door.Bounds)))
             .ToList();
     }
@@ -63,6 +84,9 @@ public class LevelManager : IGameResettable
         RoomData data = RoomParser.Load(filePath);
 
         CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture, _player, _inventory, _addRupees, roomId, _collectedItems);
+        foreach (Door door in CurrentRoom.Doors)
+            if (door.IsBombable && _bombedPassages.Contains(PassageKey(roomId, door)))
+                door.RestoreOpening();
 
         _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
         _player.Position = _currentSpawn;
@@ -193,6 +217,7 @@ public void CheckDoorTransitions()
     {
         _doorTransitioned = false;
         _collectedItems.Clear();
+        _bombedPassages.Clear();
         LoadRoom(StartingRoom);
     }
 }
