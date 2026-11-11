@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework.Input;
 using escape.Interfaces;
 using Microsoft.Xna.Framework;
 using escape.Projectiles;
+using escape.Items;
 
 namespace escape.Inputs;
 
@@ -10,12 +11,14 @@ public class UseItemCommand : ICommand
     private int _itemSlot;
     private Player _player;
     private ProjectileManager _projectiles;
+    private readonly IInventory _inventory;
 
-    public UseItemCommand(int itemSlot, Player player, ProjectileManager projectiles)
+    public UseItemCommand(int itemSlot, Player player, ProjectileManager projectiles, IInventory inventory)
     {
         _itemSlot = itemSlot;
         _player = player;
         _projectiles = projectiles;
+        _inventory = inventory;
     }
     public void Execute()
     {
@@ -28,6 +31,7 @@ public class UseItemCommand : ICommand
         }
         else if (_itemSlot == 2)
         {
+            if (!_inventory.RemoveItem(ItemType.Bomb)) return;
             _projectiles.SpawnBomb(position);
         }
         else if (_itemSlot == 3)

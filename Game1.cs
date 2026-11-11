@@ -79,6 +79,7 @@ public class Game1 : Game
     protected override void Initialize()
     {
         Inventory = new Inventory();
+        Inventory.AddItem(ItemType.Bomb, Inventory.BombCapacity);
         RegisterResettable(Inventory);
         base.Initialize();
     }
@@ -123,6 +124,7 @@ public class Game1 : Game
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
                                             Content, _itemAtlas, _player, _exteriorTexture, Inventory, AddRupees);
         RegisterResettable(_levelManager);
+        _projectiles.BombExploded += _levelManager.BombWalls;
         Transitions = new ScreenTransition(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
             HudHeight, _levelManager.GetTransitionDirection);
         _levelManager.RoomChanged += ConnectRoomCombat;
@@ -160,7 +162,8 @@ public class Game1 : Game
             if (States.CanUpdateGameplay)
             {
                 _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
-                    .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
+                    .Concat(_levelManager.CurrentRoom.ExteriorWalls)
+                    .Concat(_levelManager.CurrentRoom.BombableWalls).ToArray();
                 _projectiles.Update(gameTime);
                 foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<IDamageable>())
                     CombatCollisionHandler.Resolve(_player, enemy);
@@ -252,6 +255,7 @@ public class Game1 : Game
         Transitions.Cancel();
         Rupees = 0;
         _resetCoordinator.Reset();
+        Inventory.AddItem(ItemType.Bomb, Inventory.BombCapacity);
         InventoryScreen.Reset();
         States.Reset();
     }
@@ -286,7 +290,8 @@ public class Game1 : Game
         _roomBosses.Clear();
         _projectiles.Reset();
         _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
-            .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
+            .Concat(_levelManager.CurrentRoom.ExteriorWalls)
+            .Concat(_levelManager.CurrentRoom.BombableWalls).ToArray();
         foreach (var boss in _levelManager.CurrentRoom.Enemies.OfType<Boss>())
         {
             boss.FireRequested += SpawnBossProjectile;
