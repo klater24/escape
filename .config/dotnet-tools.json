@@ -9,17 +9,17 @@
       ],
       "rollForward": false
     },
-    "dotnet-mgcb-editor": {
-      "version": "3.8.1.303",
-      "commands": [
-        "mgcb-editor"
-      ],
-      "rollForward": false
-    },
     "dotnet-mgcb-editor-windows": {
       "version": "3.8.1.303",
       "commands": [
         "mgcb-editor-windows"
+      ],
+      "rollForward": false
+    },
+    "dotnet-mgcb-editor-mac": {
+      "version": "3.8.1.303",
+      "commands": [
+        "mgcb-editor-mac"
       ],
       "rollForward": false
     }
