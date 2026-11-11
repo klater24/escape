@@ -21,7 +21,7 @@ public class ProjectileFactory
 
     public Bomb CreateBomb(Vector2 position) =>
         new Bomb(ProjectileSprites.CreateBomb(_projectileAtlas, position, 2f),
-            ProjectileSprites.CreateBombExplosion(_projectileAtlas, position, 2f), position);
+            ProjectileSprites.CreateBombExplosion(_projectileAtlas, position, Bomb.ExplosionSize / 16f), position);
 
     public Boomerang CreateBoomerang(Vector2 position, Vector2 direction) =>
         new Boomerang(ProjectileSprites.CreateBoomerang(_projectileAtlas, position, 2f), position, direction);
