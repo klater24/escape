@@ -73,6 +73,7 @@ public class KeyboardController : IController
         if (Pressed(Keys.P)) { _game.States.TogglePause(); return; }
         if (Pressed(Keys.Enter)) { _game.ToggleInventory(); return; }
         if (!_game.States.CanUpdateGameplay || _player.IsDefeated) return;
+        if (Pressed(Keys.Space)) _player.Jump();
         bool moving = false;
 
         foreach (var key in heldCommands.Keys)

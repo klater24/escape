@@ -32,6 +32,7 @@ Click the game window to give it keyboard focus. Close the running game before r
 | A / Left arrow | Move left |
 | S / Down arrow | Move down |
 | D / Right arrow | Move right |
+| Space | Jump while standing on a platform in the side-view room |
 | Z / N | Attack |
 | E | Trigger temporary player damage feedback |
 | 1 | Fire an arrow from the player's position and facing direction |
@@ -42,6 +43,15 @@ Click the game window to give it keyboard focus. Close the running game before r
 | Q | Quit |
 
 Movement keys repeat while held. Other actions occur once per press. Use the number row for 1–3; keys 4–5 have no assigned action. The window title also lists controls, but it may be clipped by the window width.
+
+### Side-view room
+
+Enter Room4 through the right doorway in Room3
+Use A/D or the left/right arrows to walk and Space to jump
+Gravity replaces up/down movement in this room
+Cross the platforms to collect the rupee and key, then return through the left doorway
+The room layout, pickups, and connections come from `Content/Levels/Room4.json`
+Normal four-direction movement returns when you leave, and room changes use the existing camera animation
 
 ## What to demonstrate
 

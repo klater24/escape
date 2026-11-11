@@ -13,7 +13,7 @@ inventory/map and camera owners.
 | `Id` | Unique, stable room identifier matching the filename without `.json`, such as `Room1`. |
 | `Name` | Display name; it may differ from the ID. Connections use the ID. |
 | `MapX`, `MapY` | Integer dungeon map coordinates. Positive X is right; positive Y is down. Each ordinary adjacent room is one grid step away. |
-| `RoomType` | `TopDown` or `SideScrolling`. All current rooms use `TopDown`. |
+| `RoomType` | `TopDown` or `SideScrolling`, with Room4 using `SideScrolling` |
 | `SpawnX`, `SpawnY` | Default player position in room-local pixels when loading the room directly. |
 | `TileMap` | Seven rows of twelve parenthesized tile symbols, described below. |
 | `Doors` | Door definitions with destination connections and arrival positions. |
@@ -25,11 +25,18 @@ not camera positions. Current arrangement:
 | --- | --- | --- | --- |
 | Room1 | 0 | 0 | Top to Room2.Bottom; Right to Room3.Left |
 | Room2 | 0 | -1 | Bottom to Room1.Top |
-| Room3 | 1 | 0 | Left to Room1.Right |
+| Room3 | 1 | 0 | Left to Room1.Right; Right to Room4.Left |
+| Room4 | 2 | 0 | Left to Room3.Right |
 
-`Id`, map coordinates, and `RoomType` are metadata at this stage. The current
-loader still selects room files by the supplied room ID, and does not dispatch
-movement behavior based on `RoomType`. Side-scrolling behavior is a later issue.
+`RoomType` selects the player's movement rules when a room loads
+`TopDown` uses the normal four directions and `SideScrolling` uses left/right
+movement, gravity, and a grounded jump with Space
+Room4 is the side-view room and is reached through Room3's right doorway
+Its `B` tiles are solid platforms with collisions on every side, while `0`
+tiles leave open air instead of generating background floor tiles
+The bottom boundary catches falls and every ledge can be reached again by jumping
+Existing camera transitions play on entry and exit, and vertical speed clears
+whenever a room loads so returning to a top-down room restores normal movement
 
 ## Tile maps and pixel coordinates
 

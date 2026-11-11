@@ -91,6 +91,7 @@ public class LevelManager : IGameResettable
         _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);
         _player.Position = _currentSpawn;
         _player.CancelAttack();
+        _player.SetSideScrolling(CurrentRoom.IsSideScrolling);
         RefreshPlayerObstacles();
 
         _currentSpawn = new Vector2(data.SpawnX, data.SpawnY);

@@ -24,6 +24,15 @@
       "DestinationDoor": "Right",
       "SpawnX": 114,
       "SpawnY": 240
+    },
+    {
+      "Direction": "Right",
+      "Id": "Room3.Right",
+      "Type": "Open",
+      "DestinationRoom": "Room4",
+      "DestinationDoor": "Left",
+      "SpawnX": 600,
+      "SpawnY": 240
     }
   ]
 }

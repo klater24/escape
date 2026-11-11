@@ -1,0 +1,29 @@
+{
+  "Id": "Room4",
+  "Name": "Underground passage",
+  "MapX": 2,
+  "MapY": 0,
+  "RoomType": "SideScrolling",
+  "SpawnX": 114,
+  "SpawnY": 240,
+  "TileMap": [
+    "(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)",
+    "(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)",
+    "(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)",
+    "(0)(0)(0)(0)(0)(R)(0)(0)(0)(0)(K)(0)",
+    "(B)(B)(0)(0)(B)(B)(0)(0)(B)(B)(B)(0)",
+    "(0)(0)(B)(B)(0)(0)(B)(B)(0)(0)(0)(0)",
+    "(B)(B)(B)(B)(B)(B)(B)(B)(B)(B)(B)(B)"
+  ],
+  "Doors": [
+    {
+      "Id": "Room4.Left",
+      "Type": "Open",
+      "Direction": "Left",
+      "DestinationRoom": "Room3",
+      "DestinationDoor": "Right",
+      "SpawnX": 114,
+      "SpawnY": 240
+    }
+  ]
+}

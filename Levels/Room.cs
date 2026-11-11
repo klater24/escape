@@ -19,6 +19,7 @@ public class Room
     public string Name { get; }
     public Point MapPosition { get; }
     public string RoomId { get; }
+    public bool IsSideScrolling => _data.RoomType.Equals("SideScrolling", StringComparison.OrdinalIgnoreCase);
     private readonly RoomExterior _exterior;
     private readonly RoomData _data;
     private readonly Texture2D _blockAtlas;
@@ -71,7 +72,8 @@ public class Room
 
         CreateExteriorWalls();
         CreateDoors();
-        CreateFloor();
+        // Side rooms leave empty tiles as air and use solid tiles as platforms
+        if (!IsSideScrolling) CreateFloor();
         CreateTileMap();
         _enemyManager = new EnemyManager(_enemies);
         _itemManager = new ItemManager(_items);
