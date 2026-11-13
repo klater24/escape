@@ -120,6 +120,10 @@ public class Room
                     _addRupees(1);
                     break;
 
+                case InventoryPickup pickup:
+                    _inventory.AddItem(pickup.ItemType);
+                    break;
+
                 default:
                     continue;
             }
@@ -175,6 +179,26 @@ private void CreateTileItem(string type, Vector2 position)
             ItemSprites.CreateRupee(_itemAtlas, position, 2f),
             position),
 
+        "Bomb" => new InventoryPickup(
+            ItemSprites.CreateBomb(_itemAtlas, position, 2f),
+            position,
+            ItemType.Bomb),
+
+        "Arrow" => new InventoryPickup(
+            ItemSprites.CreateArrow(_itemAtlas, position, 2f),
+            position,
+            ItemType.Arrow),
+
+        "Bow" => new InventoryPickup(
+            ItemSprites.CreateBow(_itemAtlas, position, 2f),
+            position,
+            ItemType.Bow),
+
+        "Boomerang" => new InventoryPickup(
+            ItemSprites.CreateBoomerang(_itemAtlas, position, 2f),
+            position,
+            ItemType.Boomerang),
+
         _ => throw new ArgumentException(
             $"Unknown item type: {type}")
     };
@@ -200,9 +224,6 @@ private void CreateTileEnemy(string type, Vector2 position)
 
     _enemies.Add(enemy);
 }
-
-
-
 
 private void CreateExteriorWalls()
 {
@@ -284,7 +305,6 @@ private void CreateExteriorWalls()
                 wallThickness, sideGapSize)));
     }
 }
-
 
 private void CreateFloor()
 {
@@ -391,6 +411,22 @@ private void CreateTileMap()
 
                 case "R":
                     CreateTileItem("Rupee", position);
+                    break;
+
+                case "A":
+                    CreateTileItem("Bomb", position);
+                    break;
+
+                case "L":
+                    CreateTileItem("Arrow", position);
+                    break;
+
+                case "O":
+                    CreateTileItem("Bow", position);
+                    break;
+
+                case "G":
+                    CreateTileItem("Boomerang", position);
                     break;
 
                 default:
