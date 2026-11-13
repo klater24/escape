@@ -32,7 +32,7 @@ public static ISprite CreatePotion(Texture2D atlas, Vector2 position, float scal
     {
         var itemWatchFrames = new[]
         {
-           new Rectangle(47, 0, 10, 16)
+           new Rectangle(58, 0, 11, 16)
         };
         return new AnimatedSprite(atlas, itemWatchFrames, position, .5f, scale);
     }
@@ -75,5 +75,32 @@ public static ISprite CreatePotion(Texture2D atlas, Vector2 position, float scal
         };
 
         return new AnimatedSprite(atlas, frames, position, .5f, scale);
+    }
+    public static ISprite CreateBomb(Texture2D atlas, Vector2 position, float scale)
+    {
+        return new StaticSprite(
+            atlas, new Rectangle(136, 0, 8, 16), position, scale);
+    }
+
+    public static ISprite CreateArrow(Texture2D atlas, Vector2 position, float scale)
+    {
+        return new StaticSprite(
+            atlas, new Rectangle(152, 0, 8, 16), position, scale);
+    }
+
+    public static ISprite CreateBoomerang(Texture2D atlas, Vector2 position, float scale)
+    {
+        var frames = new[]
+        {
+            new Rectangle(128, 0, 8, 16)
+        };
+
+        return new AnimatedSprite(atlas, frames, position, 0.5f, scale);
+    }
+
+    public static ISprite CreateBow(Texture2D atlas, Vector2 position, float scale)
+    {
+        return new StaticSprite(
+            atlas, new Rectangle(144, 0, 8, 16), position, scale);
     }
 }

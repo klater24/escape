@@ -82,6 +82,27 @@ public class HUD
             Color.White
         );
     }
+    private void DrawEquippedItem(SpriteBatch spriteBatch)
+    {
+        ItemType? equippedItem = _inventory.GetEquippedItem();
+
+        if (equippedItem == null)
+            return;
+
+        Rectangle source = equippedItem.Value switch
+        {
+            ItemType.Bomb => new Rectangle(604, 137, 8, 16),
+            ItemType.Boomerang => new Rectangle(584, 137, 8, 16),
+            ItemType.Bow => new Rectangle(633, 137, 8, 16),
+            ItemType.Potion => new Rectangle(704, 137, 8, 16),
+            _ => Rectangle.Empty
+        };
+
+        if (source == Rectangle.Empty)
+            return;
+
+        DrawHudItem(spriteBatch, source, new Vector2(384, 72));
+    }
 
     private void DrawHearts(SpriteBatch spriteBatch)
     {
@@ -121,7 +142,9 @@ public class HUD
 
         // Draw player health
         DrawHearts(spriteBatch);
+
         DrawHudItem(spriteBatch, _swordSprite, new Vector2(456, 72));
+        DrawEquippedItem(spriteBatch);
 
         // Draw resource counts
         // Rupees
