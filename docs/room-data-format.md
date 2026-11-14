@@ -13,7 +13,7 @@ inventory/map and camera owners.
 | `Id` | Unique, stable room identifier matching the filename without `.json`, such as `Room1`. |
 | `Name` | Display name; it may differ from the ID. Connections use the ID. |
 | `MapX`, `MapY` | Integer dungeon map coordinates. Positive X is right; positive Y is down. Each ordinary adjacent room is one grid step away. |
-| `RoomType` | `TopDown` or `SideScrolling`. All current rooms use `TopDown`. |
+| `RoomType` | `TopDown` or `SideScrolling`, with Room4 using `SideScrolling` |
 | `SpawnX`, `SpawnY` | Default player position in room-local pixels when loading the room directly. |
 | `TileMap` | Seven rows of twelve parenthesized tile symbols, described below. |
 | `Doors` | Door definitions with destination connections and arrival positions. |
@@ -25,11 +25,18 @@ not camera positions. Current arrangement:
 | --- | --- | --- | --- |
 | Room1 | 0 | 0 | Top to Room2.Bottom; Right to Room3.Left |
 | Room2 | 0 | -1 | Bottom to Room1.Top |
-| Room3 | 1 | 0 | Left to Room1.Right |
+| Room3 | 1 | 0 | Left to Room1.Right; Right to Room4.Left |
+| Room4 | 2 | 0 | Left to Room3.Right |
 
-`Id`, map coordinates, and `RoomType` are metadata at this stage. The current
-loader still selects room files by the supplied room ID, and does not dispatch
-movement behavior based on `RoomType`. Side-scrolling behavior is a later issue.
+`RoomType` selects the player's movement rules when a room loads
+`TopDown` uses the normal four directions and `SideScrolling` uses left/right
+movement, gravity, and a grounded jump with Space
+Room4 is the side-view room and is reached through Room3's right doorway
+Its `B` tiles are solid platforms with collisions on every side, while `0`
+tiles leave open air instead of generating background floor tiles
+The bottom boundary catches falls and every ledge can be reached again by jumping
+Existing camera transitions play on entry and exit, and vertical speed clears
+whenever a room loads so returning to a top-down room restores normal movement
 
 ## Tile maps and pixel coordinates
 
@@ -77,7 +84,7 @@ contents. Treat those lists as legacy; omit them from new room files.
 | Field | Meaning |
 | --- | --- |
 | `Id` | Globally unique stable door ID, using `<RoomId>.<Direction>`, such as `Room1.Top`. |
-| `Type` | `Open`, `Locked`, or `Bombable`. All current doors are `Open`. |
+| `Type` | `Open`, `Locked`, or `Bombable`. Room1.Right and Room3.Left form the example bombable passage. |
 | `Direction` | This room's doorway side: `Top`, `Bottom`, `Left`, or `Right`. Define at most one door per side. |
 | `DestinationRoom` | Destination room ID, matching its filename. |
 | `DestinationDoor` | Destination doorway's **direction**, not its `Id`. |
@@ -115,13 +122,20 @@ directions. Door trigger bounds currently come from `Room.CreateDoors()`:
 These are room-local rectangles; they are not configurable in JSON. Existing
 navigation prevents another transition until the player leaves doorway bounds.
 
-Door `Id` and `Type` currently deserialize as metadata; the runtime `Door` and
-transition code do not yet implement locks or bombable passages. In later
-issues, opening a shared passage must update both connected sides, persist
-through revisits during a run, and clear on a new run. The two door IDs and
-reciprocal connection data identify those sides. `Bombable` describes an
-exterior passage revealed by a bomb; interior destructible blocks would need
-their own data representation if required.
+`Locked` passages require and consume a key when traversed. `Bombable` passages
+draw as solid exterior walls and block player movement, projectiles, and room
+transitions until a bomb explosion overlaps their doorway bounds. Configure
+both reciprocal doors as `Bombable`. Opening either side reveals both sides
+for the rest of the run, including room revisits; reset restores the walls.
+Enemies remain blocked at all doorways, even after a passage opens.
+Interior destructible blocks require their own data representation.
+
+To try the example, stand against the middle of Room1's right wall and press
+`2` (the existing bomb test control). After the two-second fuse the centered
+96-pixel blast reveals the passage. Walk right to transition to Room3, then
+return to confirm the opening persists. A distant bomb, arrow, or key does
+not reveal the wall. Equipped bombs used with `X` use the same explosion path
+and consume inventory through the existing item-use logic.
 
 ## Integration boundaries
 

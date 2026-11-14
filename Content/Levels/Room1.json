@@ -20,7 +20,7 @@
     {
       "Direction": "Top",
       "Id": "Room1.Top",
-      "Type": "Open",
+      "Type": "Locked",
       "DestinationRoom": "Room2",
       "DestinationDoor": "Bottom",
       "SpawnX": 360,
@@ -29,7 +29,7 @@
     {
       "Direction": "Right",
       "Id": "Room1.Right",
-      "Type": "Open",
+      "Type": "Bombable",
       "DestinationRoom": "Room3",
       "DestinationDoor": "Left",
       "SpawnX": 600,

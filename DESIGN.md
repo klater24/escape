@@ -4,6 +4,24 @@ This document describes the current implementation, its relationship to the team
 
 ## Scope and ownership
 
+### Sprint 4 side-view movement
+
+`RoomData.RoomType` is read from JSON and exposed as `Room.IsSideScrolling`
+`LevelManager` selects the player's movement mode on every room load and clears
+vertical speed before the arrival position is applied
+`Player` keeps its existing combat and animation code and delegates side-view
+walking, gravity, and grounded jumping to `SideScrollingMovement`
+The movement helper works against the same collider interface as normal movement
+and uses small time steps so long frames cannot skip platforms
+Solid `B` tiles block the player's feet, head, and sides
+Side-view rooms leave empty tiles as air instead of generating the usual floor tiles
+
+Room4 connects to Room3 through reciprocal JSON door definitions so the existing
+camera transition handles entry and exit without a separate transition path
+Pickups share the normal inventory and collected-item persistence
+Pause and inventory screens suspend gameplay updates, so falling also pauses
+Reset and every room load clear queued movement and vertical speed
+
 | Owner | Responsibility | Main implementation |
 | --- | --- | --- |
 | Person 1 — Nesrin | Player movement, facing, states, animation, reset | `player/Player.cs` |

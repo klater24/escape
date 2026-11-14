@@ -79,6 +79,7 @@ public class Game1 : Game
     protected override void Initialize()
     {
         Inventory = new Inventory();
+        Inventory.AddItem(ItemType.Bomb, Inventory.BombCapacity);
         RegisterResettable(Inventory);
         base.Initialize();
     }
@@ -125,6 +126,7 @@ public class Game1 : Game
                                             Content, _itemAtlas, _player, _exteriorTexture, Inventory, AddRupees);
         ((BasicInventoryScreen)InventoryScreen).DungeonMap = _levelManager.DungeonMap;
         RegisterResettable(_levelManager);
+        _projectiles.BombExploded += _levelManager.BombWalls;
         Transitions = new ScreenTransition(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
             HudHeight, _levelManager.GetTransitionDirection);
         _levelManager.RoomChanged += ConnectRoomCombat;
@@ -143,7 +145,7 @@ public class Game1 : Game
         bool wasAttacking = _player.IsAttacking;
         float previousHealth = _player.Health;
         _keyboardController.Update();
-        if (!wasAttacking && _player.IsAttacking) _audio.PlaySound("main");
+        if (!wasAttacking && _player.IsAttacking) _audio.PlaySound("attack");
         EvaluateOutcome();
         if (States.Current == GameState.Transition)
         {
@@ -162,7 +164,8 @@ public class Game1 : Game
             if (States.CanUpdateGameplay)
             {
                 _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
-                    .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
+                    .Concat(_levelManager.CurrentRoom.ExteriorWalls)
+                    .Concat(_levelManager.CurrentRoom.BombableWalls).ToArray();
                 _projectiles.Update(gameTime);
                 foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<IDamageable>())
                     CombatCollisionHandler.Resolve(_player, enemy);
@@ -172,7 +175,7 @@ public class Game1 : Game
             }
         }
         var boss = _levelManager.CurrentRoom.Enemies.OfType<Boss>().FirstOrDefault();
-        if (_player.Health < previousHealth) _audio.PlaySound("main");
+        if (_player.Health < previousHealth) _audio.PlaySound("damage");
         string bossStatus = boss is null ? "" : $" | Boss HP: {boss.Health}/{Boss.MaxHealth}";
         Window.Title = $"Escape | {States.Current} | HP: {_player.Health}/{_player.MaxHealth}{bossStatus} | M: music {(_audio.IsMusicMuted ? "off" : "on")} | P: pause | Enter: inventory | X: equipped item | R: restart | Q: quit";
         base.Update(gameTime);
@@ -264,6 +267,7 @@ public class Game1 : Game
         Transitions.Cancel();
         Rupees = 0;
         _resetCoordinator.Reset();
+        Inventory.AddItem(ItemType.Bomb, Inventory.BombCapacity);
         InventoryScreen.Reset();
         States.Reset();
     }
@@ -298,7 +302,8 @@ public class Game1 : Game
         _roomBosses.Clear();
         _projectiles.Reset();
         _projectiles.Obstacles = _levelManager.CurrentRoom.Blocks.Cast<ISolidCollider>()
-            .Concat(_levelManager.CurrentRoom.ExteriorWalls).ToArray();
+            .Concat(_levelManager.CurrentRoom.ExteriorWalls)
+            .Concat(_levelManager.CurrentRoom.BombableWalls).ToArray();
         foreach (var boss in _levelManager.CurrentRoom.Enemies.OfType<Boss>())
         {
             boss.FireRequested += SpawnBossProjectile;

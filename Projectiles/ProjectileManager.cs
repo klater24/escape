@@ -12,6 +12,7 @@ public class ProjectileManager : IGameResettable
     private readonly ProjectileFactory _factory;
     private const double MaximumStepSeconds = 1.0 / 120.0;
     public IReadOnlyList<ISolidCollider> Obstacles { get; set; } = Array.Empty<ISolidCollider>();
+    public event Action<Rectangle>? BombExploded;
 
     public ProjectileManager(ProjectileFactory factory)
     {
@@ -62,7 +63,10 @@ public class ProjectileManager : IGameResettable
             {
                 double step = Math.Min(remaining, MaximumStepSeconds);
                 Vector2 previous = projectile.Position;
+                bool wasExploding = projectile is Bomb { State: BombState.Exploding };
                 projectile.Update(new GameTime(gameTime.TotalGameTime, TimeSpan.FromSeconds(step)));
+                if (!wasExploding && projectile is Bomb { State: BombState.Exploding } bomb)
+                    BombExploded?.Invoke(bomb.Bounds);
                 if (projectile is ICombatProjectile combat &&
                     projectile is not Bomb { State: BombState.Exploding } &&
                     Obstacles.Any(wall => wall.IsSolid && wall.IsCollisionEnabled &&
