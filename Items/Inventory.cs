@@ -6,6 +6,7 @@ namespace escape.Items;
 
 public class Inventory : IInventory, IGameResettable
 {
+    public const int BombCapacity = 10;
     public event Action<ItemType, int>? ItemAdded;
     public event Action<ItemType, int>? ItemRemoved;
     public event Action<ItemType>? ItemEquipped;
@@ -18,6 +19,12 @@ public class Inventory : IInventory, IGameResettable
         if (quantity <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(quantity));
+        }
+
+        if (item == ItemType.Bomb)
+        {
+            quantity = Math.Min(quantity, BombCapacity - GetQuantity(item));
+            if (quantity == 0) return;
         }
 
         if (!_items.ContainsKey(item))

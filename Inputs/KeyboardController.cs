@@ -52,9 +52,9 @@ public class KeyboardController : IController
         pressedCommands[Keys.X] = new UseEquippedItemCommand(new EquippedItemUse(
             _player, _game.Inventory, _projectiles, () => _game.States.CanUpdateGameplay, _game.TrySpendRupees));
         
-        pressedCommands[Keys.D1] = new UseItemCommand(1, _player, _projectiles);
-        pressedCommands[Keys.D2] = new UseItemCommand(2, _player, _projectiles);
-        pressedCommands[Keys.D3] = new UseItemCommand(3, _player, _projectiles);
+        pressedCommands[Keys.D1] = new UseItemCommand(1, _player, _projectiles, _game.Inventory);
+        pressedCommands[Keys.D2] = new UseItemCommand(2, _player, _projectiles, _game.Inventory);
+        pressedCommands[Keys.D3] = new UseItemCommand(3, _player, _projectiles, _game.Inventory);
 
         pressedCommands[Keys.F1] = new ChangeRoomCommand(_levelManager, "Room1", new Vector2(100, 100));
         pressedCommands[Keys.F2] = new ChangeRoomCommand(_levelManager, "Room2", new Vector2(100, 100));
@@ -73,6 +73,7 @@ public class KeyboardController : IController
         if (Pressed(Keys.P)) { _game.States.TogglePause(); return; }
         if (Pressed(Keys.Enter)) { _game.ToggleInventory(); return; }
         if (!_game.States.CanUpdateGameplay || _player.IsDefeated) return;
+        if (Pressed(Keys.Space)) _player.Jump();
         bool moving = false;
 
         foreach (var key in heldCommands.Keys)

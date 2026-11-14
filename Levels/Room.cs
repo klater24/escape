@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
@@ -17,6 +18,8 @@ public class Room
 {
     public string Name { get; }
     public Point MapPosition { get; }
+    public string RoomId { get; }
+    public bool IsSideScrolling => _data.RoomType.Equals("SideScrolling", StringComparison.OrdinalIgnoreCase);
     private readonly RoomExterior _exterior;
     private readonly RoomData _data;
     private readonly Texture2D _blockAtlas;
@@ -38,7 +41,8 @@ public class Room
     private readonly IInventory _inventory;
     private readonly Player _player;
     private readonly Action<int> _addRupees;
-    
+    private readonly HashSet<string> _collectedItems;
+    private readonly Dictionary<IItem, string> _itemKeys = new();
 
     public Room(
         RoomData data,
@@ -48,9 +52,12 @@ public class Room
         Texture2D exteriorTexture,
         Player player,
         IInventory inventory,
-        Action<int> addRupees)
+        Action<int> addRupees,
+        string roomId,
+        HashSet<string> collectedItems)
     {
         Name = data.Name;
+        RoomId = roomId;
         MapPosition = new Point(data.MapX, data.MapY);
         _data = data;
         _blockAtlas = blockAtlas;
@@ -59,22 +66,46 @@ public class Room
         _player = player;
         _inventory = inventory;
         _addRupees = addRupees;
+        _collectedItems = collectedItems;
 
         _exterior = new RoomExterior(exteriorTexture, Vector2.Zero, 3f);
 
         CreateExteriorWalls();
         CreateDoors();
-        CreateFloor();
+        // Side rooms leave empty tiles as air and use solid tiles as platforms
+        if (!IsSideScrolling) CreateFloor();
         CreateTileMap();
         _enemyManager = new EnemyManager(_enemies);
         _itemManager = new ItemManager(_items);
-        var enemyObstacles = _blocks.Cast<ISolidCollider>()
+        var enemyObstacles = _blocks.Where(block => block.IsSolid).Cast<ISolidCollider>()
             .Concat(_exteriorWalls)
-            .Concat(_doors.Select(door => (ISolidCollider)new RoomWallCollider(door.Bounds)))
+            .Concat(_doors
+                .Select(door => (ISolidCollider)new RoomWallCollider(door.Bounds)))
             .ToArray();
         foreach (var enemy in _enemies.OfType<IEnvironmentEnemy>())
             enemy.Obstacles = enemyObstacles;
         
+    }
+
+    private static Vector2 NormalizeItemTilePosition(Vector2 position)
+    {
+        const float tileSize = 48f;
+        float x = (float)Math.Floor(position.X / tileSize) * tileSize;
+        float y = (float)Math.Floor(position.Y / tileSize) * tileSize;
+        return new Vector2(x, y);
+    }
+
+    private string GetCollectedItemKey(string itemType, Vector2 position)
+    {
+        Vector2 stablePosition = NormalizeItemTilePosition(position);
+        int x = (int)Math.Round(stablePosition.X);
+        int y = (int)Math.Round(stablePosition.Y);
+        return $"{RoomId}:{itemType}:{x}:{y}";
+    }
+
+    private bool IsCollectedItem(string itemType, Vector2 position)
+    {
+        return _collectedItems.Contains(GetCollectedItemKey(itemType, position));
     }
 
     private void CheckItemCollisions()
@@ -124,6 +155,9 @@ public class Room
                     continue;
             }
 
+            // Use the spawn identity: pickup animations move across tile boundaries.
+            _collectedItems.Add(_itemKeys[item]);
+            _itemKeys.Remove(item);
             _items.Remove(item);
         }
     }
@@ -142,6 +176,9 @@ public class Room
 
 private void CreateTileItem(string type, Vector2 position)
 {
+    if (IsCollectedItem(type, position))
+        return;
+
     IItem item = type switch
     {
         "Triforce" => new Triforce(
@@ -180,6 +217,7 @@ private void CreateTileItem(string type, Vector2 position)
     };
 
     _items.Add(item);
+    _itemKeys.Add(item, GetCollectedItemKey(type, position));
 }
 
 private void CreateTileEnemy(string type, Vector2 position)
@@ -200,9 +238,6 @@ private void CreateTileEnemy(string type, Vector2 position)
 
     _enemies.Add(enemy);
 }
-
-
-
 
 private void CreateExteriorWalls()
 {
@@ -285,7 +320,6 @@ private void CreateExteriorWalls()
     }
 }
 
-
 private void CreateFloor()
 {
     const int columns = 12;
@@ -313,7 +347,6 @@ private void CreateFloor()
         }
     }
 }
-
 
 private void CreateTileMap()
 {
@@ -401,16 +434,6 @@ private void CreateTileMap()
     }
 }
 
-
-private void CreateExterior()
-{
-    Vector2 topPosition = new(320, 0);
-    Vector2 leftPosition = new(0, 320);
-    Vector2 rightPosition = new(640, 320);
-    Vector2 bottomPosition = new(320, 640);
-}
-
-
 private void CreateDoors()
 {
 
@@ -430,7 +453,10 @@ private void CreateDoors()
         _doors.Add(new Door(
             bounds,
             doorData.DestinationDoor,
-            doorData.DestinationRoom));
+            doorData.DestinationRoom,
+            doorData.Id,
+            doorData.Type,
+            doorData.Direction));
     }
 }
 
@@ -448,6 +474,13 @@ private bool HasDoor(string direction)
     return false;
 }
 
+private bool HasVisibleDoor(string direction) => _doors.Any(door =>
+    door.Direction.Equals(direction, StringComparison.OrdinalIgnoreCase) && !door.IsBombable);
+
+public IEnumerable<ISolidCollider> BombableWalls => _doors
+    .Where(door => door.IsBombable)
+    .Select(door => (ISolidCollider)new RoomWallCollider(door.Bounds));
+
     public void Update(GameTime gameTime)
     {
         foreach (Block block in _blocks)
@@ -463,10 +496,10 @@ private bool HasDoor(string direction)
     {
         _exterior.Draw(spriteBatch);
 
-        bool hasUpDoor = HasDoor("Top");
-        bool hasLeftDoor = HasDoor("Left");
-        bool hasRightDoor = HasDoor("Right");
-        bool hasDownDoor = HasDoor("Bottom");
+        bool hasUpDoor = HasVisibleDoor("Top");
+        bool hasLeftDoor = HasVisibleDoor("Left");
+        bool hasRightDoor = HasVisibleDoor("Right");
+        bool hasDownDoor = HasVisibleDoor("Bottom");
 
         _exterior.DrawOpening(spriteBatch, _blockAtlas, hasUpDoor, "up");
         _exterior.DrawOpening(spriteBatch, _blockAtlas, hasLeftDoor, "left");

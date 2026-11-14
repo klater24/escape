@@ -32,6 +32,7 @@ Click the game window to give it keyboard focus. Close the running game before r
 | A / Left arrow | Move left |
 | S / Down arrow | Move down |
 | D / Right arrow | Move right |
+| Space | Jump while standing on a platform in the side-view room |
 | Z / N | Attack |
 | E | Trigger temporary player damage feedback |
 | 1 | Fire an arrow from the player's position and facing direction |
@@ -43,6 +44,15 @@ Click the game window to give it keyboard focus. Close the running game before r
 
 Movement keys repeat while held. Other actions occur once per press. Use the number row for 1–3; keys 4–5 have no assigned action. The window title also lists controls, but it may be clipped by the window width.
 
+### Side-view room
+
+Enter Room4 through the right doorway in Room3
+Use A/D or the left/right arrows to walk and Space to jump
+Gravity replaces up/down movement in this room
+Cross the platforms to collect the rupee and key, then return through the left doorway
+The room layout, pickups, and connections come from `Content/Levels/Room4.json`
+Normal four-direction movement returns when you leave, and room changes use the existing camera animation
+
 ## What to demonstrate
 
 - **Player:** starts at (100, 100), moves, faces left/right/up/down, and displays idle, walking, attack, and damaged states. Attack lasts 0.48 seconds; damage normally lasts 0.96 seconds.
@@ -50,7 +60,7 @@ Movement keys repeat while held. Other actions occur once per press. Use the num
 - **Boss:** The Sorcerer requests a rightward projectile every two seconds while in the active room. Its projectiles continue after leaving the room until they expire or are reset.
 - **Pickups:** All pickups placed in the active room are shown and updated together. Book, Key, Watch, Heart, and Potion bob six pixels around their starting positions on a two-second cycle. Heart and Potion also change image frames.
 - **Blocks:** grass, dirt, stone, brick, water, wood, sand, ice, metal, and platform. Only the selected block is shown; blocks remain stationary. All three selectors wrap at either end.
-- **Projectiles:** the scene starts empty. Create shots with 1–3; boss shots are created by the selected boss. Arrow moves for two seconds and expires after three. Bomb has a two-second fuse and a one-second explosion display. Boomerang travels outward for three seconds and returns to its launch point over three seconds. Boss shots expire after six seconds or when they leave the right edge.
+- **Projectiles:** the scene starts empty. Create shots with 1–3; boss shots are created by the selected boss. Arrow moves for two seconds and expires after three. Bomb has a two-second fuse and a one-second explosion display. Each run starts with 10 bombs, the inventory maximum. Pressing 2 or using an equipped bomb with X spends one bomb; neither control works when bombs reach zero. The HUD and inventory show the remaining count. Reset restores the starting supply. Boomerang travels outward for three seconds and returns to its launch point over three seconds. Boss shots expire after six seconds or when they leave the right edge.
 - **Reset:** R restores room objects to their initial state, restores the player's position/facing/state, and clears every active projectile. If the player was defeated, R revives them at their death position. It does not create demo shots.
 - **Defeated player:** F1-F3 and door transitions do not leave the player’s death room. Press R to reset the scene and revive the player.
 

@@ -41,6 +41,23 @@ public class Player : IGameResettable, IMoveCollider
     public IReadOnlyList<ISolidCollider> Obstacles { get; set; }
         = Array.Empty<ISolidCollider>();
     private Direction facingDirection;
+    private readonly escape.SideScrollingMovement _sideMovement = new();
+    public bool IsSideScrolling { get; private set; }
+
+    public void SetSideScrolling(bool enabled)
+    {
+        IsSideScrolling = enabled;
+        // Room transitions should never carry a fall or a held movement into the next room
+        _sideMovement.Reset();
+        StopMoving();
+        if (enabled) facingDirection = Direction.Right;
+    }
+
+    public void Jump()
+    {
+        if (IsSideScrolling && !IsDefeated && currentState != State.Attacking && currentState != State.Damaged)
+            _sideMovement.TryJump(this, Obstacles);
+    }
     public Vector2 position, initialPosition;
     //Index 0 for Up, Index 1 for down, Index 2 for side
     private AnimatedSprite[] attackUDS = new AnimatedSprite[3];
@@ -116,6 +133,8 @@ public class Player : IGameResettable, IMoveCollider
     public void Move(Direction direct)
     {
         if (IsDefeated) return;
+        // Up and down still belong to the dungeon controls but cannot move the player through the air
+        if (IsSideScrolling && (direct == Direction.Up || direct == Direction.Down)) return;
         if (currentState == State.Attacking || currentState == State.Damaged)
         {
             return;
@@ -148,7 +167,10 @@ public class Player : IGameResettable, IMoveCollider
         }
 
         // Move the player while resolving collisions with obstacles
-        EnvironmentCollisionResolver.Move(this, movement * MovementSpeed, Obstacles);
+        if (IsSideScrolling)
+            _sideMovement.SetHorizontalInput(movement.X);
+        else
+            EnvironmentCollisionResolver.Move(this, movement * MovementSpeed, Obstacles);
     }
     public Direction GetFacingDirection()
     {
@@ -214,6 +236,7 @@ public class Player : IGameResettable, IMoveCollider
     }
     public void Reset()
     {
+        SetSideScrolling(false);
         MaxHealth = StartingHealth;
         Health = MaxHealth;
         position = initialPosition;
@@ -249,6 +272,8 @@ public class Player : IGameResettable, IMoveCollider
     public void Update(GameTime gameTime)
     {
         if (IsDefeated) return;
+        // Gravity keeps running during attacks and damage so the player cannot hover
+        if (IsSideScrolling) _sideMovement.Update(this, Obstacles, gameTime);
         damageCooldownTimer = MathF.Max(
             0f,
             damageCooldownTimer - (float)gameTime.ElapsedGameTime.TotalSeconds
