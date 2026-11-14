@@ -123,6 +123,7 @@ public class Game1 : Game
 
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
                                             Content, _itemAtlas, _player, _exteriorTexture, Inventory, AddRupees);
+        ((BasicInventoryScreen)InventoryScreen).DungeonMap = _levelManager.DungeonMap;
         RegisterResettable(_levelManager);
         Transitions = new ScreenTransition(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
             HudHeight, _levelManager.GetTransitionDirection);
@@ -210,6 +211,7 @@ public class Game1 : Game
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
         if (state == GameState.Inventory)
         {
+            ((BasicInventoryScreen)InventoryScreen).CurrentRoomId = _levelManager.CurrentRoom.Id;
             InventoryScreen.Draw(_spriteBatch, GraphicsDevice.Viewport.Bounds);
             _spriteBatch.End();
 

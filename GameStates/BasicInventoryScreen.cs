@@ -3,6 +3,8 @@ using escape.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Linq;
+using escape.Levels;
 
 namespace escape.GameStates;
 
@@ -25,6 +27,8 @@ public sealed class BasicInventoryScreen : IInventoryScreen
     }
     private InventoryLayout _layout = InventoryLayout.DungeonMap;
     private readonly Texture2D _hudAtlas;
+    public DungeonMap? DungeonMap { get; set; }
+    public string? CurrentRoomId { get; set; }
     public BasicInventoryScreen(IInventory inventory, SpriteFont font, Texture2D hudAtlas)
     {
         _inventory = inventory;
@@ -111,6 +115,47 @@ public sealed class BasicInventoryScreen : IInventoryScreen
             : _dungeonMapBackground;
 
         batch.Draw(_hudAtlas, new Rectangle(0, 264, 768, 264), infoBackground, Color.White);
+
+        // Draw explored dungeon rooms.
+        if (DungeonMap != null)
+        {
+            const int roomSize = 24;
+            const int spacing = 0;
+
+            // Center the dungeon layout in the map panel.
+            int minX = DungeonMap.Rooms.Values.Min(p => p.X);
+            int maxX = DungeonMap.Rooms.Values.Max(p => p.X);
+            int minY = DungeonMap.Rooms.Values.Min(p => p.Y);
+            int maxY = DungeonMap.Rooms.Values.Max(p => p.Y);
+
+            int mapWidth = (maxX - minX + 1) * (roomSize + spacing) - spacing;
+            int mapHeight = (maxY - minY + 1) * (roomSize + spacing) - spacing;
+
+            const int gridX = 384;
+            const int gridY = 288;
+            const int gridSize = 192;
+
+            int startX = gridX + (gridSize - mapWidth) / 2;
+            int startY = gridY + (gridSize - mapHeight) / 2;
+
+            foreach (var room in DungeonMap.Rooms)
+            {
+                if (!DungeonMap.IsExplored(room.Key))
+                    continue;
+
+                int x = startX + (room.Value.X - minX) * (roomSize + spacing);
+                int y = startY + (room.Value.Y - minY) * (roomSize + spacing);
+
+                // Draw the room tile.
+                batch.Draw(_hudAtlas, new Rectangle(x, y, roomSize, roomSize), DungeonMap.GetRoomTileSource(room.Key), Color.White);
+
+                // Draw the player marker over the current room.
+                if (room.Key == CurrentRoomId)
+                {
+                    batch.Draw(_hudAtlas, new Rectangle(x+7, y+7, 9, 9), DungeonMap.GetPlayerMarkerSource(), Color.White);
+                };
+            }
+        }
 
         // Item positions.
         Rectangle[] itemPositions =

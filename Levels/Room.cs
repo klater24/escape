@@ -38,6 +38,7 @@ public class Room
     private readonly IInventory _inventory;
     private readonly Player _player;
     private readonly Action<int> _addRupees;
+    public string Id { get; }
     
 
     public Room(
@@ -59,6 +60,7 @@ public class Room
         _player = player;
         _inventory = inventory;
         _addRupees = addRupees;
+        Id = data.Id;
 
         _exterior = new RoomExterior(exteriorTexture, Vector2.Zero, 3f);
 
@@ -198,6 +200,11 @@ private void CreateTileItem(string type, Vector2 position)
             ItemSprites.CreateBoomerang(_itemAtlas, position, 2f),
             position,
             ItemType.Boomerang),
+
+        "Map" => new InventoryPickup(
+            ItemSprites.CreateMap(_itemAtlas, position, 2f),
+            position,
+            ItemType.Map),
 
         _ => throw new ArgumentException(
             $"Unknown item type: {type}")
@@ -427,6 +434,10 @@ private void CreateTileMap()
 
                 case "G":
                     CreateTileItem("Boomerang", position);
+                    break;
+                
+                case "Q":
+                    CreateTileItem("Map", position);
                     break;
 
                 default:
