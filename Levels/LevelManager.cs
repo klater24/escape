@@ -49,6 +49,7 @@ public class LevelManager : IGameResettable
     public event Action? RoomChanged;
     public event Action<string>? RoomChanging;
     private readonly Action<int> _addRupees;
+    public DungeonMap DungeonMap { get; }
 
     private void RefreshPlayerObstacles()
     {
@@ -73,6 +74,7 @@ public class LevelManager : IGameResettable
         _exteriorTexture = exteriorTexture;
         _inventory = inventory;
         _addRupees = addRupees;
+        DungeonMap = new DungeonMap(_levelsDirectory);
 
         LoadRoom(StartingRoom);
     }
@@ -82,6 +84,7 @@ public class LevelManager : IGameResettable
     {
         string filePath = Path.Combine(_levelsDirectory, $"{roomId}.json");
         RoomData data = RoomParser.Load(filePath);
+        DungeonMap.MarkExplored(roomId);
 
         CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture, _player, _inventory, _addRupees, roomId, _collectedItems);
         foreach (Door door in CurrentRoom.Doors)

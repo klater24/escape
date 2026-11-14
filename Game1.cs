@@ -97,7 +97,7 @@ public class Game1 : Game
         Inventory.ItemRemoved += OnItemRemoved;
         var stateFont = Content.Load<SpriteFont>("Fonts/StateFont");
         _stateScreen = new StateScreen(GraphicsDevice, stateFont);
-        InventoryScreen = new BasicInventoryScreen(Inventory, stateFont);
+        
 
         _itemAtlas = Content.Load<Texture2D>("zeldaitems");
         _projectileAtlas = Content.Load<Texture2D>("zelda");
@@ -113,7 +113,8 @@ public class Game1 : Game
 
         _hudAtlas = Content.Load<Texture2D>("Textures/UI/NES - The Legend of Zelda - Miscellaneous - HUD & Pause Screen");
         _hudFont = Content.Load<SpriteFont>("HUDFont");
-        _hud = new HUD(_player, Inventory, _hudFont, _itemAtlas, _hudAtlas);        
+        _hud = new HUD(_player, Inventory, _hudFont, _itemAtlas, _hudAtlas);  
+        InventoryScreen = new BasicInventoryScreen(Inventory, stateFont, _hudAtlas);      
 
         RegisterResettable(_player);
 
@@ -123,6 +124,7 @@ public class Game1 : Game
 
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
                                             Content, _itemAtlas, _player, _exteriorTexture, Inventory, AddRupees);
+        ((BasicInventoryScreen)InventoryScreen).DungeonMap = _levelManager.DungeonMap;
         RegisterResettable(_levelManager);
         _projectiles.BombExploded += _levelManager.BombWalls;
         Transitions = new ScreenTransition(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
@@ -211,7 +213,17 @@ public class Game1 : Game
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
         if (state == GameState.Inventory)
+        {
+            ((BasicInventoryScreen)InventoryScreen).CurrentRoomId = _levelManager.CurrentRoom.Id;
             InventoryScreen.Draw(_spriteBatch, GraphicsDevice.Viewport.Bounds);
+            _spriteBatch.End();
+
+            _spriteBatch.Begin(
+            samplerState: SamplerState.PointClamp,
+            transformMatrix: Matrix.CreateTranslation(0, 528, 0));
+
+            _hud.Draw(_spriteBatch, Rupees);
+        }
         else
         {
             _hud.Draw(_spriteBatch, Rupees);

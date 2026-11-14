@@ -3,6 +3,8 @@ using escape.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Linq;
+using escape.Levels;
 
 namespace escape.GameStates;
 
@@ -14,48 +16,190 @@ public sealed class BasicInventoryScreen : IInventoryScreen
     private int _selected;
     private string _selectionStatus = "";
     public ItemType SelectedItem => Equipment[_selected];
-    private static readonly ItemType[] Equipment = { ItemType.Bomb, ItemType.Bow, ItemType.Boomerang, ItemType.Potion };
-
-    public BasicInventoryScreen(IInventory inventory, SpriteFont font)
+    private static readonly ItemType[] Equipment = { ItemType.Bomb, ItemType.Boomerang, ItemType.Bow, ItemType.Potion };
+    private readonly Rectangle _inventoryBackground = new Rectangle(1, 11, 256, 88);
+    private readonly Rectangle _triforceBackground = new Rectangle(1, 112, 256, 88);
+    private readonly Rectangle _dungeonMapBackground = new Rectangle(258, 112, 256, 88);
+    private enum InventoryLayout
+    {
+        Triforce,
+        DungeonMap
+    }
+    private InventoryLayout _layout = InventoryLayout.DungeonMap;
+    private readonly Texture2D _hudAtlas;
+    public DungeonMap? DungeonMap { get; set; }
+    public string? CurrentRoomId { get; set; }
+    public BasicInventoryScreen(IInventory inventory, SpriteFont font, Texture2D hudAtlas)
     {
         _inventory = inventory;
         _font = font;
+        _hudAtlas = hudAtlas;
     }
 
     public void Update(GameTime gameTime) => Update(Keyboard.GetState());
 
     public void Update(KeyboardState keys)
     {
-        if (Pressed(keys, Keys.Down)) { _selected = (_selected + 1) % Equipment.Length; _selectionStatus = ""; }
-        if (Pressed(keys, Keys.Up)) { _selected = (_selected + Equipment.Length - 1) % Equipment.Length; _selectionStatus = ""; }
-        if (Pressed(keys, Keys.Space))
+        // Left / Right: move horizontally within the current row.
+    if (Pressed(keys, Keys.Right) || Pressed(keys, Keys.D))
+    {
+        int row = _selected / 4;
+        int column = (_selected % 4 + 1) % 4;
+        _selected = row * 4 + column;
+        _selectionStatus = "";
+    }
+
+    if (Pressed(keys, Keys.Left) || Pressed(keys, Keys.A))
+    {
+        int row = _selected / 4;
+        int column = (_selected % 4 + 3) % 4;
+        _selected = row * 4 + column;
+        _selectionStatus = "";
+    }
+
+    // Up / Down: move between rows, keeping the same column.
+    if (Pressed(keys, Keys.Down) || Pressed(keys, Keys.S))
+    {
+        _selected = (_selected + 4) % 8;
+        _selectionStatus = "";
+    }
+
+    if (Pressed(keys, Keys.Up) || Pressed(keys, Keys.W))
+    {
+        _selected = (_selected + 4) % 8;
+        _selectionStatus = "";
+    }
+
+    // Space: only the top four slots currently contain items.
+    if (Pressed(keys, Keys.Space))
+    {
+        if (_selected < Equipment.Length)
+        {
             _selectionStatus = _inventory.EquipItem(SelectedItem)
                 ? $"Equipped {ItemLabel(SelectedItem)}. Press X during gameplay to use."
-                : SelectedItem == ItemType.Bow ? "Collect both the bow and arrows to equip them." : "You have not collected this item.";
-        _previous = keys;
+                : SelectedItem == ItemType.Bow
+                    ? "Collect both the bow and arrows to equip them."
+                    : "You have not collected this item.";
+        }
+        else
+        {
+            _selectionStatus = "This slot is empty.";
+        }
+    }
+
+    _previous = keys;
     }
 
     private bool Pressed(KeyboardState keys, Keys key) => keys.IsKeyDown(key) && _previous.IsKeyUp(key);
     private static string ItemLabel(ItemType item) => item == ItemType.Bow ? "Bow/Arrow" : item.ToString();
 
+    private static Rectangle GetItemSource(ItemType item)
+    {
+        return item switch
+        {
+            ItemType.Bomb => new Rectangle(604, 137, 8, 16),
+            ItemType.Bow => new Rectangle(633, 137, 8, 16),
+            ItemType.Boomerang => new Rectangle(584, 137, 8, 16),
+            ItemType.Potion => new Rectangle(704, 137, 8, 16),
+            _ => Rectangle.Empty
+        };
+    }
     public void Draw(SpriteBatch batch, Rectangle viewport)
     {
-        Vector2 origin = new(viewport.Left + 48, viewport.Top + 32);
-        batch.DrawString(_font, "INVENTORY", origin, Color.Gold);
-        batch.DrawString(_font, "Up/Down: Select   Space: Equip   Enter: Return", origin + new Vector2(0, 40), Color.White);
+        // Draw inventory background.
+        batch.Draw( _hudAtlas, new Rectangle(0, 0, 768, 264), _inventoryBackground, Color.White);
+
+        // Draw Triforce or dungeon map background.
+        Rectangle infoBackground = _layout == InventoryLayout.Triforce
+            ? _triforceBackground
+            : _dungeonMapBackground;
+
+        batch.Draw(_hudAtlas, new Rectangle(0, 264, 768, 264), infoBackground, Color.White);
+
+        // Draw explored dungeon rooms.
+        if (DungeonMap != null)
+        {
+            const int roomSize = 24;
+            const int spacing = 0;
+
+            // Center the dungeon layout in the map panel.
+            int minX = DungeonMap.Rooms.Values.Min(p => p.X);
+            int maxX = DungeonMap.Rooms.Values.Max(p => p.X);
+            int minY = DungeonMap.Rooms.Values.Min(p => p.Y);
+            int maxY = DungeonMap.Rooms.Values.Max(p => p.Y);
+
+            int mapWidth = (maxX - minX + 1) * (roomSize + spacing) - spacing;
+            int mapHeight = (maxY - minY + 1) * (roomSize + spacing) - spacing;
+
+            const int gridX = 384;
+            const int gridY = 288;
+            const int gridSize = 192;
+
+            int startX = gridX + (gridSize - mapWidth) / 2;
+            int startY = gridY + (gridSize - mapHeight) / 2;
+
+            foreach (var room in DungeonMap.Rooms)
+            {
+                if (!DungeonMap.IsExplored(room.Key))
+                    continue;
+
+                int x = startX + (room.Value.X - minX) * (roomSize + spacing);
+                int y = startY + (room.Value.Y - minY) * (roomSize + spacing);
+
+                // Draw the room tile.
+                batch.Draw(_hudAtlas, new Rectangle(x, y, roomSize, roomSize), DungeonMap.GetRoomTileSource(room.Key), Color.White);
+
+                // Draw the player marker over the current room.
+                if (room.Key == CurrentRoomId)
+                {
+                    batch.Draw(_hudAtlas, new Rectangle(x+7, y+7, 9, 9), DungeonMap.GetPlayerMarkerSource(), Color.White);
+                };
+            }
+        }
+
+        // Item positions.
+        Rectangle[] itemPositions =
+        {
+            new Rectangle(396, 144, 24, 48), // Bomb
+            new Rectangle(468, 144, 24, 48), // Boomerang
+            new Rectangle(552, 144, 24, 48), // Bow
+            new Rectangle(612, 144, 24, 48),  // Potion
+            new Rectangle(396, 192, 24, 48), // Empty slot 5
+            new Rectangle(468, 192, 24, 48), // Empty slot 6
+            new Rectangle(552, 192, 24, 48), // Empty slot 7
+            new Rectangle(612, 192, 24, 48)  // Empty slot 8
+        };
+
+        // Arrow position (visual companion to bow).
+        Rectangle arrowPosition = new Rectangle(528, 144, 24, 48);
+
+        // Draw selection square.
+        int selectionOffset = (_selected == 2 || _selected == 6) ? 24 : 12;
+
+        batch.Draw(_hudAtlas, new Rectangle(itemPositions[_selected].X - selectionOffset,
+            itemPositions[_selected].Y, 48, 48), new Rectangle(519, 137, 16, 16), Color.White);
+
+        // Draw selectable item sprites.
         for (int i = 0; i < Equipment.Length; i++)
         {
-            var item = Equipment[i];
-            string equipped = _inventory.GetEquippedItem() == item ? " (equipped)" : "";
-            string availability = item == ItemType.Bow
-                ? (_inventory.HasItem(ItemType.Bow) && _inventory.HasItem(ItemType.Arrow) ? "Ready - 1 rupee/shot" : "Requires bow and arrows")
-                : _inventory.GetQuantity(item).ToString();
-            batch.DrawString(_font, $"{(i == _selected ? ">" : " ")} {ItemLabel(item)}: {availability}{equipped}",
-                origin + new Vector2(0, 95 + i * 38), i == _selected ? Color.Gold : Color.White);
+            ItemType item = Equipment[i];
+
+            if (!_inventory.HasItem(item))
+                continue;
+
+            batch.Draw(_hudAtlas, itemPositions[i], GetItemSource(item), Color.White);
         }
-        batch.DrawString(_font, $"Keys: {_inventory.GetQuantity(ItemType.Key)}   Map: {_inventory.HasItem(ItemType.Map)}   Compass: {_inventory.HasItem(ItemType.Compass)}",
-            origin + new Vector2(0, 320), Color.White);
-        batch.DrawString(_font, _selectionStatus, origin + new Vector2(0, 370), Color.Gold);
+
+        // Draw arrow beside bow.
+        if (_inventory.HasItem(ItemType.Bow) && _inventory.HasItem(ItemType.Arrow))
+        {
+            batch.Draw(_hudAtlas, arrowPosition, new Rectangle(615, 137, 8, 16), Color.White);
+        }
+
+        // Draw equipment feedback.
+        Vector2 origin = new(viewport.Left + 48, viewport.Top + 402);
+
+        batch.DrawString(_font, _selectionStatus, origin, Color.Gold);
     }
 
     public void Reset()

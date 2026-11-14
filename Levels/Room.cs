@@ -41,6 +41,7 @@ public class Room
     private readonly IInventory _inventory;
     private readonly Player _player;
     private readonly Action<int> _addRupees;
+    public string Id { get; }
     private readonly HashSet<string> _collectedItems;
     private readonly Dictionary<IItem, string> _itemKeys = new();
 
@@ -66,6 +67,7 @@ public class Room
         _player = player;
         _inventory = inventory;
         _addRupees = addRupees;
+        Id = data.Id;
         _collectedItems = collectedItems;
 
         _exterior = new RoomExterior(exteriorTexture, Vector2.Zero, 3f);
@@ -151,6 +153,10 @@ public class Room
                     _addRupees(1);
                     break;
 
+                case InventoryPickup pickup:
+                    _inventory.AddItem(pickup.ItemType);
+                    break;
+
                 default:
                     continue;
             }
@@ -211,6 +217,31 @@ private void CreateTileItem(string type, Vector2 position)
         "Rupee" => new Rupee(
             ItemSprites.CreateRupee(_itemAtlas, position, 2f),
             position),
+
+        "Bomb" => new InventoryPickup(
+            ItemSprites.CreateBomb(_itemAtlas, position, 2f),
+            position,
+            ItemType.Bomb),
+
+        "Arrow" => new InventoryPickup(
+            ItemSprites.CreateArrow(_itemAtlas, position, 2f),
+            position,
+            ItemType.Arrow),
+
+        "Bow" => new InventoryPickup(
+            ItemSprites.CreateBow(_itemAtlas, position, 2f),
+            position,
+            ItemType.Bow),
+
+        "Boomerang" => new InventoryPickup(
+            ItemSprites.CreateBoomerang(_itemAtlas, position, 2f),
+            position,
+            ItemType.Boomerang),
+
+        "Map" => new InventoryPickup(
+            ItemSprites.CreateMap(_itemAtlas, position, 2f),
+            position,
+            ItemType.Map),
 
         _ => throw new ArgumentException(
             $"Unknown item type: {type}")
@@ -424,6 +455,26 @@ private void CreateTileMap()
 
                 case "R":
                     CreateTileItem("Rupee", position);
+                    break;
+
+                case "A":
+                    CreateTileItem("Bomb", position);
+                    break;
+
+                case "L":
+                    CreateTileItem("Arrow", position);
+                    break;
+
+                case "O":
+                    CreateTileItem("Bow", position);
+                    break;
+
+                case "G":
+                    CreateTileItem("Boomerang", position);
+                    break;
+                
+                case "Q":
+                    CreateTileItem("Map", position);
                     break;
 
                 default:
