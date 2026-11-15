@@ -317,3 +317,61 @@ GameStateManager centralizes gameplay, pause, inventory, transition, game-over, 
 EquippedItemUse connects the shared IInventory selection to player/projectile actions and checks gameplay state before using or consuming an item. BasicInventoryScreen highlights current equipment when reopened; the IInventoryScreen replacement point remains available for the final inventory UI.
 
 ScreenTransition implements IGameTransition using Camera interpolation. Game1 slides outgoing/incoming render targets, keeping the HUD stationary during room transitions. LevelManager derives slide direction from room map coordinates. Audio loads the supplied music/effect assets; M changes only MediaPlayer mute state.
+
+
+## HUD, Inventory, and Dungeon Map
+
+### Overview
+
+The HUD, inventory, and dungeon map systems are responsible for displaying the player's current resources and equipment, and providing maps of the dungeon's explored and unexplored areas. These components separate inventory data from its visual representation so that the HUD and inventory screen can display the same information without maintaining separate item states.
+
+### Inventory Management
+
+The `Inventory` class manages the player's collected items and equipment. It stores item quantities using a dictionary keyed by `ItemType`, allowing the game to check whether an item is owned and retrieve its current quantity.
+
+The inventory provides methods for adding and removing items, checking ownership, retrieving quantities, and equipping items. Equipment selection is maintained by the inventory rather than by the HUD or inventory screen. This allows both interfaces to display the currently equipped item consistently.
+
+The inventory also exposes events such as `ItemAdded`, `ItemRemoved`, and `ItemEquipped` so other components can respond to inventory changes without directly managing the inventory's internal data.
+
+### HUD Design
+
+The `HUD` class is responsible for displaying the player's health, rupees, keys, bombs, sword, and currently equipped item. It receives the player and inventory references along with the textures and font needed for rendering.
+
+The HUD reads information directly from the player and inventory rather than storing duplicate values. This ensures that displayed health, quantities, and equipment reflect the current game state.
+
+The HUD also contains the dungeon minimap. Its room layout is displayed only when the player has collected the Map item. The player's position marker remains visible even without the Map, and collecting the Compass reveals a blinking marker indicating the Triforce's location. This allows players to navigate toward the objective before obtaining the full map.
+
+### Inventory Screen Design
+
+`BasicInventoryScreen` handles the visual representation of the player's inventory. It displays the inventory background, item slots, selection indicator, equipment, and dungeon map.
+
+The screen uses the shared inventory data to determine which items are owned and which item is equipped. Keyboard navigation allows the player to move between inventory slots and select equipment. Empty slots remain selectable but cannot equip an item.
+
+The Map and Compass icons are displayed in their designated inventory map area when the corresponding items have been collected. The inventory map also displays explored rooms, allowing the player to track dungeon progress.
+
+The inventory screen is responsible for presentation and selection input, while the `Inventory` class remains responsible for the actual item ownership and equipment state.
+
+### Dungeon Map and Exploration Tracking
+
+The `DungeonMap` class generates the dungeon map from the existing room JSON files rather than relying on manually entered room positions. It reads each room through `RoomParser` and stores its map coordinates, room connections, and tile information.
+
+Room connections are derived from the room door definitions. This allows the map to reflect the same room relationships used by the level-loading system.
+
+Exploration is tracked using a collection of explored room identifiers. When the player enters a room, that room is marked as explored. The inventory map uses this information to display only rooms the player has discovered.
+
+`MinimapLayout` converts the dungeon room coordinates into screen positions for rendering the HUD minimap. This keeps map positioning separate from the inventory and HUD drawing code.
+
+The dungeon map also identifies the room containing the Triforce by checking the room tile data. When the player owns the Compass, the HUD and inventory map can display a blinking waypoint at that room's position.
+
+### Component Interaction
+
+The systems interact as follows:
+
+- `Inventory` stores item ownership, quantities, and equipment selection.
+- `HUD` reads player and inventory information to display the player's current status and minimap.
+- `BasicInventoryScreen` reads the same inventory data to display items, equipment, and explored rooms.
+- `DungeonMap` reads room JSON data and maintains room positions, connections, and exploration state.
+- `MinimapLayout` converts dungeon coordinates into positions used by the HUD.
+- `Game1` connects the active level's dungeon map and current room to the HUD and updates the dungeon map during gameplay.
+
+This design separates game data, dungeon exploration, and visual presentation. It also allows the HUD and inventory screen to share the same inventory and dungeon information without duplicating their underlying logic.
