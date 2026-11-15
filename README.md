@@ -192,3 +192,42 @@ Bow/Arrow is one equipment option requiring both items. X spends one rupee per s
 ### Camera and audio integration
 
 Rooms slide according to their map coordinates; Enter slides inventory in/out. Gameplay freezes during the 0.35-second animations, and R cancels them. M toggles background music without muting sound effects. Attack, damage, and inventory changes currently reuse the supplied generic effect; distinct original-game effects remain unfinished.
+
+
+## HUD, Inventory, and Dungeon Map
+
+### HUD
+
+The Heads-Up Display (HUD) provides information about the player's current condition and resources without requiring the inventory screen to be opened.
+
+The HUD displays:
+- Player health using heart icons.
+- Current rupee count.
+- Key and bomb quantities.
+- The sword in equipment slot A.
+- The currently equipped item in equipment slot B.
+- The dungeon minimap when the Map item has been collected.
+
+The player marker is always displayed on the minimap, even before obtaining the Map. Collecting the Compass reveals a blinking waypoint showing the Triforce's location.
+
+### Inventory
+
+The inventory screen allows players to view collected items, navigate between item slots, and select equipment.
+
+Collected items are tracked by the Inventory system. Item quantities are updated when items are collected or consumed. The equipped item is stored in the inventory so that the HUD and inventory screen always display the same equipment selection.
+
+The sword is permanently assigned to equipment slot A, while slot B displays the currently equipped secondary item.
+
+Players can navigate the inventory using the available movement controls and equip owned items with SPACE and use equiped items with X. Items that have not been collected cannot be equipped.
+
+### Dungeon Map
+
+The dungeon map is generated using the room JSON data rather than manually defined room positions. This allows the map to reflect the actual layout and connections of the dungeon.
+
+The inventory map displays explored rooms as the player discovers them. The HUD minimap has additional functionality that becomes available through item collection:
+
+- **Map:** Reveals the dungeon room layout on the HUD minimap.
+- **Compass:** Reveals a blinking marker showing the Triforce's location.
+- **Player marker:** Always indicates the player's current room, even without the Map.
+
+The map and Compass work independently, allowing players to locate the Triforce before obtaining the full dungeon map.
