@@ -1,11 +1,13 @@
 using escape.Interfaces;
 using escape.Projectiles;
 using Microsoft.Xna.Framework;
+using escape.Sounds;
 
 namespace escape.Items;
 
 public sealed class EquippedItemUse
 {
+    private Audio _audio = new Audio();
     private readonly Player _player;
     private readonly IInventory _inventory;
     private readonly ProjectileManager _projectiles;

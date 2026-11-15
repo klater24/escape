@@ -170,6 +170,7 @@ public class Game1 : Game
                 foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<IDamageable>())
                     CombatCollisionHandler.Resolve(_player, enemy);
                 _projectiles.ResolveCombat(_player, _levelManager.CurrentRoom.Enemies.OfType<IDamageable>());
+                
                 EvaluateOutcome();
                 if (States.CanUpdateGameplay) _levelManager.CheckDoorTransitions();
             }

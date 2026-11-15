@@ -10,12 +10,14 @@ using escape.Interfaces;
 using escape.Sprites;
 using escape.Items;
 using escape.Collisions;
+using escape.Sounds;
 
 
 namespace escape.Levels;
 
 public class Room
 {
+    private Audio _audio = new Audio(); 
     public string Name { get; }
     public Point MapPosition { get; }
     public string RoomId { get; }
@@ -143,14 +145,17 @@ public class Room
 
                 case Heart:
                     _player.RestoreHealth();
+                    _audio.PlaySound("ItemPickup");
                     break;
 
                 case HeartContainer:
                     _player.IncreaseMaxHealth();
+                    _audio.PlaySound("ItemPickup");
                     break;
                 
                 case Rupee:
                     _addRupees(1);
+                    _audio.PlaySound("ItemPickup");
                     break;
 
                 case InventoryPickup pickup:
