@@ -36,6 +36,8 @@ public class DungeonMap
         return _exploredRooms.Contains(roomId);
     }
 
+    public void Reset() => _exploredRooms.Clear();
+
     public Rectangle GetRoomTileSource(string roomId)
     {
         int tileIndex = _roomTileIndices[roomId];

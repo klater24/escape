@@ -222,6 +222,7 @@ public void CheckDoorTransitions()
         _doorTransitioned = false;
         _collectedItems.Clear();
         _bombedPassages.Clear();
+        DungeonMap.Reset();
         LoadRoom(StartingRoom);
     }
 }
