@@ -20,20 +20,23 @@ public sealed class BasicInventoryScreen : IInventoryScreen
     private readonly Rectangle _inventoryBackground = new Rectangle(1, 11, 256, 88);
     private readonly Rectangle _triforceBackground = new Rectangle(1, 112, 256, 88);
     private readonly Rectangle _dungeonMapBackground = new Rectangle(258, 112, 256, 88);
+    private static readonly Rectangle MapSource = new(88, 0, 8, 16);
+    private readonly Texture2D _itemAtlas;
     private enum InventoryLayout
     {
         Triforce,
-        DungeonMap
+        DungeonMap,
     }
     private InventoryLayout _layout = InventoryLayout.DungeonMap;
     private readonly Texture2D _hudAtlas;
     public DungeonMap? DungeonMap { get; set; }
     public string? CurrentRoomId { get; set; }
-    public BasicInventoryScreen(IInventory inventory, SpriteFont font, Texture2D hudAtlas)
+    public BasicInventoryScreen(IInventory inventory, SpriteFont font, Texture2D hudAtlas, Texture2D itemAtlas)
     {
         _inventory = inventory;
         _font = font;
         _hudAtlas = hudAtlas;
+        _itemAtlas = itemAtlas;
     }
 
     public void Update(GameTime gameTime) => Update(Keyboard.GetState());
@@ -92,6 +95,7 @@ public sealed class BasicInventoryScreen : IInventoryScreen
 
     private bool Pressed(KeyboardState keys, Keys key) => keys.IsKeyDown(key) && _previous.IsKeyUp(key);
     private static string ItemLabel(ItemType item) => item == ItemType.Bow ? "Bow/Arrow" : item.ToString();
+   
 
     private static Rectangle GetItemSource(ItemType item)
     {
@@ -115,6 +119,16 @@ public sealed class BasicInventoryScreen : IInventoryScreen
             : _dungeonMapBackground;
 
         batch.Draw(_hudAtlas, new Rectangle(0, 264, 768, 264), infoBackground, Color.White);
+        // Draw the Map when collected.
+        if (_inventory.HasItem(ItemType.Map))
+        {
+            batch.Draw(
+                _itemAtlas,
+                new Rectangle(144, 336, 24, 48),
+                MapSource,
+                Color.White);
+        }
+        
 
         // Draw explored dungeon rooms.
         if (DungeonMap != null)
