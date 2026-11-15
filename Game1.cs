@@ -114,7 +114,7 @@ public class Game1 : Game
         _hudAtlas = Content.Load<Texture2D>("Textures/UI/NES - The Legend of Zelda - Miscellaneous - HUD & Pause Screen");
         _hudFont = Content.Load<SpriteFont>("HUDFont");
         _hud = new HUD(_player, Inventory, _hudFont, _itemAtlas, _hudAtlas);  
-        InventoryScreen = new BasicInventoryScreen(Inventory, stateFont, _hudAtlas);      
+        InventoryScreen = new BasicInventoryScreen(Inventory, stateFont, _hudAtlas, _itemAtlas);      
 
         RegisterResettable(_player);
 
@@ -125,6 +125,7 @@ public class Game1 : Game
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
                                             Content, _itemAtlas, _player, _exteriorTexture, Inventory, AddRupees);
         ((BasicInventoryScreen)InventoryScreen).DungeonMap = _levelManager.DungeonMap;
+        _hud.DungeonMap = _levelManager.DungeonMap;
         RegisterResettable(_levelManager);
         _projectiles.BombExploded += _levelManager.BombWalls;
         Transitions = new ScreenTransition(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
@@ -141,6 +142,7 @@ public class Game1 : Game
     protected override void Update(GameTime gameTime)
     {
         EvaluateOutcome();
+        _levelManager.DungeonMap.Update(gameTime);
         var stateBeforeInput = States.Current;
         bool wasAttacking = _player.IsAttacking;
         float previousHealth = _player.Health;
@@ -196,6 +198,7 @@ public class Game1 : Game
     private void DrawScene(GameState state, GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
+        _hud.CurrentRoomId = _levelManager.CurrentRoom.Id;
 
         if (state != GameState.Inventory)
         {
