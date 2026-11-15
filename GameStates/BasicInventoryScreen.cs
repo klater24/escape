@@ -128,6 +128,14 @@ public sealed class BasicInventoryScreen : IInventoryScreen
                 MapSource,
                 Color.White);
         }
+        if (_inventory.HasItem(ItemType.Compass))
+        {
+            batch.Draw(
+                _itemAtlas,
+                new Rectangle(138, 463, 33, 36),
+                new Rectangle(258, 1, 11, 12),
+                Color.White);
+        }
         
 
         // Draw explored dungeon rooms.

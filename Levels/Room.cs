@@ -243,6 +243,11 @@ private void CreateTileItem(string type, Vector2 position)
             position,
             ItemType.Map),
 
+        "Compass" => new InventoryPickup(
+            ItemSprites.CreateCompass(_itemAtlas, position, 2f),
+            position,
+            ItemType.Compass),
+
         _ => throw new ArgumentException(
             $"Unknown item type: {type}")
     };
@@ -475,6 +480,10 @@ private void CreateTileMap()
                 
                 case "Q":
                     CreateTileItem("Map", position);
+                    break;
+
+                case "U":
+                    CreateTileItem("Compass", position);
                     break;
 
                 default:

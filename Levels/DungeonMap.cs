@@ -16,6 +16,8 @@ public class DungeonMap
     public IReadOnlyDictionary<string, Point> Rooms => _rooms;
     private readonly HashSet<string> _exploredRooms = new();
     public IReadOnlyCollection<string> ExploredRooms => _exploredRooms;
+    public string? TriforceRoomId { get; private set; }
+    public bool ShowAlternateTriforceMarker { get; private set; }
 
     public Rectangle GetPlayerMarkerSource()
     {
@@ -45,6 +47,12 @@ public class DungeonMap
             8);
     }
 
+    public void Update(GameTime gameTime)
+    {
+        ShowAlternateTriforceMarker =
+            (int)(gameTime.TotalGameTime.TotalMilliseconds / 500) % 2 == 0;
+    }
+
     public DungeonMap(string levelsDirectory)
     {
         string[] files = Directory.GetFiles(levelsDirectory, "*.json");
@@ -66,6 +74,11 @@ public class DungeonMap
             }
 
             _rooms.Add(data.Id, new Point(data.MapX, data.MapY));
+            if (data.TileMap.Any(row => row.Contains("(T)")))
+            {
+                TriforceRoomId = data.Id;
+            }
+
             _connectedRooms.Add(data.Id, data.Doors.Select(door => door.DestinationRoom)
                     .Where(destination => !string.IsNullOrWhiteSpace(destination)).ToHashSet());
             

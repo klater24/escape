@@ -146,17 +146,20 @@ public class HUD
         const int gridY = 48;
         const int roomSize = 24;
 
-        foreach (MinimapLayout.Tile tile in layout.Tiles)
+        if (_inventory.HasItem(ItemType.Map))
         {
-            spriteBatch.Draw(
-                _hudAtlas,
-                new Rectangle(
-                    gridX + tile.Position.X,
-                    gridY + tile.Position.Y,
-                    21,
-                    9),
-                tile.Source,
-                Color.White);
+            foreach (MinimapLayout.Tile tile in layout.Tiles)
+            {
+                spriteBatch.Draw(
+                    _hudAtlas,
+                    new Rectangle(
+                        gridX + tile.Position.X,
+                        gridY + tile.Position.Y,
+                        21,
+                        9),
+                    tile.Source,
+                    Color.White);
+            }
         }
         if (!string.IsNullOrEmpty(CurrentRoomId) &&
             DungeonMap.Rooms.TryGetValue(CurrentRoomId, out Point currentRoom))
@@ -173,6 +176,28 @@ public class HUD
                 DungeonMap.GetPlayerMarkerSource(),
                 Color.White);
         }
+        // Draw the Triforce waypoint when the Compass is collected.
+        if (_inventory.HasItem(ItemType.Compass) &&
+            DungeonMap.TriforceRoomId != null &&
+            DungeonMap.Rooms.TryGetValue(
+                DungeonMap.TriforceRoomId, out Point triforceRoom))
+        {
+            int minX = DungeonMap.Rooms.Values.Min(room => room.X);
+            int minY = DungeonMap.Rooms.Values.Min(room => room.Y);
+
+            int markerX = gridX + (triforceRoom.X - minX) * 24 + 6;
+            int markerY = gridY + (triforceRoom.Y - minY) * 12;
+
+            Rectangle markerSource = DungeonMap.ShowAlternateTriforceMarker
+                ? new Rectangle(555, 126, 3, 3)
+                : DungeonMap.GetPlayerMarkerSource();
+
+            spriteBatch.Draw(
+                _hudAtlas,
+                new Rectangle(markerX, markerY, 9, 9),
+                markerSource,
+                Color.White);
+        }
     }
     public void Draw(SpriteBatch spriteBatch, int rupees)
     {
@@ -186,10 +211,8 @@ public class HUD
 
         // Draw player health
         DrawHearts(spriteBatch);
-        if (_inventory.HasItem(ItemType.Map))
-        {
-            DrawMinimap(spriteBatch);
-        }
+
+        DrawMinimap(spriteBatch);
 
         DrawHudItem(spriteBatch, _swordSprite, new Vector2(456, 72));
         DrawEquippedItem(spriteBatch);

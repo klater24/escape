@@ -114,4 +114,14 @@ public static ISprite CreatePotion(Texture2D atlas, Vector2 position, float scal
 
         return new AnimatedSprite(atlas, frames, position, .5f, scale);
     }
+    public static ISprite CreateCompass(
+        Texture2D atlas, Vector2 position, float scale)
+    {
+        var frames = new[]
+        {
+            new Rectangle(258, 1, 11, 12)
+        };
+
+        return new AnimatedSprite(atlas, frames, position, .5f, scale);
+    }
 }

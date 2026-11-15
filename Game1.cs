@@ -142,6 +142,7 @@ public class Game1 : Game
     protected override void Update(GameTime gameTime)
     {
         EvaluateOutcome();
+        _levelManager.DungeonMap.Update(gameTime);
         var stateBeforeInput = States.Current;
         bool wasAttacking = _player.IsAttacking;
         float previousHealth = _player.Health;
