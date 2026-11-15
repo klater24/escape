@@ -193,6 +193,21 @@ public sealed class BasicInventoryScreen : IInventoryScreen
         batch.Draw(_hudAtlas, new Rectangle(itemPositions[_selected].X - selectionOffset,
             itemPositions[_selected].Y, 48, 48), new Rectangle(519, 137, 16, 16), Color.White);
 
+        // Draw preview of the currently selected item.
+        if (_selected < Equipment.Length)
+        {
+            ItemType selectedItem = Equipment[_selected];
+
+            if (_inventory.HasItem(selectedItem))
+            {
+                batch.Draw(
+                    _hudAtlas,
+                    new Rectangle(204, 144, 24, 48),
+                    GetItemSource(selectedItem),
+                    Color.White);
+            }
+        }
+
         // Draw selectable item sprites.
         for (int i = 0; i < Equipment.Length; i++)
         {
