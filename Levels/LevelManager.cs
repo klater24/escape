@@ -8,6 +8,7 @@ using escape.Collisions;
 using Microsoft.Xna.Framework.Content;
 using escape.Interfaces;
 using System.Linq;
+using escape.Sounds;
 
 namespace escape.Levels;
 
@@ -15,6 +16,7 @@ public class LevelManager : IGameResettable
 {
     public const string StartingRoom = "Room1";
     private readonly Texture2D _blockAtlas;
+    private readonly Audio _audio; 
     private readonly string _levelsDirectory;
     private readonly ContentManager _content;
     private readonly Texture2D _itemAtlas;
@@ -64,7 +66,7 @@ public class LevelManager : IGameResettable
     }
 
     public LevelManager(Texture2D blockAtlas, string levelsDirectory, ContentManager content,
-                            Texture2D itemAtlas, Player player, Texture2D exteriorTexture, IInventory inventory, Action<int> addRupees)
+                            Texture2D itemAtlas, Player player, Texture2D exteriorTexture, IInventory inventory, Action<int> addRupees, Audio audio)
     {
         _blockAtlas = blockAtlas;
         _levelsDirectory = levelsDirectory;
@@ -74,6 +76,7 @@ public class LevelManager : IGameResettable
         _exteriorTexture = exteriorTexture;
         _inventory = inventory;
         _addRupees = addRupees;
+        _audio = audio;
         DungeonMap = new DungeonMap(_levelsDirectory);
 
         LoadRoom(StartingRoom);
@@ -86,7 +89,7 @@ public class LevelManager : IGameResettable
         RoomData data = RoomParser.Load(filePath);
         DungeonMap.MarkExplored(roomId);
 
-        CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture, _player, _inventory, _addRupees, roomId, _collectedItems);
+        CurrentRoom = new Room(data, _blockAtlas, _content, _itemAtlas, _exteriorTexture, _player, _inventory, _addRupees, roomId, _collectedItems, _audio);
         foreach (Door door in CurrentRoom.Doors)
             if (door.IsBombable && _bombedPassages.Contains(PassageKey(roomId, door)))
                 door.RestoreOpening();
@@ -222,6 +225,7 @@ public void CheckDoorTransitions()
         _doorTransitioned = false;
         _collectedItems.Clear();
         _bombedPassages.Clear();
+        DungeonMap.Reset();
         LoadRoom(StartingRoom);
     }
 }

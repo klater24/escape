@@ -185,13 +185,15 @@ See [game-state behavior and integration contracts](docs/game-states.md).
 
 ### Inventory integration (Samiya)
 
-X uses the item equipped with Space in inventory. Consumable items reduce their quantity; a potion heals only when needed. Reopening inventory highlights the equipped item. The basic inventory screen still awaits Person 2's final screen. Keys 1-3 remain projectile demo shortcuts.
+X uses the item equipped with Space in inventory. Consumable items reduce their quantity; a potion heals only when needed. Reopening inventory highlights the equipped item. The merged inventory screen uses the same equipment logic. Keys 1-3 use owned bow, bombs, and boomerang with the same resource rules as X.
 
-Bow/Arrow is one equipment option requiring both items. X spends one rupee per shot and keeps both items; zero rupees prevents firing. Keys 1-3 are still projectile demo shortcuts.
+Bow/Arrow is one equipment option requiring both items. X spends one rupee per shot and keeps both items; zero rupees prevents firing. Key 1 follows the same bow ownership and rupee rules.
 
 ### Camera and audio integration
 
 Rooms slide according to their map coordinates; Enter slides inventory in/out. Gameplay freezes during the 0.35-second animations, and R cancels them. M toggles background music without muting sound effects. Attack, damage, and inventory changes currently reuse the supplied generic effect; distinct original-game effects remain unfinished.
+
+Restart also clears explored map rooms, revealing only the starting room. Number-key shortcuts preserve the current equipped selection.
 
 
 ## HUD, Inventory, and Dungeon Map

@@ -119,11 +119,11 @@ public class Game1 : Game
         RegisterResettable(_player);
 
         _projectileFactory = new ProjectileFactory(_projectileAtlas, _bossAtlas);
-        _projectiles = new ProjectileManager(_projectileFactory);
+        _projectiles = new ProjectileManager(_projectileFactory, _audio);
         RegisterResettable(_projectiles);
 
         _levelManager = new LevelManager(_blockAtlas, Path.Combine(Content.RootDirectory, "Levels"),
-                                            Content, _itemAtlas, _player, _exteriorTexture, Inventory, AddRupees);
+                                            Content, _itemAtlas, _player, _exteriorTexture, Inventory, AddRupees, _audio);
         ((BasicInventoryScreen)InventoryScreen).DungeonMap = _levelManager.DungeonMap;
         _hud.DungeonMap = _levelManager.DungeonMap;
         RegisterResettable(_levelManager);
@@ -172,6 +172,7 @@ public class Game1 : Game
                 foreach (var enemy in _levelManager.CurrentRoom.Enemies.OfType<IDamageable>())
                     CombatCollisionHandler.Resolve(_player, enemy);
                 _projectiles.ResolveCombat(_player, _levelManager.CurrentRoom.Enemies.OfType<IDamageable>());
+                
                 EvaluateOutcome();
                 if (States.CanUpdateGameplay) _levelManager.CheckDoorTransitions();
             }

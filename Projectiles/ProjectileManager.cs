@@ -2,21 +2,24 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
 using escape.Collisions;
+using escape.Sounds;
 
 namespace escape.Projectiles;
 
 // Owns active shots and clears them when the game resets.
 public class ProjectileManager : IGameResettable
 {
+    private readonly Audio _audio;
     private readonly List<IProjectile> _projectiles = new();
     private readonly ProjectileFactory _factory;
     private const double MaximumStepSeconds = 1.0 / 120.0;
     public IReadOnlyList<ISolidCollider> Obstacles { get; set; } = Array.Empty<ISolidCollider>();
     public event Action<Rectangle>? BombExploded;
 
-    public ProjectileManager(ProjectileFactory factory)
+    public ProjectileManager(ProjectileFactory factory, Audio audio)
     {
         _factory = factory;
+        _audio = audio;
     }
 
     public void Add(IProjectile projectile) => _projectiles.Add(projectile);
@@ -24,6 +27,7 @@ public class ProjectileManager : IGameResettable
 
     public void ResolveCombat(Player player, IEnumerable<IDamageable> enemies)
     {
+       
         var targets = enemies.ToArray();
         foreach (var projectile in _projectiles.OfType<ICombatProjectile>())
         {
@@ -49,10 +53,22 @@ public class ProjectileManager : IGameResettable
         _projectiles.RemoveAll(projectile => !projectile.IsActive);
     }
 
-    public void SpawnArrow(Vector2 position, Vector2 direction) => Add(_factory.CreateArrow(position, direction));
-    public void SpawnBomb(Vector2 position) => Add(_factory.CreateBomb(position));
-    public void SpawnBoomerang(Vector2 position, Vector2 direction) => Add(_factory.CreateBoomerang(position, direction));
-    public void SpawnBossProjectile(Vector2 position, Vector2 direction) => Add(_factory.CreateBossProjectile(position, direction));
+    public void SpawnArrow(Vector2 position, Vector2 direction){
+        Add(_factory.CreateArrow(position, direction));
+        _audio.PlaySound("explode");
+        }
+    public void SpawnBomb(Vector2 position) {
+    Add(_factory.CreateBomb(position));
+    _audio.PlaySound("explode");
+}
+    public void SpawnBoomerang(Vector2 position, Vector2 direction) {
+        Add(_factory.CreateBoomerang(position, direction));
+        _audio.PlaySound("explode");
+        }
+    public void SpawnBossProjectile(Vector2 position, Vector2 direction){
+        Add(_factory.CreateBossProjectile(position, direction));
+        _audio.PlaySound("explode");
+        }
 
     public void Update(GameTime gameTime)
     {
@@ -76,8 +92,14 @@ public class ProjectileManager : IGameResettable
                     combat.HitWall();
                     projectile.Update(new GameTime(gameTime.TotalGameTime, TimeSpan.Zero));
                 }
+                 bool wasFuse = projectile is Bomb{State: BombState.Fuse};
+                projectile.Update(new GameTime(gameTime.TotalGameTime,TimeSpan.FromSeconds(step)));
+                if (wasFuse &&projectile is Bomb { State: BombState.Exploding }){
+                    _audio.PlaySound("explode");
+                }
                 remaining -= step;
             }
+            
         }
 
         _projectiles.RemoveAll(projectile => !projectile.IsActive);

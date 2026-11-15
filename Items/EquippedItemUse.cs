@@ -1,11 +1,13 @@
 using escape.Interfaces;
 using escape.Projectiles;
 using Microsoft.Xna.Framework;
+using escape.Sounds;
 
 namespace escape.Items;
 
 public sealed class EquippedItemUse
 {
+    private Audio _audio = new Audio();
     private readonly Player _player;
     private readonly IInventory _inventory;
     private readonly ProjectileManager _projectiles;
@@ -26,7 +28,12 @@ public sealed class EquippedItemUse
     {
         if (!_canUse() || _player.IsDefeated) return false;
         var equipped = _inventory.GetEquippedItem();
-        if (equipped is not ItemType item || !_inventory.HasItem(item)) return false;
+        return equipped is ItemType item && TryUse(item);
+    }
+
+    public bool TryUse(ItemType item)
+    {
+        if (!_canUse() || _player.IsDefeated || !_inventory.HasItem(item)) return false;
         var position = _player.Position;
         var direction = _player.GetFacingDirection() switch
         {
