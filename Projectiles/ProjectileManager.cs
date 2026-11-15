@@ -9,16 +9,17 @@ namespace escape.Projectiles;
 // Owns active shots and clears them when the game resets.
 public class ProjectileManager : IGameResettable
 {
-    private Audio _audio = new Audio();
+    private readonly Audio _audio;
     private readonly List<IProjectile> _projectiles = new();
     private readonly ProjectileFactory _factory;
     private const double MaximumStepSeconds = 1.0 / 120.0;
     public IReadOnlyList<ISolidCollider> Obstacles { get; set; } = Array.Empty<ISolidCollider>();
     public event Action<Rectangle>? BombExploded;
 
-    public ProjectileManager(ProjectileFactory factory)
+    public ProjectileManager(ProjectileFactory factory, Audio audio)
     {
         _factory = factory;
+        _audio = audio;
     }
 
     public void Add(IProjectile projectile) => _projectiles.Add(projectile);

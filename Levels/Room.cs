@@ -17,7 +17,7 @@ namespace escape.Levels;
 
 public class Room
 {
-    private Audio _audio = new Audio(); 
+    private readonly Audio _audio;
     public string Name { get; }
     public Point MapPosition { get; }
     public string RoomId { get; }
@@ -57,7 +57,8 @@ public class Room
         IInventory inventory,
         Action<int> addRupees,
         string roomId,
-        HashSet<string> collectedItems)
+        HashSet<string> collectedItems,
+        Audio audio)
     {
         Name = data.Name;
         RoomId = roomId;
@@ -69,6 +70,7 @@ public class Room
         _player = player;
         _inventory = inventory;
         _addRupees = addRupees;
+        _audio = audio;
         Id = data.Id;
         _collectedItems = collectedItems;
 
