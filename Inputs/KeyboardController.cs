@@ -49,12 +49,13 @@ public class KeyboardController : IController
         pressedCommands[Keys.N] = new AttackCommand(_player);
 
         pressedCommands[Keys.E] = new DamageSelfCommand(_player);
-        pressedCommands[Keys.X] = new UseEquippedItemCommand(new EquippedItemUse(
-            _player, _game.Inventory, _projectiles, () => _game.States.CanUpdateGameplay, _game.TrySpendRupees));
+        var itemUse = new EquippedItemUse(
+            _player, _game.Inventory, _projectiles, () => _game.States.CanUpdateGameplay, _game.TrySpendRupees);
+        pressedCommands[Keys.X] = new UseEquippedItemCommand(itemUse);
         
-        pressedCommands[Keys.D1] = new UseItemCommand(1, _player, _projectiles, _game.Inventory);
-        pressedCommands[Keys.D2] = new UseItemCommand(2, _player, _projectiles, _game.Inventory);
-        pressedCommands[Keys.D3] = new UseItemCommand(3, _player, _projectiles, _game.Inventory);
+        pressedCommands[Keys.D1] = new UseItemCommand(ItemType.Bow, itemUse);
+        pressedCommands[Keys.D2] = new UseItemCommand(ItemType.Bomb, itemUse);
+        pressedCommands[Keys.D3] = new UseItemCommand(ItemType.Boomerang, itemUse);
 
         pressedCommands[Keys.F1] = new ChangeRoomCommand(_levelManager, "Room1", new Vector2(100, 100));
         pressedCommands[Keys.F2] = new ChangeRoomCommand(_levelManager, "Room2", new Vector2(100, 100));
