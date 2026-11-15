@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
 using escape.Collisions;
+using escape.Sounds;
 
 namespace escape.Projectiles;
 
@@ -12,6 +13,7 @@ public class Bomb : ICombatProjectile
     public const int ExplosionSize = 96;
     private const int BombWidth = 16;
     private const int BombHeight = 32;
+    private Audio _audio = new Audio(); 
     private readonly ProjectileHitTracker _hits = new();
     public bool HitsPlayer => false;
     public Collision Category => Collision.PlayerProjectile;
@@ -24,7 +26,6 @@ public class Bomb : ICombatProjectile
     public bool TryHit(ICollidable target)
     {
         if (!_hits.TryHit(this, target)) return false;
-
         return true;
     }
 
@@ -53,7 +54,6 @@ public class Bomb : ICombatProjectile
     {
         if (!IsActive) 
             return;
-
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         _ageSeconds += deltaTime;
         State = _ageSeconds >= FuseSeconds + ExplosionSeconds ? BombState.Finished

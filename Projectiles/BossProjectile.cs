@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using escape.Interfaces;
 using escape.Collisions;
+using escape.Sounds;
 
 namespace escape.Projectiles;
 
@@ -10,6 +11,7 @@ public class BossProjectile : ICombatProjectile
     private const int HitboxWidth = 16;
     private const int HitboxHeight = 32;
     private readonly ProjectileHitTracker _hits = new();
+    private Audio _audio = new Audio(); 
     public bool HitsPlayer => true;
     public Collision Category => Collision.EnemyProjectile;
     public bool IsCollisionEnabled => IsActive;
@@ -50,7 +52,6 @@ public class BossProjectile : ICombatProjectile
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         float movementSeconds = MathHelper.Clamp(LifetimeSeconds - _ageSeconds, 0f, deltaTime);
         _ageSeconds += deltaTime;
-
 
         Position += _direction * movementSeconds * 100;
 

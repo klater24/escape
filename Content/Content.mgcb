@@ -69,6 +69,12 @@
 /processorParam:Quality=Best
 /build:SoundEffects/effect.wav
 
+#begin SoundEffects/explode.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:SoundEffects/explode.wav
+
 #begin Textures/Blocks/doors.png
 /importer:TextureImporter
 /processor:TextureProcessor
